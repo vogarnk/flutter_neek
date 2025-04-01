@@ -1,4 +1,4 @@
-package com.movibus.movibus
+package com.neek.app
 
 import io.flutter.embedding.android.FlutterActivity
 

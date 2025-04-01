@@ -1,12 +1,13 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'register_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:io' show Platform;
+import 'register_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,11 +26,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String getBackendUrl() {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api'; // Android emulator
+      return 'http://10.0.2.2:8000/api/login';
     } else {
-      return 'http://192.168.1.221:8000/api'; // iOS emulator (tu IP)
+      return 'http://192.168.1.221:8000/api';
     }
   }
+
   void _showError(String message) {
     setState(() {
       _errorMessage = message;
@@ -55,12 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          await _secureStorage.write(key: 'auth_token', value: data['token']);
-          Navigator.pushReplacementNamed(context, '/home');          
-          print('Token guardado');          
-        print('Token recibido: ${data['token']}');
-        // Aquí puedes guardar el token en secure storage y navegar
+        final data = jsonDecode(response.body);
+        await _secureStorage.write(key: 'auth_token', value: data['token']);
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         final data = jsonDecode(response.body);
         _showError(data['message'] ?? 'Error al iniciar sesión');
@@ -80,16 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
       final account = await _googleSignIn.signIn();
 
       if (account != null) {
-        final email = account.email;
-        final name = account.displayName ?? '';
-
         final response = await http.post(
           Uri.parse('${getBackendUrl()}/social-login'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'provider': 'google',
-            'email': email,
-            'name': name,
+            'email': account.email,
+            'name': account.displayName ?? '',
           }),
         );
 
@@ -97,8 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
           final data = jsonDecode(response.body);
           await _secureStorage.write(key: 'auth_token', value: data['token']);
           Navigator.pushReplacementNamed(context, '/home');
-          print('Token guardado');;          
-          print('Login con Google exitoso');
         } else {
           print('Fallo al loguearse con Google: ${response.body}');
         }
@@ -132,8 +126,6 @@ class _LoginScreenState extends State<LoginScreen> {
         final data = jsonDecode(response.body);
         await _secureStorage.write(key: 'auth_token', value: data['token']);
         Navigator.pushReplacementNamed(context, '/home');
-        print('Token guardado');        
-        print('Login con Apple exitoso');
       } else {
         print('Fallo al loguearse con Apple: ${response.body}');
       }
@@ -145,100 +137,123 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF0D1117), // Fondo oscuro
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-                SizedBox(height: 120, child: Image.asset('assets/logo.png')),
-                const SizedBox(height: 32),
-                const Text(
-                  "Bienvenido de nuevo",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailCtrl,
-                  decoration: InputDecoration(
-                    labelText: "Correo electrónico",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const SizedBox(height: 32),
+                  SvgPicture.asset(
+                    'assets/logo.svg',
+                    height: 80,
+                    fit: BoxFit.contain,
                   ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Ingresa tu correo' : null,
-                ),                
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordCtrl,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Contraseña",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(height: 48),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF161B22),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Inicia sesión',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Ingresa tus datos para iniciar sesión',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        const SizedBox(height: 24),
+                        TextFormField(
+                          controller: _emailCtrl,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: 'Email',
+                            hintStyle: const TextStyle(color: Colors.grey),
+                            filled: true,
+                            fillColor: const Color(0xFF0D1117),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Ingresa tu correo' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _passwordCtrl,
+                          obscureText: true,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: 'Contraseña',
+                            hintStyle: const TextStyle(color: Colors.grey),
+                            filled: true,
+                            fillColor: const Color(0xFF0D1117),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Ingresa tu contraseña' : null,
+                        ),
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 12),
+                          Text(
+                            _errorMessage!,
+                            style: const TextStyle(color: Colors.redAccent),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleLogin,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF3B5BFE),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : const Text('Iniciar sesión'),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("¿No tienes cuenta aun?",
+                                style: TextStyle(color: Colors.white70)),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                                );
+                              },
+                              child: const Text("Regístrate aquí"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? 'Ingresa tu contraseña' : null,
-                ),
-                const SizedBox(height: 16),
-                if (_errorMessage != null)
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                  ),                
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("Iniciar sesión"),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    const Expanded(child: Divider(thickness: 1)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        "o continúa con",
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ),
-                    const Expanded(child: Divider(thickness: 1)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                if (Platform.isIOS)
-                  SignInButton(Buttons.AppleDark, onPressed: _handleAppleSignIn),                             
-                const SizedBox(height: 12),
-                SignInButton(Buttons.Google, onPressed: _handleGoogleSignIn),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("¿No tienes cuenta?"),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                        );
-                      },
-                      child: const Text("Regístrate"),
-                    ),
-                  ],
-                )
-              ],
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),

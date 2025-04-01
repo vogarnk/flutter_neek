@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.movibus.movibus"
+    namespace = "com.neek.app"
     compileSdk = 35
     ndkVersion = "27.0.12077973" 
 
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.movibus"
+        applicationId = "com.neek.app"
         minSdk = 21
         targetSdk = 35
         versionCode = 1

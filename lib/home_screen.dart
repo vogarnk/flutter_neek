@@ -1,198 +1,176 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:movibus/widgets/charts/animated_multi_ring_chart.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  String getBackendUrl() {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
-    } else {
-      return 'http://192.168.1.221:8000/api';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.directions_bus), label: 'Rutas'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Configuración'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Usuario'),
-        ],
-      ),
+      backgroundColor: const Color(0xFF0D1117),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Sección superior
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E0E6B),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // LOGO + ICONOS
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Hola José',
-                    style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                  SvgPicture.asset(
+                    'assets/logo.svg',
+                    height: 25,
+                    fit: BoxFit.contain,                    
                   ),
-                  const SizedBox(height: 20),
-                  _searchInput("¿Dónde te encuentras?"),
-                  const SizedBox(height: 12),
-                  Stack(
-                    alignment: Alignment.centerRight,
-                    children: [
-                      _searchInput("¿A dónde vas?"),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        child: const Icon(Icons.sync, color: Colors.white),
-                      )
+                  Row(
+                    children: const [
+                      Icon(Icons.headphones, color: Colors.white70),
+                      SizedBox(width: 16),
+                      Icon(Icons.notifications_none, color: Colors.white70),
+                      SizedBox(width: 16),
+                      Icon(Icons.person_outline, color: Colors.white70),
                     ],
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-            // Favoritos
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text("Favoritos", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text("Agregar", style: TextStyle(color: Colors.deepPurple)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _favoriteCard(icon: Icons.home, title: "Casa", subtitle: "Malvas 112, fracc. Del Llano"),
-            const SizedBox(height: 8),
-            _favoriteCard(icon: Icons.work, title: "Trabajo", subtitle: "Venustiano Carranza 500, col. Centro"),
-            const SizedBox(height: 24),
-
-            // Cuponera
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text("Cuponera", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text("Ver todo", style: TextStyle(color: Colors.deepPurple)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 110,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _couponCard("assets/little_caesar.png", "10% de descuento"),
-                  _couponCard("assets/devlyn.png", "5% de descuento"),
-                  _couponCard("assets/cinemex.png", "2 x 1"),
-                ],
+              const Text(
+                'Hola Lucia!',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
               ),
-            ),
-            const SizedBox(height: 24),
-
-            // Historial
-            const Text("Historial", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            ListTile(
-              tileColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              leading: const Icon(Icons.access_time, color: Colors.deepPurple),
-              title: const Text("Ruta 24"),
-              subtitle: const Text("Av. Industrias 600"),
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text("Hace 2 días", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  SizedBox(height: 4),
-                  Icon(Icons.delete_outline, size: 18, color: Colors.grey),
-                ],
+              const SizedBox(height: 8),
+              const Text(
+                'Este es un resumen de tu cuenta',
+                style: TextStyle(color: Colors.white70),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+              const SizedBox(height: 24),
 
-  Widget _searchInput(String hint) {
-    return TextField(
-      readOnly: true,
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white70),
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.1),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-      ),
-      style: const TextStyle(color: Colors.white),
-    );
-  }
+              // TARJETA DE AHORRO
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Chip(
+                            label: Text('Activo'),
+                            backgroundColor: Color(0xFFD1FADF),
+                            labelStyle: TextStyle(color: Color(0xFF027A48)),
+                          ),
+                          SizedBox(height: 8),
+                          Text('Ahorro total', style: TextStyle(fontWeight: FontWeight.bold)),
+                          SizedBox(height: 4),
+                          Text('200,800 UDIS', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 12),
+                          Text('● Familia Monasteri', style: TextStyle(color: Colors.indigo)),
+                          Text('● Mi Futuro', style: TextStyle(color: Colors.indigo)),
+                          Text('● Mis Hijos', style: TextStyle(color: Colors.indigo)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const AnimatedMultiRingChart(
+                      values: [0.9, 0.8, 0.75],
+                      colors: [
+                        Color(0xFF1E3A8A),
+                        Color(0xFF2563EB),
+                        Color(0xFF60A5FA),
+                      ],
+                      size: 100,
+                    ),                    
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
 
-  Widget _favoriteCard({required IconData icon, required String title, required String subtitle}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.deepPurple),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text(subtitle, style: const TextStyle(color: Colors.grey)),
+              // TARJETA DE PLAN
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1F2937),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('neek', style: TextStyle(color: Colors.white70, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    const Text('Mis Hijos', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    const Text('Lucia Monarrez', style: TextStyle(color: Colors.white)),
+                    const SizedBox(height: 12),
+                    const Text('MOTIVO DE AHORRO:', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    const Text('Retiro', style: TextStyle(color: Colors.white, fontSize: 14)),
+                    const SizedBox(height: 4),
+                    const Text('PLAN DE AHORRO + PROTECCIÓN', style: TextStyle(color: Colors.white70)),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Chip(
+                          label: const Text('Por Activar'),
+                          backgroundColor: const Color(0xFFFDF6B2),
+                          labelStyle: const TextStyle(color: Color(0xFF92400E)),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF3B5BFE),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Ver Plan'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      '160,860.49 UDIS',
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // TARJETA UDI
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text('8.24 MXN 🇲🇽', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 4),
+                        Text('Valor del UDI al día de hoy', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                    SizedBox(
+                      width: 80,
+                      height: 40,
+                      child: Image.asset('assets/udi_graph.png', fit: BoxFit.cover), // imagen curva UDI
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
             ],
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _couponCard(String imagePath, String offerText) {
-    return Container(
-      width: 120,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        image: DecorationImage(
-          image: AssetImage(imagePath),
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.darken),
-        ),
-      ),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          margin: const EdgeInsets.only(bottom: 8),
-          decoration: BoxDecoration(
-            color: Colors.white70,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            offerText,
-            style: const TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
           ),
         ),
       ),
     );
   }
+  
 }
