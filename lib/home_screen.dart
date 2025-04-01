@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:movibus/widgets/charts/animated_multi_ring_chart.dart';
+import 'package:neek/widgets/charts/animated_multi_ring_chart.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override

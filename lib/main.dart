@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'splash_screen.dart';
-import 'package:movibus/auth/login_screen.dart';
-import 'package:movibus/auth/register_screen.dart';
+import 'package:neek/auth/login_screen.dart';
+import 'package:neek/auth/register_screen.dart';
 import 'home_screen.dart';
 
 void main() {
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Movibus',
+      title: 'Neek',
       debugShowCheckedModeBanner: false,
       home: const SplashScreen(),
       routes: {
