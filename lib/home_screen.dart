@@ -7,7 +7,13 @@ import 'package:neek/widgets/cards/udi_card.dart';
 
 class HomeScreen extends StatelessWidget {
   final Map<String, dynamic> user;
-  const HomeScreen({super.key, required this.user});
+  final List<String> planNames;
+
+  const HomeScreen({
+    Key? key,
+    required this.user,
+    required this.planNames,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +48,13 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               Text(
-                'Hola ${user['name']}!',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                'neek ${user['name']}!',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white
+                  ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -53,7 +64,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // TARJETA DE AHORRO
-              const AhorroCard(),
+              AhorroCard(planNames: planNames),
 
               const SizedBox(height: 20),
 

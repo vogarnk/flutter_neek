@@ -62,9 +62,18 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _goToHome(Map<String, dynamic> userData) {
+    final List<dynamic> userPlans = userData['user_plans'] ?? [];
+
+    // Extrae solo los nombres
+    final List<String> planNames = userPlans
+        .map<String>((plan) => plan['nombre_plan'].toString())
+        .toList();
+
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => HomeScreen(user: userData)),
+      MaterialPageRoute(
+        builder: (_) => HomeScreen(user: userData, planNames: planNames),
+      ),
     );
   }
 

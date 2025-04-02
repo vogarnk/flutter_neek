@@ -16,6 +16,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Neek',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Inter',
+      ),      
       home: const SplashScreen(),
       routes: {
         '/login': (_) => const LoginScreen(),

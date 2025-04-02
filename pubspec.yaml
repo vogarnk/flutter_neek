@@ -57,6 +57,12 @@ dev_dependencies:
 flutter:
   assets:
     - assets/logo.svg
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter/Inter-VariableFont_opsz,wght.ttf
+        - asset: assets/fonts/Inter/Inter-Italic-VariableFont_opsz,wght.ttf
+          style: italic    
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
