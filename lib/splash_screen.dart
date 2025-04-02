@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:neek/auth/login_screen.dart';
 import 'home_screen.dart';
@@ -48,7 +49,9 @@ class _SplashScreenState extends State<SplashScreen> {
       );
 
       if (response.statusCode == 200) {
-        _goToHome();
+        final decoded = jsonDecode(response.body);
+        final userData = decoded['data']; // ✅ Aquí ya accedes al objeto con name, email, etc.
+        _goToHome(userData);
       } else {
         await _secureStorage.delete(key: 'auth_token');
         _goToLogin();
@@ -58,10 +61,10 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  void _goToHome() {
+  void _goToHome(Map<String, dynamic> userData) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => HomeScreen(user: userData)),
     );
   }
 
