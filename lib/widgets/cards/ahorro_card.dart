@@ -27,9 +27,13 @@ class AhorroCard extends StatelessWidget {
               children: [
                 const EstadoActivoChip(),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Ahorro total',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16, // text-base ≈ 16px
+                    color: Color(0xFF9CA3AF), // text-gray-400 en Tailwind
+                  ),
                 ),
                 const SizedBox(height: 4),
                 const Text(

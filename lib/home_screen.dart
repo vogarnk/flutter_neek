@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:neek/widgets/charts/animated_multi_ring_chart.dart';
+import 'package:neek/screens/help_center_screen.dart';
 import 'package:neek/widgets/cards/ahorro_card.dart';
 import 'package:neek/widgets/cards/plan_card.dart';
 import 'package:neek/widgets/cards/udi_card.dart';
+import 'package:neek/screens/account_screen.dart'; // 👈 importa tu pantalla
+import 'package:neek/screens/notifications_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -32,15 +34,45 @@ class HomeScreen extends StatelessWidget {
                   SvgPicture.asset(
                     'assets/logo.svg',
                     height: 25,
-                    fit: BoxFit.contain,                    
+                    fit: BoxFit.contain,
                   ),
                   Row(
-                    children: const [
-                      Icon(Icons.headphones, color: Colors.white70),
-                      SizedBox(width: 16),
-                      Icon(Icons.notifications_none, color: Colors.white70),
-                      SizedBox(width: 16),
-                      Icon(Icons.person_outline, color: Colors.white70),
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const HelpCenterScreen(),
+                            ),
+                          );
+                        },
+                        child: const Icon(Icons.headphones, color: Colors.white70),
+                      ),
+                      const SizedBox(width: 16),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen(),
+                            ),
+                          );
+                        },
+                        child: const Icon(Icons.notifications_none, color: Colors.white70),
+                      ),                      
+                      const SizedBox(width: 16),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AccountScreen(),
+                            ),
+                          );
+                        },
+                        child: const Icon(Icons.person_outline, color: Colors.white70),
+                      ),
                     ],
                   ),
                 ],
@@ -48,13 +80,12 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               Text(
-                'neek ${user['name']}!',
+                'pruebas ${user['name']}!',
                 style: const TextStyle(
                   fontSize: 28,
-                  fontFamily: 'Inter',
                   fontWeight: FontWeight.bold,
-                  color: Colors.white
-                  ),
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -81,5 +112,4 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
-  
 }
