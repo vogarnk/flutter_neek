@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'register_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String getBackendUrl() {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api/login';
+      return 'http://10.0.2.2:8000/api';
     } else {
       return 'http://192.168.1.221:8000/api';
     }
@@ -99,38 +97,6 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       print('Error en Google Sign-In: $e');
-    }
-  }
-
-  Future<void> _handleAppleSignIn() async {
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
-      );
-
-      final email = credential.email ?? 'user@apple.com';
-      final name =
-          "${credential.givenName ?? ''} ${credential.familyName ?? ''}".trim();
-
-      final response = await http.post(
-        Uri.parse('${getBackendUrl()}/social-login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'provider': 'apple',
-          'email': email,
-          'name': name,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        await _secureStorage.write(key: 'auth_token', value: data['token']);
-        Navigator.pushReplacementNamed(context, '/home');
-      } else {
-        print('Fallo al loguearse con Apple: ${response.body}');
-      }
-    } catch (e) {
-      print('Error en Apple Sign-In: $e');
     }
   }
 

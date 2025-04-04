@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:neek/widgets/common/gradient_circle_ring.dart';
+import 'package:intl/intl.dart';
 
 class PlanCard extends StatelessWidget {
-  const PlanCard({super.key});
+  final String nombrePlan;
+  final double recuperacionFinalUdis;
+
+  const PlanCard({
+    super.key,
+    required this.nombrePlan,
+    required this.recuperacionFinalUdis,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final montoFinal = NumberFormat('#,###', 'en_US').format(recuperacionFinalUdis);
+
     return Container(
+      width: MediaQuery.of(context).size.width, // 🔧 Ocupa todo el ancho disponible
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Tarjeta interior oscura con contenido
@@ -24,6 +36,7 @@ class PlanCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Información del plan
                 Expanded(
@@ -35,30 +48,35 @@ class PlanCard extends StatelessWidget {
                         height: 16,
                         fit: BoxFit.contain,
                       ),
-                      SizedBox(height: 4),
-                      Text('Mis Hijos',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          )),
-                      SizedBox(height: 4),
-                      Text('Lucia Monarrez', style: TextStyle(color: Colors.white)),
-                      SizedBox(height: 12),
-                      Text('MOTIVO DE AHORRO:', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                      Text('Retiro', style: TextStyle(color: Colors.white, fontSize: 14)),
-                      SizedBox(height: 4),
-                      Text('PLAN DE AHORRO + PROTECCIÓN',
-                          style: TextStyle(color: Colors.white70)),
+                      const SizedBox(height: 4),
+                      Text(
+                        nombrePlan,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text('MOTIVO DE AHORRO:', style: TextStyle(color: Colors.white, fontSize: 12)),
+                      const Text('Retiro', style: TextStyle(color: Colors.white, fontSize: 14)),
+                      const SizedBox(height: 4),
+                      const Text('PLAN DE AHORRO + PROTECCIÓN', style: TextStyle(color: Colors.white)),
                     ],
                   ),
                 ),
-                // Círculo decorativo tipo gráfico
-                const GradientCircleRing(size: 120, strokeWidth: 4),
+                const SizedBox(width: 12),
+                // Centrado vertical
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    GradientCircleRing(size: 90, strokeWidth: 4),
+                  ],
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
 
           // Estado y botón
           Row(
@@ -90,7 +108,9 @@ class PlanCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3B5BFE),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  minimumSize: Size.zero,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),
@@ -100,12 +120,11 @@ class PlanCard extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // Monto
-          const Text(
-            '160,860.49 UDIS',
-            style: TextStyle(
+          Text(
+            '$montoFinal UDIS',
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0F172A),

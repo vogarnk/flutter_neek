@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:neek/widgets/charts/animated_multi_ring_chart.dart';
 import 'package:neek/widgets/common/status_chip.dart';
+import 'package:intl/intl.dart';
 
 class AhorroCard extends StatelessWidget {
-  final List<String> planNames;
+  final List<Map<String, dynamic>> plans;
 
-  const AhorroCard({super.key, required this.planNames});
+  const AhorroCard({super.key, required this.plans});
 
   @override
   Widget build(BuildContext context) {
+    final List<String> planNames = plans.map((p) => p['nombre_plan'].toString()).toList();
+    final double ahorroTotal = plans.fold(0.0, (sum, plan) {
+      final value = double.tryParse(plan['recuperacion_final_udis'].toString()) ?? 0.0;
+      return sum + value;
+    });
+
     final List<double> ringValues = _getRingValues(planNames.length);
     final List<Color> ringColors = _getRingColors(planNames.length);
 
@@ -27,28 +34,26 @@ class AhorroCard extends StatelessWidget {
               children: [
                 const EstadoActivoChip(),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Ahorro total',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16, // text-base ≈ 16px
-                    color: Color(0xFF9CA3AF), // text-gray-400 en Tailwind
+                    fontSize: 16,
+                    color: Color(0xFF9CA3AF),
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  '200,800 UDIS',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                Text(
+                  '${NumberFormat("#,###", "en_US").format(ahorroTotal)} UDIS',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                // Lista de nombres de planes
                 for (var name in planNames)
                   Text('● $name', style: const TextStyle(color: Colors.indigo)),
               ],
             ),
           ),
           const SizedBox(width: 12),
-          // Gráfico con anillos
           AnimatedMultiRingChart(
             values: ringValues,
             colors: ringColors,

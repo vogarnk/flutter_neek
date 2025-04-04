@@ -20,7 +20,7 @@ class UdiCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text(
-                '8.24 MXN 🇲🇽',
+                '8.42 MXN 🇲🇽',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

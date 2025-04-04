@@ -1,3 +1,4 @@
+// main.dart
 import 'package:flutter/material.dart';
 import 'splash_screen.dart';
 import 'package:neek/auth/login_screen.dart';
@@ -18,11 +19,32 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Inter',
-      ),      
+      ),
       home: const SplashScreen(),
-      routes: {
-        '/login': (_) => const LoginScreen(),
-        '/register': (_) => const RegisterScreen(),
+      onGenerateRoute: (settings) {
+        if (settings.name == '/login') {
+          return MaterialPageRoute(builder: (_) => const LoginScreen());
+        } else if (settings.name == '/register') {
+          return MaterialPageRoute(builder: (_) => const RegisterScreen());
+        } else if (settings.name == '/home') {
+          final args = settings.arguments as Map<String, dynamic>?;
+
+          if (args != null && args.containsKey('user') && args.containsKey('planNames')) {
+            return MaterialPageRoute(
+              builder: (_) => HomeScreen(
+                user: args['user'],
+                planNames: List<String>.from(args['planNames']),
+              ),
+            );
+          } else {
+            return MaterialPageRoute(
+              builder: (_) => const Scaffold(
+                body: Center(child: Text('Faltan argumentos para /home')), 
+              ),
+            );
+          }
+        }
+        return null; // Ruta no encontrada
       },
     );
   }

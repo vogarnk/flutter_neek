@@ -11,52 +11,57 @@ class AccountScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.pop(context), // <- Aquí está el fix
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Mi Cuenta',
           style: TextStyle(color: Colors.white),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Column(
-            children: const [
-              AccountTile(
-                title: 'Mi cuenta',
-                subtitle: 'Configura tu cuenta, información personal y conecta con tu agente Neek',
-              ),
-              Divider(),
-              AccountTile(
-                title: 'Notificaciones',
-                subtitle: 'Recibe notificaciones de la actividad de tu cuenta y cambios en la plataforma',
-              ),
-              Divider(),
-              AccountTile(
-                title: 'Seguridad',
-                subtitle: 'Ajustes de privacidad, información de tu cuenta y acceso',
-              ),
-              Divider(),
-              AccountTile(
-                title: 'Verificación',
-                subtitle: 'Verifica tu cuenta y carga tu información para verificar tu identidad',
-              ),
-              Divider(),
-              AccountTile(
-                title: 'Asociación de celular',
-                subtitle: 'Agrega tu número de celular a tu cuenta Neek',
-              ),
-              Divider(),
-              AccountTile(
-                title: 'Legal',
-                subtitle: 'Consulta los aspectos legales de Neek aquí',
-              ),
-            ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Column(
+              children: const [
+                AccountTile(
+                  title: 'Mi cuenta',
+                  subtitle:
+                      'Configura tu cuenta, información personal y conecta con tu agente Neek',
+                ),
+                Divider(),
+                AccountTile(
+                  title: 'Notificaciones',
+                  subtitle:
+                      'Recibe notificaciones de la actividad de tu cuenta y cambios en la plataforma',
+                ),
+                Divider(),
+                AccountTile(
+                  title: 'Seguridad',
+                  subtitle: 'Ajustes de privacidad, información de tu cuenta y acceso',
+                ),
+                Divider(),
+                AccountTile(
+                  title: 'Verificación',
+                  subtitle:
+                      'Verifica tu cuenta y carga tu información para verificar tu identidad',
+                ),
+                Divider(),
+                AccountTile(
+                  title: 'Asociación de celular',
+                  subtitle: 'Agrega tu número de celular a tu cuenta Neek',
+                ),
+                Divider(),
+                AccountTile(
+                  title: 'Legal',
+                  subtitle: 'Consulta los aspectos legales de Neek aquí',
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -93,12 +98,12 @@ class AccountTile extends StatelessWidget {
           subtitle,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey.shade600, // Aproximación a text-gray-400
+            color: Colors.grey.shade600,
           ),
         ),
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: () {}, // Puedes implementar navegación aquí
+      onTap: () {},
     );
   }
 }
