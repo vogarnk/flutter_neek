@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:neek/screens/help_center_screen.dart';
 import 'package:neek/widgets/cards/ahorro_card.dart';
 import 'package:neek/widgets/cards/plan_card.dart';
 import 'package:neek/widgets/cards/udi_card.dart';
-import 'package:neek/screens/account_screen.dart'; // 👈 importa tu pantalla
-import 'package:neek/screens/notifications_screen.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:neek/widgets/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
 
 class HomeScreen extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -31,55 +28,8 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // LOGO + ICONOS
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SvgPicture.asset(
-                    'assets/logo.svg',
-                    height: 25,
-                    fit: BoxFit.contain,
-                  ),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const HelpCenterScreen(),
-                            ),
-                          );
-                        },
-                        child: const Icon(Icons.headphones, color: Colors.white70),
-                      ),
-                      const SizedBox(width: 16),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const NotificationsScreen(),
-                            ),
-                          );
-                        },
-                        child: const Icon(Icons.notifications_none, color: Colors.white70),
-                      ),                      
-                      const SizedBox(width: 16),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AccountScreen(),
-                            ),
-                          );
-                        },
-                        child: const Icon(Icons.person_outline, color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              const CustomHomeAppBar(),
+
               const SizedBox(height: 20),
 
               Text(
