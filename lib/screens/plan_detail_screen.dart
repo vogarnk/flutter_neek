@@ -7,20 +7,28 @@ import 'package:intl/intl.dart';
 
 class PlanDetailScreen extends StatelessWidget {
   final String nombrePlan;
-  final double udis;
-  final double sumaAsegurada;
-  final double totalRetirar;
-  final double totalRetirar2065;
   final int duracion;
+  final double recuperacionFinalUdis;
+  final double recuperacionFinalMxn;
+  final double sumaAsegurada;
+  final double sumaAseguradaMxn;
+  final double totalRetirar;
+  final double totalRetirarMxn;
+  final double totalRetirar2065;
+  final double totalRetirar2065Mxn;
 
   const PlanDetailScreen({
     super.key,
     required this.nombrePlan,
-    required this.udis,
-    required this.sumaAsegurada,
-    required this.totalRetirar,
-    required this.totalRetirar2065,
     required this.duracion,
+    required this.recuperacionFinalUdis,
+    required this.recuperacionFinalMxn,
+    required this.sumaAsegurada,
+    required this.sumaAseguradaMxn,
+    required this.totalRetirar,
+    required this.totalRetirarMxn,
+    required this.totalRetirar2065,
+    required this.totalRetirar2065Mxn,
   });
 
 
@@ -69,15 +77,15 @@ class PlanDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
             DetailCard(
               title: 'Suma Asegurada',
-              udis: '${numberFormat.format(udis)} UDIS',
-              mxn: 'MXN \$1,308,409.47',
+              udis: '${numberFormat.format(sumaAsegurada)} UDIS',
+              mxn: currencyFormat.format(sumaAseguradaMxn),
               icon: Icons.shield_outlined,
             ),
             const SizedBox(height: 16),
             DetailCard(
               title: 'Total a Retirar en $retiroEnAnio',
-              udis: '200,800 UDIS',
-              mxn: 'MXN \$1,308,409.47',
+              udis: '${numberFormat.format(totalRetirar)} UDIS',
+              mxn: currencyFormat.format(totalRetirarMxn),
               icon: Icons.savings_outlined,
             ),
             const SizedBox(height: 24),

@@ -6,20 +6,28 @@ import 'package:neek/screens/plan_detail_screen.dart'; // 👈 Asegúrate de imp
 
 class PlanCard extends StatelessWidget {
   final String nombrePlan;
-  final double recuperacionFinalUdis;
-  final double sumaAsegurada;
-  final double totalRetirar;
-  final double totalRetirar2065;
   final int duracion;
+  final double recuperacionFinalUdis;
+  final double recuperacionFinalMxn;
+  final double sumaAsegurada;
+  final double sumaAseguradaMxn;
+  final double totalRetirar;
+  final double totalRetirarMxn;
+  final double totalRetirar2065;
+  final double totalRetirar2065Mxn;
 
   const PlanCard({
     super.key,
     required this.nombrePlan,
-    required this.recuperacionFinalUdis,
-    required this.sumaAsegurada,
-    required this.totalRetirar,
-    required this.totalRetirar2065,
     required this.duracion,
+    required this.recuperacionFinalUdis,
+    required this.recuperacionFinalMxn,
+    required this.sumaAsegurada,
+    required this.sumaAseguradaMxn,
+    required this.totalRetirar,
+    required this.totalRetirarMxn,
+    required this.totalRetirar2065,
+    required this.totalRetirar2065Mxn,
   });
 
 
@@ -120,11 +128,15 @@ class PlanCard extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => PlanDetailScreen(
                         nombrePlan: nombrePlan,
-                        udis: recuperacionFinalUdis,
-                        sumaAsegurada: sumaAsegurada,
-                        totalRetirar: totalRetirar,
-                        totalRetirar2065: totalRetirar2065,
                         duracion: duracion,
+                        recuperacionFinalUdis: recuperacionFinalUdis,
+                        recuperacionFinalMxn: recuperacionFinalMxn,
+                        sumaAsegurada: sumaAsegurada,
+                        sumaAseguradaMxn: sumaAseguradaMxn,
+                        totalRetirar: totalRetirar,
+                        totalRetirarMxn: totalRetirarMxn,
+                        totalRetirar2065: totalRetirar2065,
+                        totalRetirar2065Mxn: totalRetirar2065Mxn,
                       ),
                     ),
                   );

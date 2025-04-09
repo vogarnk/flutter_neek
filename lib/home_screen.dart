@@ -63,20 +63,28 @@ class HomeScreen extends StatelessWidget {
 
                     final nombre = plan['nombre_plan'] ?? 'Plan sin nombre';
                     final udis = double.tryParse(plan['recuperacion_final_udis'].toString()) ?? 0;
+                    final udisMxn = double.tryParse(plan['recuperacion_final_udis_mxn'].toString()) ?? 0;
                     final sumaAsegurada = (plan['suma_asegurada'] ?? 0).toDouble();
+                    final sumaAseguradaMxn = (plan['suma_asegurada_mxn'] ?? 0).toDouble();
                     final totalRetirar = (plan['total_a_retirar'] ?? 0).toDouble();
+                    final totalRetirarMxn = (plan['total_a_retirar_mxn'] ?? 0).toDouble();
                     final totalRetirar2065 = (plan['total_a_retirar_2065'] ?? 0).toDouble();
+                    final totalRetirar2065Mxn = (plan['total_a_retirar_2065_mxn'] ?? 0).toDouble();
                     final duracion = (plan['duracion'] ?? 0).toInt();
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: PlanCard(
                         nombrePlan: nombre,
+                        duracion: duracion,
                         recuperacionFinalUdis: udis,
+                        recuperacionFinalMxn: udisMxn,
                         sumaAsegurada: sumaAsegurada,
+                        sumaAseguradaMxn: sumaAseguradaMxn,
                         totalRetirar: totalRetirar,
+                        totalRetirarMxn: totalRetirarMxn,
                         totalRetirar2065: totalRetirar2065,
-                        duracion: duracion
+                        totalRetirar2065Mxn: totalRetirar2065Mxn,
                       ),
                     );
                   },
