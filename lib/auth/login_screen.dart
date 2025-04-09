@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117), // Fondo oscuro
+      backgroundColor: Theme.of(context).colorScheme.surface, // Fondo oscuro
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -122,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF161B22),
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(

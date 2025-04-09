@@ -4,6 +4,7 @@ import 'splash_screen.dart';
 import 'package:neek/auth/login_screen.dart';
 import 'package:neek/auth/register_screen.dart';
 import 'home_screen.dart';
+import 'core/theme/app_theme.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,9 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Neek',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Inter',
-      ),
+      theme: appTheme,
       home: const SplashScreen(),
       onGenerateRoute: (settings) {
         if (settings.name == '/login') {
