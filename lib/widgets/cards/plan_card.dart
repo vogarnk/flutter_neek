@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:neek/widgets/common/gradient_circle_ring.dart';
 import 'package:intl/intl.dart';
+import 'package:neek/screens/plan_detail_screen.dart'; // 👈 Asegúrate de importar correctamente
 
 class PlanCard extends StatelessWidget {
   final String nombrePlan;
@@ -104,7 +105,17 @@ class PlanCard extends StatelessWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PlanDetailScreen(
+                        nombrePlan: nombrePlan,
+                        udis: recuperacionFinalUdis,
+                      ),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3B5BFE),
                   foregroundColor: Colors.white,

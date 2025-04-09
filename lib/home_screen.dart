@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
     final PageController _pageController = PageController(viewportFraction: 1);
     final plans = List<Map<String, dynamic>>.from(user['user_plans'] ?? []);    
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),

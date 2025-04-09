@@ -45,7 +45,10 @@ class AhorroCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${NumberFormat("#,###", "en_US").format(ahorroTotal)} UDIS',
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),                  
                 ),
                 const SizedBox(height: 12),
                 for (var name in planNames)

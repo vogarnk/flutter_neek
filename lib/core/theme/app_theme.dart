@@ -16,6 +16,7 @@ final ThemeData appTheme = ThemeData(
     bodyMedium: TextStyle(color: AppColors.textGray300),
     labelLarge: TextStyle(color: AppColors.textGray400),
     titleLarge: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold),
+    displaySmall: TextStyle( color: AppColors.textGray900),    
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
