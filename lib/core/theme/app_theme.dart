@@ -15,6 +15,7 @@ final ThemeData appTheme = ThemeData(
     bodyLarge: TextStyle(color: AppColors.textWhite),
     bodyMedium: TextStyle(color: AppColors.textGray300),
     labelLarge: TextStyle(color: AppColors.textGray400),
+    bodySmall: TextStyle(color: AppColors.textGray500), // 👈 Aquí lo agregas    
     titleLarge: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold),
     displaySmall: TextStyle( color: AppColors.textGray900),    
   ),

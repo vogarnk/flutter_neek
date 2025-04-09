@@ -39,7 +39,7 @@ class DetailCard extends StatelessWidget {
                     Text(
                       udis,
                       style: const TextStyle(
-                        fontSize: 18,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -67,13 +67,16 @@ class DetailCard extends StatelessWidget {
           ),
 
           // Parte derecha: Circular progress
-          SizedBox(
-            width: 80,
-            height: 80,
-            child: CustomPaint(
-              painter: ArcPainter(progress),
-              child: const Center(
-                child: Icon(Icons.shield, size: 24, color: Colors.black),
+          Padding(
+            padding: const EdgeInsets.only(top: 20), // 👈 Padding aplicado al gráfico completo
+            child: SizedBox(
+              width: 80,
+              height: 80,
+              child: CustomPaint(
+                painter: ArcPainter(progress),
+                child: const Center(
+                  child: Icon(Icons.shield, size: 24, color: Colors.black),
+                ),
               ),
             ),
           ),

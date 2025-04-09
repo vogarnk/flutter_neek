@@ -4,6 +4,8 @@ import 'package:neek/widgets/app_bars/custom_home_app_bar.dart'; // 👈 Importa
 import 'package:neek/widgets/cards/detail_card.dart';
 import 'package:neek/widgets/buttons/plan_action_button.dart';
 import 'package:intl/intl.dart';
+import 'package:neek/widgets/cards/udi_card.dart';
+import 'package:neek/widgets/tables/plan_contributions_screen.dart' show PlanContributionsTable;
 
 class PlanDetailScreen extends StatelessWidget {
   final String nombrePlan;
@@ -41,22 +43,21 @@ class PlanDetailScreen extends StatelessWidget {
 
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface, // Fondo oscuro
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        automaticallyImplyLeading: true, // Muestra flecha si hay navegación previa
+        automaticallyImplyLeading: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const CustomHomeAppBar(), // ✅ Aquí se pone correctamente
+        title: const CustomHomeAppBar(),
       ),
-
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               nombrePlan,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
@@ -79,14 +80,14 @@ class PlanDetailScreen extends StatelessWidget {
               title: 'Suma Asegurada',
               udis: '${numberFormat.format(sumaAsegurada)} UDIS',
               mxn: currencyFormat.format(sumaAseguradaMxn),
-              icon: Icons.shield_outlined,
+              icon: Icons.lock,
             ),
             const SizedBox(height: 16),
             DetailCard(
               title: 'Total a Retirar en $retiroEnAnio',
               udis: '${numberFormat.format(totalRetirar)} UDIS',
               mxn: currencyFormat.format(totalRetirarMxn),
-              icon: Icons.savings_outlined,
+              icon: Icons.lock,
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -115,7 +116,18 @@ class PlanDetailScreen extends StatelessWidget {
                 PlanActionButton(icon: Icons.people, label: 'Beneficiarios'),
                 PlanActionButton(icon: Icons.description, label: 'Legal'),
               ],
-            )
+            ),
+            const SizedBox(height: 24),
+            DetailCard(
+              title: 'Retira en año 2065',
+              udis: '${numberFormat.format(totalRetirar2065)} UDIS',
+              mxn: currencyFormat.format(totalRetirar2065Mxn),
+              icon: Icons.lock,
+            ),
+            const SizedBox(height: 24),
+            const UdiCard(),
+            const SizedBox(height: 24),
+            const PlanContributionsTable(),           
           ],
         ),
       ),
