@@ -7,12 +7,21 @@ import 'package:neek/screens/plan_detail_screen.dart'; // 👈 Asegúrate de imp
 class PlanCard extends StatelessWidget {
   final String nombrePlan;
   final double recuperacionFinalUdis;
+  final double sumaAsegurada;
+  final double totalRetirar;
+  final double totalRetirar2065;
+  final int duracion;
 
   const PlanCard({
     super.key,
     required this.nombrePlan,
     required this.recuperacionFinalUdis,
+    required this.sumaAsegurada,
+    required this.totalRetirar,
+    required this.totalRetirar2065,
+    required this.duracion,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +121,10 @@ class PlanCard extends StatelessWidget {
                       builder: (_) => PlanDetailScreen(
                         nombrePlan: nombrePlan,
                         udis: recuperacionFinalUdis,
+                        sumaAsegurada: sumaAsegurada,
+                        totalRetirar: totalRetirar,
+                        totalRetirar2065: totalRetirar2065,
+                        duracion: duracion,
                       ),
                     ),
                   );

@@ -3,19 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:neek/widgets/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
 import 'package:neek/widgets/cards/detail_card.dart';
 import 'package:neek/widgets/buttons/plan_action_button.dart';
+import 'package:intl/intl.dart';
 
 class PlanDetailScreen extends StatelessWidget {
   final String nombrePlan;
   final double udis;
+  final double sumaAsegurada;
+  final double totalRetirar;
+  final double totalRetirar2065;
+  final int duracion;
 
   const PlanDetailScreen({
     super.key,
     required this.nombrePlan,
     required this.udis,
+    required this.sumaAsegurada,
+    required this.totalRetirar,
+    required this.totalRetirar2065,
+    required this.duracion,
   });
+
 
   @override
   Widget build(BuildContext context) {
+  final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: 'MXN \$');
+  final numberFormat = NumberFormat('#,###', 'es_MX'); // Para UDIS
+  final currentYear = DateTime.now().year;
+  final retiroEnAnio = currentYear + duracion;
+
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface, // Fondo oscuro
       appBar: AppBar(
@@ -53,13 +69,13 @@ class PlanDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
             DetailCard(
               title: 'Suma Asegurada',
-              udis: '50,198 UDIS',
+              udis: '${numberFormat.format(udis)} UDIS',
               mxn: 'MXN \$1,308,409.47',
               icon: Icons.shield_outlined,
             ),
             const SizedBox(height: 16),
             DetailCard(
-              title: 'Total a Retirar en 2028',
+              title: 'Total a Retirar en $retiroEnAnio',
               udis: '200,800 UDIS',
               mxn: 'MXN \$1,308,409.47',
               icon: Icons.savings_outlined,

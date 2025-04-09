@@ -60,19 +60,30 @@ class HomeScreen extends StatelessWidget {
                   itemCount: plans.length,
                   itemBuilder: (context, index) {
                     final plan = plans[index];
+
                     final nombre = plan['nombre_plan'] ?? 'Plan sin nombre';
                     final udis = double.tryParse(plan['recuperacion_final_udis'].toString()) ?? 0;
+                    final sumaAsegurada = (plan['suma_asegurada'] ?? 0).toDouble();
+                    final totalRetirar = (plan['total_a_retirar'] ?? 0).toDouble();
+                    final totalRetirar2065 = (plan['total_a_retirar_2065'] ?? 0).toDouble();
+                    final duracion = (plan['duracion'] ?? 0).toInt();
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: PlanCard(
                         nombrePlan: nombre,
                         recuperacionFinalUdis: udis,
+                        sumaAsegurada: sumaAsegurada,
+                        totalRetirar: totalRetirar,
+                        totalRetirar2065: totalRetirar2065,
+                        duracion: duracion
                       ),
                     );
                   },
                 ),
               ),
+
+
 
               const SizedBox(height: 12),
 
