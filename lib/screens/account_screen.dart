@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'account_detail_screen.dart'; // 👈 Asegúrate de importar esta vista
+import 'notification_settings_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -27,36 +29,51 @@ class AccountScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             child: Column(
-              children: const [
+              children: [
                 AccountTile(
                   title: 'Mi cuenta',
                   subtitle:
                       'Configura tu cuenta, información personal y conecta con tu agente Neek',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AccountDetailScreen(),
+                      ),
+                    );
+                  },
                 ),
-                Divider(),
+                const Divider(),
                 AccountTile(
                   title: 'Notificaciones',
-                  subtitle:
-                      'Recibe notificaciones de la actividad de tu cuenta y cambios en la plataforma',
+                  subtitle: 'Recibe notificaciones de la actividad de tu cuenta y cambios en la plataforma',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationSettingsScreen(),
+                      ),
+                    );
+                  },
                 ),
-                Divider(),
-                AccountTile(
+                const Divider(),
+                const AccountTile(
                   title: 'Seguridad',
                   subtitle: 'Ajustes de privacidad, información de tu cuenta y acceso',
                 ),
-                Divider(),
-                AccountTile(
+                const Divider(),
+                const AccountTile(
                   title: 'Verificación',
                   subtitle:
                       'Verifica tu cuenta y carga tu información para verificar tu identidad',
                 ),
-                Divider(),
-                AccountTile(
+                const Divider(),
+                const AccountTile(
                   title: 'Asociación de celular',
                   subtitle: 'Agrega tu número de celular a tu cuenta Neek',
                 ),
-                Divider(),
-                AccountTile(
+                const Divider(),
+                const AccountTile(
                   title: 'Legal',
                   subtitle: 'Consulta los aspectos legales de Neek aquí',
                 ),
@@ -72,11 +89,13 @@ class AccountScreen extends StatelessWidget {
 class AccountTile extends StatelessWidget {
   final String title;
   final String subtitle;
+  final VoidCallback? onTap; // 👈 Nuevo parámetro opcional
 
   const AccountTile({
     super.key,
     required this.title,
     required this.subtitle,
+    this.onTap,
   });
 
   @override
@@ -103,7 +122,7 @@ class AccountTile extends StatelessWidget {
         ),
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: () {},
+      onTap: onTap, // 👈 Aquí se usa
     );
   }
 }

@@ -6,8 +6,13 @@ class UdiLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _UdiChartPainter(),
+    return SizedBox(
+      // Dale un tamaño cualquiera para ver mejor la gráfica
+      width: 300,
+      height: 200,
+      child: CustomPaint(
+        painter: _UdiChartPainter(),
+      ),
     );
   }
 }
@@ -15,7 +20,7 @@ class UdiLineChart extends StatelessWidget {
 class _UdiChartPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path();
+    // Definimos los puntos para la línea
     final points = [
       Offset(0, size.height * 0.85),
       Offset(size.width * 0.2, size.height * 0.75),
@@ -25,48 +30,60 @@ class _UdiChartPainter extends CustomPainter {
       Offset(size.width, size.height * 0.25),
     ];
 
-    path.moveTo(points.first.dx, points.first.dy);
+    // Creamos la ruta
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+
+    // Usamos Bezier cuadráticas para suavizar la curva
     for (int i = 1; i < points.length; i++) {
-      final controlPoint = Offset(
+      final midpoint = Offset(
         (points[i - 1].dx + points[i].dx) / 2,
         (points[i - 1].dy + points[i].dy) / 2,
       );
+
       path.quadraticBezierTo(
         points[i - 1].dx,
         points[i - 1].dy,
-        controlPoint.dx,
-        controlPoint.dy,
+        midpoint.dx,
+        midpoint.dy,
       );
     }
 
-    // Cierre del path para el área del relleno
+    // Terminamos la curva en el último punto (opcional, si lo deseas exacto)
+    path.lineTo(points.last.dx, points.last.dy);
+
+    // Creamos otra ruta para rellenar, partiendo de la original
     final filledPath = Path.from(path)
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();
 
-    // Gradiente más preciso (basado en tu imagen)
+    // Definimos un gradiente vertical (de arriba a abajo)
     final gradient = ui.Gradient.linear(
       Offset(0, 0),
       Offset(0, size.height),
       [
-        const Color(0xFF2B5FF3).withOpacity(1.0),
-        const Color(0xFF2D60F3).withOpacity(0.99),
-        const Color(0xFFFFFFFF).withOpacity(0.0),
+        // Empieza con tu color principal
+        const Color(0xFF2B5FF3).withOpacity(0.3),
+        // Termina completamente transparente
+        const Color(0xFF2B5FF3).withOpacity(0.02)
       ],
-      [0.0, 0.0, 1.0],
+      // Stops bien definidos: 0.0 hasta 1.0
+      [0.0, 0.8],
     );
 
+    // Pintura para el relleno con gradiente
     final fillPaint = Paint()
       ..shader = gradient
       ..style = PaintingStyle.fill;
 
+    // Pintura para la línea
     final linePaint = Paint()
       ..color = const Color(0xFF2B5FF3)
-      ..strokeWidth = 4
+      ..strokeWidth = 3
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
+    // Dibujamos primero el relleno, luego la línea
     canvas.drawPath(filledPath, fillPaint);
     canvas.drawPath(path, linePaint);
   }

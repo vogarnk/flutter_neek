@@ -19,14 +19,18 @@ class PlanActionButton extends StatelessWidget {
       child: Column(
         children: [
           CircleAvatar(
-            radius: 22,
-            backgroundColor:  Colors.white,
-            child: Icon(icon, color: Colors.black),
+            radius: 30,
+            backgroundColor: Colors.white,
+            child: Icon(
+              icon,
+              color: Colors.black,
+              size: 40, // 👈 Aumenta este valor para agrandar el ícono
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
         ],
       ),

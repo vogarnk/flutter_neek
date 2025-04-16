@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neek/screens/what_is_neek_screen.dart';
 
 class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({Key? key}) : super(key: key);
@@ -30,6 +31,12 @@ class HelpCenterScreen extends StatelessWidget {
               _buildHelpItem(
                 title: '¿Qué es Neek?',
                 subtitle: 'Conoce qué es Neek y cómo puede ayudarte a ahorrar.',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WhatIsNeekScreen()),
+                  );
+                },
               ),
               const Divider(height: 1, color: Colors.black12),
               _buildHelpItem(
@@ -56,6 +63,7 @@ class HelpCenterScreen extends StatelessWidget {
   Widget _buildHelpItem({
     required String title,
     required String subtitle,
+    VoidCallback? onTap,
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -75,9 +83,7 @@ class HelpCenterScreen extends StatelessWidget {
         ),
       ),
       trailing: const Icon(Icons.chevron_right, color: Colors.black38),
-      onTap: () {
-        // Acción al tocar el item
-      },
+      onTap: onTap,
     );
   }
 }

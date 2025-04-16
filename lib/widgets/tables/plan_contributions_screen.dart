@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
-class PlanContributionsTable extends StatelessWidget {
+class PlanContributionsTable extends StatefulWidget {
   const PlanContributionsTable({super.key});
+
+  @override
+  State<PlanContributionsTable> createState() => _PlanContributionsTableState();
+}
+
+class _PlanContributionsTableState extends State<PlanContributionsTable> {
+  bool isUdiSelected = true; // Estado del switch
 
   @override
   Widget build(BuildContext context) {
@@ -51,17 +58,28 @@ class PlanContributionsTable extends StatelessWidget {
                   ],
                 ),
               ),
-              // 👈 Switch
+              // 👈 Switch funcional
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('UDI'),
-                  Switch(
-                    value: true,
-                    onChanged: (val) {},
-                    activeColor: const Color(0xFF2B5FF3),
+                  Text(
+                    'UDI',
+                    style: Theme.of(context).textTheme.labelLarge,
                   ),
-                  const Text('MXN'),
+                  Switch(
+                    value: isUdiSelected,
+                    onChanged: (val) {
+                      setState(() {
+                        isUdiSelected = val;
+                      });
+                    },
+                    activeColor: Colors.white,     // Thumb cuando está ON
+                    activeTrackColor: Theme.of(context).primaryColor, // Línea cuando está ON          // Línea cuando está OFF
+                  ),
+                  Text(
+                    'MXN',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                 ],
               ),
             ],
@@ -109,17 +127,17 @@ class PlanContributionsTable extends StatelessWidget {
                     child: Text(
                       '${item['index']}  ${item['year']}',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontSize: 14,
-                      ),
-                    ),                  
+                            fontSize: 14,
+                          ),
+                    ),
                   ),
                   Expanded(
                     child: Text(
                       item['amount'] as String,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        fontSize: 14,
-                      ),
-                    ),                      
+                            fontSize: 14,
+                          ),
+                    ),
                   ),
                   Expanded(
                     child: Container(

@@ -101,9 +101,22 @@ class PlanDetailScreen extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text(
-                  'Activar mi plan',
-                  style: TextStyle(fontSize: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min, // para que se ajuste al contenido
+                  children: [
+                    const Text(
+                      'Activar mi plan',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 8), // espacio entre el texto y el ícono
+                    const Icon(
+                      Icons.arrow_forward,
+                      size: 20,
+                    ),
+                  ],
                 ),
               ),
             ),
