@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'register_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../core/api_service.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,18 +18,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passwordCtrl = TextEditingController();
-  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   bool _isLoading = false;
   String? _errorMessage;
-
-  String getBackendUrl() {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
-    } else {
-      //return 'http://192.168.110.238:8000/api';
-      return 'http://192.168.110.238:8000/api';
-    }
-  }
 
   void _showError(String message) {
     setState(() {
@@ -46,14 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response = await http.post(
-        Uri.parse('${getBackendUrl()}/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailCtrl.text,
-          'password': _passwordCtrl.text,
-        }),
-      );
+      final response = await ApiService.instance.post('/login', body: {
+        'email': _emailCtrl.text,
+        'password': _passwordCtrl.text,
+      });
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -78,33 +65,29 @@ class _LoginScreenState extends State<LoginScreen> {
       final account = await _googleSignIn.signIn();
 
       if (account != null) {
-        final response = await http.post(
-          Uri.parse('${getBackendUrl()}/social-login'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'provider': 'google',
-            'email': account.email,
-            'name': account.displayName ?? '',
-          }),
-        );
+        final response = await ApiService.instance.post('/social-login', body: {
+          'provider': 'google',
+          'email': account.email,
+          'name': account.displayName ?? '',
+        });
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           await _secureStorage.write(key: 'auth_token', value: data['token']);
           Navigator.pushReplacementNamed(context, '/home');
         } else {
-          print('Fallo al loguearse con Google: ${response.body}');
+          _showError('Fallo al loguearse con Google');
         }
       }
     } catch (e) {
-      print('Error en Google Sign-In: $e');
+      _showError('Error en Google Sign-In: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface, // Fondo oscuro
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

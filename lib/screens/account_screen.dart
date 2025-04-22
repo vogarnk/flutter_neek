@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'account_detail_screen.dart'; // 👈 Asegúrate de importar esta vista
 import 'notification_settings_screen.dart';
+import 'package:neek/screens/verificacion_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -62,10 +63,15 @@ class AccountScreen extends StatelessWidget {
                   subtitle: 'Ajustes de privacidad, información de tu cuenta y acceso',
                 ),
                 const Divider(),
-                const AccountTile(
+                AccountTile(
                   title: 'Verificación',
-                  subtitle:
-                      'Verifica tu cuenta y carga tu información para verificar tu identidad',
+                  subtitle: 'Verifica tu cuenta y carga tu información para verificar tu identidad',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const VerificacionScreen()),
+                    );
+                  },
                 ),
                 const Divider(),
                 const AccountTile(

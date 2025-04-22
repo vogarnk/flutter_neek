@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:io';
 import 'dart:convert';
 
+import 'core/api_service.dart';
 import 'package:neek/auth/login_screen.dart';
 import 'home_screen.dart';
 
@@ -16,15 +15,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-
-  String getBackendUrl() {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
-    } else {
-      //return 'http://192.168.110.238:8000/api';
-      return 'http://192.168.110.238:8000/api';
-    }
-  }
 
   @override
   void initState() {
@@ -41,31 +31,24 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     try {
-      final response = await http.get(
-        Uri.parse('${getBackendUrl()}/user'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await ApiService.instance.get('/user');
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final userData = decoded['data']; // ✅ Aquí ya accedes al objeto con name, email, etc.
+        final userData = decoded['data'];
         _goToHome(userData);
       } else {
         await _secureStorage.delete(key: 'auth_token');
         _goToLogin();
       }
     } catch (e) {
+      await _secureStorage.delete(key: 'auth_token');
       _goToLogin();
     }
   }
 
   void _goToHome(Map<String, dynamic> userData) {
     final List<dynamic> userPlans = userData['user_plans'] ?? [];
-
-    // Extrae solo los nombres
     final List<String> planNames = userPlans
         .map<String>((plan) => plan['nombre_plan'].toString())
         .toList();
