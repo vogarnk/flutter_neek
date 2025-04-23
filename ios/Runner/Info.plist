@@ -4,6 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Necesitamos acceso a la cámara para tomar tu INE.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Necesitamos acceso a tu galería para cargar imágenes de tu INE.</string>	
 	<key>CFBundleDisplayName</key>
 	<string>Neek</string>
 	<key>CFBundleExecutable</key>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/api_service.dart';
+import '../widgets/ine_upload_screen.dart';
 
 class PersonalDataScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -194,14 +195,28 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
               const SizedBox(height: 24),
 
               ElevatedButton(
-                onPressed: _handleSubmit, // 👈 Llamada directa
-                style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                      padding: MaterialStateProperty.all(
-                        const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
+                onPressed: _datosCorrectos ? _handleSubmit : null,
+                style: ButtonStyle(
+                  padding: MaterialStateProperty.all(
+                    const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  backgroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return Colors.grey.shade400; // color cuando está deshabilitado
+                    }
+                    return Theme.of(context).primaryColor; // color normal
+                  }),
+                  foregroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return Colors.white70; // texto cuando está deshabilitado
+                    }
+                    return Colors.white; // texto normal
+                  }),
+                ),
                 child: const Center(child: Text('Continuar')),
               ),
+
+
               const SizedBox(height: 16),
 
               OutlinedButton(
@@ -312,10 +327,12 @@ class _PersonalDataScreenState extends State<PersonalDataScreen> {
     final response = await ApiService.instance.post('/user/personal-data', body: dataToSend);
 
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Datos enviados correctamente')),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const INEUploadScreen(), // 👈 Aquí va tu pantalla para subir INE
+        ),
       );
-      Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${response.body}')),
