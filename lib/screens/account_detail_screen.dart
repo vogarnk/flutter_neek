@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../widgets/user_detail_tile.dart';
 import '../widgets/agent_card.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
 import '../screens/edit_request_screen.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
 
 class AccountDetailScreen extends StatelessWidget {
-  const AccountDetailScreen({super.key});
+  final Map<String, dynamic> user;
+
+  const AccountDetailScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +33,20 @@ class AccountDetailScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const CircleAvatar(radius: 36, backgroundColor: Colors.grey),
+                  CircleAvatar(
+                    radius: 36,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: user['avatar'] != null && user['avatar'].toString().isNotEmpty
+                        ? NetworkImage('https://app.neek.mx/storage/${user['avatar']}')
+                        : null,
+                    child: (user['avatar'] == null || user['avatar'].toString().isEmpty)
+                        ? const Icon(Icons.person, size: 36, color: Colors.white)
+                        : null,
+                  ),
+
                   const SizedBox(height: 12),
-                  const Text(
-                    'Andrea Marquez',
+                  Text(
+                      '${user['name']} ${user['sName'] ?? ''} ${user['lName'] ?? ''} ${user['lName2'] ?? ''}',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
@@ -146,14 +157,15 @@ class AccountDetailScreen extends StatelessWidget {
                     trailing: Icon(Icons.verified, size: 18, color: Color(0xFF2B5FF3)),
                   ),
                   _userRow(label: 'Número de cliente', value: 'NK-2310-01-W857567'),
-                  _userRow(label: 'Nombre(s)', value: 'Andrea Mariana'),
-                  _userRow(label: 'Apellidos', value: 'Marquez Monasteri'),
-                  _userRow(label: 'Género', value: 'Femenino'),
-                  _userRow(label: 'Fecha de Nacimiento', value: '12/05/1996'),
-                  _userRow(label: 'Lugar de Nacimiento', value: 'Guadalajara'),
-                  _userRow(label: 'CURP', value: 'CAAD990512MSLCHCL05'),
-                  _userRow(label: 'RFC', value: 'CAAD990512MG1'),
-                  _userRow(label: 'Correo', value: 'andymonar@gmail.com'),
+                  _userRow(label: 'Nombre(s)', value: '${user['name'] ?? ''} ${user['sName'] ?? ''}' ),
+                  _userRow(label: 'Apellidos', value: '${user['lName'] ?? ''} ${user['lName2'] ?? ''}'),
+                  _userRow(label: 'Género', value: user['genero'] ?? ''),
+                  _userRow(label: 'Fecha de Nacimiento', value: user['dateBirth'] ?? ''),
+                  _userRow(label: 'Lugar de Nacimiento', value: user['estadoNacimiento'] ?? ''),
+                  _userRow(label: 'CURP', value: user['curp'] ?? ''),
+                  _userRow(label: 'RFC', value: user['rfc'] ?? ''),
+                  _userRow(label: 'Correo', value: user['email'] ?? ''),
+
                   const SizedBox(height: 20),
                   SizedBox(
                     width: double.infinity,

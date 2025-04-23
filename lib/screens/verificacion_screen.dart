@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:neek/screens/personal_data_screen.dart'; // Ajusta el path si es necesario
 
 class VerificacionScreen extends StatelessWidget {
-  const VerificacionScreen({super.key});
+  final Map<String, dynamic> user;
+
+  const VerificacionScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,7 @@ class VerificacionScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const PersonalDataScreen()),
+                          MaterialPageRoute(builder: (context) => PersonalDataScreen(user: user)),
                         );
                       },
                       style: Theme.of(context).elevatedButtonTheme.style?.copyWith(

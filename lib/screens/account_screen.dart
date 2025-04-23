@@ -4,7 +4,9 @@ import 'notification_settings_screen.dart';
 import 'package:neek/screens/verificacion_screen.dart';
 
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
+  final Map<String, dynamic> user;
+
+  const AccountScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +41,7 @@ class AccountScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const AccountDetailScreen(),
+                        builder: (_) => AccountDetailScreen(user: user), // ✅ ya tienes 'user' como parámetro
                       ),
                     );
                   },
@@ -69,7 +71,7 @@ class AccountScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const VerificacionScreen()),
+                      MaterialPageRoute(builder: (context) => VerificacionScreen(user: user)),
                     );
                   },
                 ),

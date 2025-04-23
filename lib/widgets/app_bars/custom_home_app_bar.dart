@@ -5,7 +5,9 @@ import 'package:neek/screens/notifications_screen.dart';
 import 'package:neek/screens/account_screen.dart';
 
 class CustomHomeAppBar extends StatelessWidget {
-  const CustomHomeAppBar({super.key});
+  final Map<String, dynamic> user;
+
+  const CustomHomeAppBar({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class CustomHomeAppBar extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const AccountScreen(),
+                    builder: (_) => AccountScreen(user: user),
                   ),
                 );
               },

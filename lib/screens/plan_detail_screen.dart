@@ -18,9 +18,11 @@ class PlanDetailScreen extends StatelessWidget {
   final double totalRetirarMxn;
   final double totalRetirar2065;
   final double totalRetirar2065Mxn;
+  final Map<String, dynamic> user;
 
   const PlanDetailScreen({
     super.key,
+    required this.user,
     required this.nombrePlan,
     required this.duracion,
     required this.recuperacionFinalUdis,
@@ -48,7 +50,8 @@ class PlanDetailScreen extends StatelessWidget {
         automaticallyImplyLeading: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: const CustomHomeAppBar(),
+        title: CustomHomeAppBar(user: user), // ✅ pero antes tienes que agregarlo al constructor
+
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),

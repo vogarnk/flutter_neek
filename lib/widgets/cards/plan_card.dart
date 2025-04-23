@@ -15,9 +15,11 @@ class PlanCard extends StatelessWidget {
   final double totalRetirarMxn;
   final double totalRetirar2065;
   final double totalRetirar2065Mxn;
+  final Map<String, dynamic> user;
 
   const PlanCard({
     super.key,
+    required this.user,
     required this.nombrePlan,
     required this.duracion,
     required this.recuperacionFinalUdis,
@@ -127,6 +129,7 @@ class PlanCard extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => PlanDetailScreen(
+                        user:user,
                         nombrePlan: nombrePlan,
                         duracion: duracion,
                         recuperacionFinalUdis: recuperacionFinalUdis,

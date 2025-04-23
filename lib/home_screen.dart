@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // LOGO + ICONOS
-              const CustomHomeAppBar(),
+              CustomHomeAppBar(user: user),
 
               const SizedBox(height: 20),
 
@@ -75,6 +75,7 @@ class HomeScreen extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: PlanCard(
+                        user: user,
                         nombrePlan: nombre,
                         duracion: duracion,
                         recuperacionFinalUdis: udis,
