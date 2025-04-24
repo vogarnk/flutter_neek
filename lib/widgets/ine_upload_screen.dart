@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../core/theme/app_colors.dart';
 import '../screens/direccion_screen.dart';
+import '../core/api_service.dart';
+import 'package:http/http.dart' as http;
 
 class INEUploadScreen extends StatefulWidget {
   const INEUploadScreen({super.key});
@@ -101,33 +103,32 @@ class _INEUploadScreenState extends State<INEUploadScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-                onPressed: ambosSubidos
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const DireccionScreen()),
-                        );
-                      }
-                    : null,
+              onPressed: ambosSubidos ? _subirINEs : null,
               style: ButtonStyle(
                 padding: MaterialStateProperty.all(
                   const EdgeInsets.symmetric(vertical: 16),
                 ),
                 backgroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
-                    return Colors.grey.shade400; // Color deshabilitado
+                    return Colors.grey.shade400;
                   }
-                  return Theme.of(context).primaryColor; // Color habilitado
+                  return Theme.of(context).primaryColor;
                 }),
                 foregroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
-                    return Colors.white70; // Texto deshabilitado
+                    return Colors.white70;
                   }
-                  return Colors.white; // Texto habilitado
+                  return Colors.white;
                 }),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30), // Más redondeado
+                  ),
+                ),
               ),
               child: const Center(child: Text('Continuar')),
             ),
+
 
             const SizedBox(height: 12),
             OutlinedButton(
@@ -242,4 +243,43 @@ class _INEUploadScreenState extends State<INEUploadScreen> {
       const SnackBar(content: Text('Documentos cargados correctamente')),
     );
   }
+
+  Future<void> _subirINEs() async {
+    if (_ineFrente == null || _ineReverso == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Faltan archivos por cargar')),
+      );
+      return;
+    }
+
+    try {
+      final files = [
+        await http.MultipartFile.fromPath('ine_frente', _ineFrente!.path),
+        await http.MultipartFile.fromPath('ine_reverso', _ineReverso!.path),
+      ];
+
+      final response = await ApiService.instance.postMultipart(
+        path: '/user/ine',
+        fields: {},
+        files: files,
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const DireccionScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al subir los archivos')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ocurrió un error: $e')),
+      );
+    }
+  }
+
+
 }

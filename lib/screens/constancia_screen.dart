@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../core/theme/app_colors.dart';
 import '../screens/verificacion_completada_screen.dart';
+import '../core/api_service.dart';
+import 'package:http/http.dart' as http;
+
 class ConstanciaScreen extends StatefulWidget {
   const ConstanciaScreen({super.key});
 
@@ -98,14 +101,8 @@ class _ConstanciaScreenState extends State<ConstanciaScreen> {
                 ),
               const Spacer(),
               ElevatedButton(
-                onPressed: _constancia != null
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const VerificacionCompletadaScreen()),
-                        );
-                      }
-                    : null,
+                onPressed: _constancia != null ? _subirConstancia : null,
+
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.resolveWith((states) {
                     if (states.contains(MaterialState.disabled)) {
@@ -129,4 +126,36 @@ class _ConstanciaScreenState extends State<ConstanciaScreen> {
       ),
     );
   }
+
+  Future<void> _subirConstancia() async {
+    if (_constancia == null) return;
+
+    try {
+      final file = await http.MultipartFile.fromPath('constancia', _constancia!.path);
+
+      final response = await ApiService.instance.postMultipart(
+        path: '/user/constancia',
+        fields: {}, // Puedes incluir campos adicionales si es necesario
+        files: [file],
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const VerificacionCompletadaScreen()),
+        );
+      } else {
+        print('❌ Error: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al subir la constancia')),
+        );
+      }
+    } catch (e) {
+      print('❌ Exception: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ocurrió un error: $e')),
+      );
+    }
+  }
+
 }

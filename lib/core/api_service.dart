@@ -61,6 +61,25 @@ class ApiService {
     final headers = await _buildHeaders();
     return _client.delete(uri, headers: headers);
   }
+  // POST con archivos (multipart/form-data)
+  Future<http.Response> postMultipart({
+    required String path,
+    required Map<String, String> fields,
+    required List<http.MultipartFile> files,
+  }) async {
+    final uri = Uri.parse('$_baseUrl$path');
+    final token = await _storage.read(key: 'auth_token');
+
+    final request = http.MultipartRequest('POST', uri)
+      ..headers['Authorization'] = 'Bearer $token'
+      ..headers['Accept'] = 'application/json' // 👈 esto es lo que falta
+      ..fields.addAll(fields)
+      ..files.addAll(files);
+
+    final streamedResponse = await request.send();
+    return http.Response.fromStream(streamedResponse);
+  }
+
 
   // Opcional: expone el storage para borrar token en logout
   Future<void> clearToken() => _storage.delete(key: 'auth_token');

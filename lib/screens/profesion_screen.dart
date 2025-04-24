@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../screens/constancia_screen.dart';
+import '../core/api_service.dart';
+import 'package:http/http.dart' as http;
+
 class ProfesionScreen extends StatefulWidget {
   const ProfesionScreen({super.key});
 
@@ -95,16 +98,10 @@ class _ProfesionScreenState extends State<ProfesionScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Datos registrados')),
-                      );
+                      _enviarDatosProfesion();
                     }
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ConstanciaScreen()),
-                    );
-
                   },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -164,4 +161,44 @@ class _ProfesionScreenState extends State<ProfesionScreen> {
       ),
     );
   }
+
+  Future<void> _enviarDatosProfesion() async {
+    final fieldsOcupacion = {
+      'sector': giro,
+      'company_name': empresaController.text,
+      'activity_detail': lugarController.text,
+      'position': profesionController.text,
+      'description': descripcionLaboresController.text,
+      'city': ciudadController.text,
+      'state': estadoController.text,
+      'antiguedad_laboral': antiguedadController.text,
+    };
+
+    final fieldsIngresos = {
+      'ingresos': ingresosController.text,
+    };
+
+    final responseOcupacion = await ApiService.instance.post(
+      '/user/occupation',
+      body: fieldsOcupacion,
+    );
+
+    final responseIngresos = await ApiService.instance.post(
+      '/user/ingresos',
+      body: fieldsIngresos,
+    );
+
+    if (responseOcupacion.statusCode == 200 && responseIngresos.statusCode == 200) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ConstanciaScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al guardar la información')),
+      );
+      print('Ocupación: ${responseOcupacion.body}');
+      print('Ingresos: ${responseIngresos.body}');
+    }
+  }  
 }

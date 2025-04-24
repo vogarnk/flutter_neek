@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../core/theme/app_colors.dart';
 import 'profesion_screen.dart'; // ajusta la ruta si está en otra carpeta
+import '../core/api_service.dart';
+import 'package:http/http.dart' as http;
 
 class DireccionScreen extends StatefulWidget {
   const DireccionScreen({super.key});
@@ -97,28 +99,18 @@ class _DireccionScreenState extends State<DireccionScreen> {
 
 
                 const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () {
-                    // Aquí puedes integrar ImagePicker igual que en la screen anterior
-                  },
-                  child: DottedBorderBox(),
-                ),
+                DottedBorderBox(onTap: _pickComprobante),
+
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Mostrar mensaje (opcional)
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Dirección registrada')),
-                      );
-
-                      // Navegar a la siguiente pantalla
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ProfesionScreen()),
-                      );
+                    final isValid = _formKey.currentState?.validate() ?? false;
+                    if (isValid) {
+                      _subirDireccion();
                     }
                   },
+
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B5FF3),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -171,32 +163,85 @@ class _DireccionScreenState extends State<DireccionScreen> {
       ),
     );
   }
+  Future<void> _pickComprobante() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (picked != null) {
+      setState(() {
+        comprobanteDomicilio = File(picked.path);
+      });
+    }
+  }
+
+  Future<void> _subirDireccion() async {
+    if (comprobanteDomicilio == null) return;
+
+    final requestFile = await http.MultipartFile.fromPath('comprobante', comprobanteDomicilio!.path);
+
+    final fields = {
+      'street': calleController.text,
+      'ext_number': numeroController.text,
+      'suburb': coloniaController.text,
+      'zip_code': cpController.text,
+      'city': ciudadController.text,
+      'state': estadoController.text,
+      'country': paisController.text,
+      'tipo_vivienda': relacion,
+    };
+
+    final response = await ApiService.instance.postMultipart(
+      path: '/user/address',
+      fields: fields,
+      files: [requestFile],
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ProfesionScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error al subir la dirección')),
+      );
+      
+        print('Error: ${response.body}');
+    }
+  }
 
 
 }
 
 class DottedBorderBox extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const DottedBorderBox({super.key, required this.onTap});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 150,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey, style: BorderStyle.solid),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      alignment: Alignment.center,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.upload_file, size: 40),
-          SizedBox(height: 8),
-          Text(
-            'Haz click para subir la imagen\n o busca el archivo en tu dispositivo',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.black87),
-          ),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 150,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey, style: BorderStyle.solid),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            const Icon(Icons.upload_file, size: 40, color: Colors.black),
+            SizedBox(height: 8),
+            Text(
+              'Haz click para subir la imagen\n o busca el archivo en tu dispositivo',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black87),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+
