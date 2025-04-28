@@ -61,6 +61,7 @@ class HomeScreen extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final plan = plans[index];
 
+                    final beneficiarios = List<Map<String, dynamic>>.from(plan['beneficiarios'] ?? []);
                     final nombre = plan['nombre_plan'] ?? 'Plan sin nombre';
                     final udis = double.tryParse(plan['recuperacion_final_udis'].toString()) ?? 0;
                     final udisMxn = double.tryParse(plan['recuperacion_final_udis_mxn'].toString()) ?? 0;
@@ -86,6 +87,7 @@ class HomeScreen extends StatelessWidget {
                         totalRetirarMxn: totalRetirarMxn,
                         totalRetirar2065: totalRetirar2065,
                         totalRetirar2065Mxn: totalRetirar2065Mxn,
+                        beneficiarios: beneficiarios, // ✅ agregado
                       ),
                     );
                   },

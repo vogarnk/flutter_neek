@@ -6,6 +6,10 @@ import 'package:neek/widgets/buttons/plan_action_button.dart';
 import 'package:intl/intl.dart';
 import 'package:neek/widgets/cards/udi_card.dart';
 import 'package:neek/widgets/tables/plan_contributions_screen.dart' show PlanContributionsTable;
+import '../screens/verificacion_completada_screen.dart';
+import '../screens/verificacion_exitosa_screen.dart';
+import 'package:neek/screens/verificacion_screen.dart';
+import '../screens/beneficiaries_screen.dart';
 
 class PlanDetailScreen extends StatelessWidget {
   final String nombrePlan;
@@ -19,10 +23,12 @@ class PlanDetailScreen extends StatelessWidget {
   final double totalRetirar2065;
   final double totalRetirar2065Mxn;
   final Map<String, dynamic> user;
+  final List<dynamic> beneficiarios;
 
   const PlanDetailScreen({
     super.key,
     required this.user,
+    required this.beneficiarios, // 👈 nuevo
     required this.nombrePlan,
     required this.duracion,
     required this.recuperacionFinalUdis,
@@ -96,7 +102,36 @@ class PlanDetailScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  final verificacion = user['verificacion'];
+                  final perfilCompleto = user['perfil_completo'] == 1;
+
+                  if (perfilCompleto) {
+                    print("Perfil completo: $beneficiarios");
+                    // TODO: Activar plan aquí
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BeneficiariesScreen(
+                          user: user,
+                          beneficiarios: beneficiarios,
+                        ),
+                      ),
+                    );
+
+                    // Aquí podrías hacer un POST al backend o navegar a una pantalla de confirmación
+                  } else if (verificacion['completed'] == true) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const VerificacionCompletadaScreen()),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => VerificacionScreen(user: user)),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E5AFF),
                   shape: RoundedRectangleBorder(

@@ -16,6 +16,7 @@ class PlanCard extends StatelessWidget {
   final double totalRetirar2065;
   final double totalRetirar2065Mxn;
   final Map<String, dynamic> user;
+  final List<dynamic> beneficiarios;
 
   const PlanCard({
     super.key,
@@ -30,6 +31,7 @@ class PlanCard extends StatelessWidget {
     required this.totalRetirarMxn,
     required this.totalRetirar2065,
     required this.totalRetirar2065Mxn,
+    required this.beneficiarios, // 👈 nuevo
   });
 
 
@@ -140,6 +142,7 @@ class PlanCard extends StatelessWidget {
                         totalRetirarMxn: totalRetirarMxn,
                         totalRetirar2065: totalRetirar2065,
                         totalRetirar2065Mxn: totalRetirar2065Mxn,
+                        beneficiarios: beneficiarios,
                       ),
                     ),
                   );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'account_detail_screen.dart'; // 👈 Asegúrate de importar esta vista
 import 'notification_settings_screen.dart';
 import 'package:neek/screens/verificacion_screen.dart';
+import '../screens/verificacion_completada_screen.dart';
+import '../screens/verificacion_exitosa_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -69,12 +71,31 @@ class AccountScreen extends StatelessWidget {
                   title: 'Verificación',
                   subtitle: 'Verifica tu cuenta y carga tu información para verificar tu identidad',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => VerificacionScreen(user: user)),
-                    );
+                    final verificacion = user['verificacion'];
+                    final perfilCompleto = user['perfil_completo'] == 1;
+
+                    if (perfilCompleto) {
+                      // Perfil ya validado por el equipo Neek
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const VerificacionExitosaScreen()),
+                      );
+                    } else if (verificacion['completed'] == true) {
+                      // Documentación cargada, falta revisión
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const VerificacionCompletadaScreen()),
+                      );
+                    } else {
+                      // Aún falta completar información
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => VerificacionScreen(user: user)),
+                      );
+                    }
                   },
                 ),
+
                 const Divider(),
                 const AccountTile(
                   title: 'Asociación de celular',
