@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../core/api_service.dart';
@@ -56,31 +55,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    try {
-      final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
-      final account = await _googleSignIn.signIn();
-
-      if (account != null) {
-        final response = await ApiService.instance.post('/social-login', body: {
-          'provider': 'google',
-          'email': account.email,
-          'name': account.displayName ?? '',
-        });
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          await _secureStorage.write(key: 'auth_token', value: data['token']);
-          Navigator.pushReplacementNamed(context, '/home');
-        } else {
-          _showError('Fallo al loguearse con Google');
-        }
-      }
-    } catch (e) {
-      _showError('Error en Google Sign-In: $e');
     }
   }
 

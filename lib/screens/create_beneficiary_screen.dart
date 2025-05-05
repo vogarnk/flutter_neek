@@ -9,7 +9,10 @@ class CreateBeneficiaryScreen extends StatefulWidget {
 }
 
 class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController nombresController = TextEditingController();
+  final TextEditingController segundoNombreController = TextEditingController();
+  final TextEditingController apellidoPaternoController = TextEditingController();
+  final TextEditingController apellidoMaternoController = TextEditingController();
   final TextEditingController dayController = TextEditingController();
   final TextEditingController monthController = TextEditingController();
   final TextEditingController yearController = TextEditingController();
@@ -23,12 +26,14 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
   final TextEditingController numeroIntController = TextEditingController();
   final TextEditingController ciudadController = TextEditingController();
   final TextEditingController paisController = TextEditingController(text: 'México');
+  final TextEditingController _dobController = TextEditingController();
 
   double porcentaje = 25;
   String tipoBeneficiario = 'Tradicional';
   String categoria = 'Básico';
   bool mismoDomicilio = true;
   bool tutorRequerido = false;
+  DateTime? _selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +59,27 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _sectionTitle('Agregar nuevo beneficiario'),
-              _textField('Nombre Completo', controller: nameController),
-              _dobFields(),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _textField('Luis', controller: nombresController)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _textField('Ernesto', controller: segundoNombreController)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _textField('Garcia', controller: apellidoPaternoController)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _textField('Sánchez', controller: apellidoMaternoController)),
+                    ],
+                  ),
+                ],
+              ),
+              _dobField(context),
               _textField('Parentesco', controller: parentescoController),
               _textField('Ocupación', controller: ocupacionController),
               const SizedBox(height: 8),
@@ -80,6 +104,7 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
               Row(
                 children: [
                   _radioOption('Tradicional', tipoBeneficiario, (val) => setState(() => tipoBeneficiario = val!)),
+                  const SizedBox(width: 16),
                   _radioOption('Intermedio', tipoBeneficiario, (val) => setState(() => tipoBeneficiario = val!)),
                 ],
               ),
@@ -103,14 +128,13 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
               _sectionTitle('INE del Beneficiario'),
               _fileUploaderWidget(),
               _sectionTitle('Categoría de acceso a la información'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  Expanded(child: _radioOption('Básico', categoria, (val) => setState(() => categoria = val!))),
-                  const SizedBox(width: 8),
-                  Expanded(child: _radioOption('Intermedio', categoria, (val) => setState(() => categoria = val!))),
-                  const SizedBox(width: 8),
-                  Expanded(child: _radioOption('Avanzado', categoria, (val) => setState(() => categoria = val!))),
+                  _radioOption('Básico', categoria, (val) => setState(() => categoria = val!)),
+                  _radioOption('Intermedio', categoria, (val) => setState(() => categoria = val!)),
+                  _radioOption('Avanzado', categoria, (val) => setState(() => categoria = val!)),
                 ],
               ),
               _sectionTitle('Tutor del Beneficiario'),
@@ -122,7 +146,7 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
               ),
               if (tutorRequerido) ...[
                 _textField('Nombre Completo'),
-                _dobFields(),
+                _dobField(context),
                 _textField('Parentesco'),
                 _textField('Ocupación'),
                 _textField('Calle'),
@@ -177,25 +201,49 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
         ),
       );
 
-  Widget _dobFields() => Row(
-        children: [
-          Expanded(child: _textField('DD')),
-          const SizedBox(width: 8),
-          Expanded(child: _textField('MM')),
-          const SizedBox(width: 8),
-          Expanded(child: _textField('YYYY')),
-        ],
-      );
+  Widget _dobField(BuildContext context) {
+    return TextFormField(
+      controller: _dobController,
+      readOnly: true,
+      onTap: () async {
+        final now = DateTime.now();
+        final DateTime? picked = await showDatePicker(
+          context: context,
+          initialDate: DateTime(now.year - 18),
+          firstDate: DateTime(1900),
+          lastDate: now,
+          locale: const Locale('es', 'MX'),
+        );
+        if (picked != null) {
+          _selectedDate = picked;
+          _dobController.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+        }
+      },
+      decoration: const InputDecoration(
+        labelText: 'Fecha de nacimiento',
+        border: OutlineInputBorder(),
+        suffixIcon: Icon(Icons.calendar_today),
+      ),
+    );
+  }
 
-  Widget _radioOption(String label, String group, ValueChanged<String?> onChanged) => Expanded(
-        child: RadioListTile<String>(
-          title: Text(label, style: const TextStyle(color: Colors.black)),
-          value: label,
-          groupValue: group,
-          onChanged: onChanged,
-          activeColor: AppColors.primary,
-        ),
-      );
+Widget _radioOption(String label, String groupValue, Function(String?) onChanged) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Radio<String>(
+        value: label,
+        groupValue: groupValue,
+        onChanged: onChanged,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      Text(
+        label,
+        style: const TextStyle(color: Colors.black ,fontSize: 13), // 👈 Letra más pequeña
+      ),
+    ],
+  );
+}
 
   Widget _fileUploaderWidget() => Container(
         width: double.infinity,
