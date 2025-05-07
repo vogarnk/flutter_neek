@@ -7,8 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:neek/widgets/cards/udi_card.dart';
 import 'package:neek/widgets/tables/plan_contributions_screen.dart' show PlanContributionsTable;
 import '../screens/verificacion_completada_screen.dart';
-import '../screens/verificacion_exitosa_screen.dart';
 import 'package:neek/screens/verificacion_screen.dart';
+import '../screens/beneficiaries_screen.dart';
+import '../screens/plan_settings_screen.dart';
 import '../screens/beneficiaries_screen.dart';
 
 class PlanDetailScreen extends StatelessWidget {
@@ -161,10 +162,31 @@ class PlanDetailScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
+              children: [
                 PlanActionButton(icon: Icons.calculate, label: 'Cotización'),
-                PlanActionButton(icon: Icons.settings, label: 'Ajustes'),
-                PlanActionButton(icon: Icons.people, label: 'Beneficiarios'),
+                PlanActionButton(
+                  icon: Icons.settings,
+                  label: 'Ajustes',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PlanSettingsScreen()),
+                    );
+                  },
+                ),                
+                PlanActionButton(
+                  icon: Icons.people,
+                  label: 'Beneficiarios',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BeneficiariesScreen(
+                          user: user,
+                          beneficiarios: beneficiarios,                        
+                      )),
+                    );
+                  },
+                ),                 
                 PlanActionButton(icon: Icons.description, label: 'Legal'),
               ],
             ),

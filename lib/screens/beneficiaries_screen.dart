@@ -6,14 +6,13 @@ import '../screens/create_beneficiary_screen.dart';
 
 class BeneficiariesScreen extends StatelessWidget {
   final Map<String, dynamic> user;
-  final List<dynamic> beneficiarios; // 👈 nuevo
+  final List<dynamic> beneficiarios;
 
   const BeneficiariesScreen({
     super.key,
     required this.user,
     required this.beneficiarios,
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +63,21 @@ class BeneficiariesScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  if (beneficiarios.isEmpty) {
+                    _mostrarAlerta(context, 'Debes añadir al menos un beneficiario.');
+                    return;
+                  }
+
+                  final int sumaPorcentajes = beneficiarios.fold<int>(
+                    0,
+                    (total, b) => total + (int.tryParse(b['porcentaje'].toString()) ?? 0),
+                  );
+
+                  if (sumaPorcentajes != 100) {
+                    _mostrarAlerta(context, 'La suma de los porcentajes debe ser exactamente 100%. Actualmente tienes $sumaPorcentajes%.');
+                    return;
+                  }
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const ActivatePlanIntroScreen()),
@@ -94,52 +108,111 @@ class BeneficiariesScreen extends StatelessWidget {
                 children: [
                   const Text(
                     'Mis beneficiarios',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 , color: AppColors.textGray900),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: AppColors.textGray900,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   const Text(
                     'Administra tus beneficiarios',
-                    style: TextStyle(fontSize: 12, color: AppColors.textGray400),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textGray400,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Divider(),
                   const SizedBox(height: 8),
 
-                  // 🔁 Recorremos los beneficiarios reales
-                  for (var b in beneficiarios)
-                    _beneficiarioRow(
-                      avatarPath: b['avatar_url'] ?? 'assets/avatars/default.png',
-                      nombre: b['nombre'] ?? 'Desconocido',
-                      tipo: b['tipo'] ?? 'Tipo no definido',
-                      acceso: b['acceso'] ?? 'N/A',
-                      porcentaje: int.tryParse(b['porcentaje'].toString()) ?? 0,
+                  // Títulos
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: const [
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            'BENEFICIARIO',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'TIPO',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'ACCESO',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '%',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                      ],
                     ),
-                ],
-              ),
-            ),
-
-
-            const SizedBox(height: 16),
-
-            // Botón añadir beneficiarios
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const CreateBeneficiaryScreen()),
-                  );
-                  // Navegar a pantalla de añadir beneficiarios
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
                   ),
-                ),
-                child: const Text('Añadir beneficiarios'),
+                  const Divider(height: 1),
+                  const SizedBox(height: 8),
+
+                  // Beneficiarios renderizados
+                  ...[
+                    for (var b in beneficiarios)
+                      _beneficiarioRow(
+                        avatarPath: b['avatar_url'] ?? 'assets/avatars/default.png',
+                        nombre: b['nombre'] ?? 'Desconocido',
+                        tipo: b['tipo'] ?? 'Tipo no definido',
+                        acceso: b['acceso'] ?? 'N/A',
+                        porcentaje: int.tryParse(b['porcentaje'].toString()) ?? 0,
+                      ),
+                  ],
+
+                  const SizedBox(height: 16),
+
+                  // Botón añadir beneficiarios
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CreateBeneficiaryScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text('Añadir beneficiarios'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -157,42 +230,75 @@ class BeneficiariesScreen extends StatelessWidget {
   }) {
     final bool esBasico = acceso == 'Básico';
     final Color bgColor = esBasico ? const Color(0xFFE8F0FF) : const Color(0xFFE0FFF5);
-    final Color textColor = esBasico ? const Color(0xFF2563EB) : const Color(0xFF10B981);
+    final Color textColor = esBasico ? const Color(0xFF6366F1) : const Color(0xFF06B6D4);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           CircleAvatar(
-            radius: 16,
+            radius: 20,
             backgroundImage: AssetImage(avatarPath),
           ),
           const SizedBox(width: 12),
           Expanded(
+            flex: 3,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(nombre, style: const TextStyle(fontWeight: FontWeight.w500 , color: AppColors.textGray900)),
-                Text(tipo, style: const TextStyle(fontSize: 12, color: AppColors.textGray900)),
+                Text(nombre, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                const SizedBox(height: 2),
+                Text(tipo, style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280))),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              acceso,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: textColor),
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  acceso,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          Text('$porcentaje%', style: const TextStyle(fontWeight: FontWeight.bold , color: AppColors.textGray900)),
+          const SizedBox(width: 8),
+          Text(
+            '$porcentaje%',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Color(0xFF111928),
+            ),
+          ),
         ],
       ),
     );
   }
-  
+
+  void _mostrarAlerta(BuildContext context, String mensaje) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Atención'),
+        content: Text(mensaje),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 }

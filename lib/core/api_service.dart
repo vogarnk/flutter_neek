@@ -20,6 +20,8 @@ class ApiService {
     } else {
       return 'https://app.neek.mx/api';
       //return 'http://192.168.1.69:8000/api';
+      //return 'http://192.168.110.37:8000/api';
+      return 'https://app.neek.mx/api';
     }
   }
 
