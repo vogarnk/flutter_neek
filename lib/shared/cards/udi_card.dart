@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neek/widgets/charts/udi_line_chart.dart';
+import 'package:neek/shared/charts/udi_line_chart.dart';
 
 class UdiCard extends StatelessWidget {
   const UdiCard({super.key});

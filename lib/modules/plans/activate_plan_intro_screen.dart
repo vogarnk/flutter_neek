@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
-import '../screens/questionnaire_stepper_screen.dart';
+import '../../core/theme/app_colors.dart';
+import 'questionnaire_stepper_screen.dart';
 
 class ActivatePlanIntroScreen extends StatelessWidget {
   const ActivatePlanIntroScreen({super.key});

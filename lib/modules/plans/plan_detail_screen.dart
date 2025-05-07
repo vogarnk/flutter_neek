@@ -1,16 +1,16 @@
 // PASO 1: Crea una pantalla de detalles del plan (PlanDetailScreen)
 import 'package:flutter/material.dart';
-import 'package:neek/widgets/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
-import 'package:neek/widgets/cards/detail_card.dart';
-import 'package:neek/widgets/buttons/plan_action_button.dart';
+import 'package:neek/shared/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
+import 'package:neek/shared/cards/detail_card.dart';
+import 'package:neek/shared/buttons/plan_action_button.dart';
 import 'package:intl/intl.dart';
-import 'package:neek/widgets/cards/udi_card.dart';
-import 'package:neek/widgets/tables/plan_contributions_screen.dart' show PlanContributionsTable;
-import '../screens/verificacion_completada_screen.dart';
-import 'package:neek/screens/verificacion_screen.dart';
-import '../screens/beneficiaries_screen.dart';
-import '../screens/plan_settings_screen.dart';
-import '../screens/beneficiaries_screen.dart';
+import 'package:neek/shared/cards/udi_card.dart';
+import 'package:neek/shared/tables/plan_contributions_screen.dart' show PlanContributionsTable;
+import '../verification/verificacion_completada_screen.dart';
+import 'package:neek/modules/verification/verificacion_screen.dart';
+import '../beneficiaries/beneficiaries_screen.dart';
+import 'plan_settings_screen.dart';
+import '../beneficiaries/beneficiaries_screen.dart';
 
 class PlanDetailScreen extends StatelessWidget {
   final String nombrePlan;

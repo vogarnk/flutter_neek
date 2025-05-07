@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:neek/screens/help_center_screen.dart';
-import 'package:neek/screens/notifications_screen.dart';
-import 'package:neek/screens/account_screen.dart';
+import 'package:neek/modules/agent/help_center_screen.dart';
+import 'package:neek/modules/notifications/notifications_screen.dart';
+import 'package:neek/modules/account/account_screen.dart';
 
 class CustomHomeAppBar extends StatelessWidget {
   final Map<String, dynamic> user;

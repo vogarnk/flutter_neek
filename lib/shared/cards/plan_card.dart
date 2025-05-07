@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:neek/widgets/common/gradient_circle_ring.dart';
+import 'package:neek/shared/common/gradient_circle_ring.dart';
 import 'package:intl/intl.dart';
-import 'package:neek/screens/plan_detail_screen.dart'; // 👈 Asegúrate de importar correctamente
+import 'package:neek/modules/plans/plan_detail_screen.dart'; // 👈 Asegúrate de importar correctamente
 
 class PlanCard extends StatelessWidget {
   final String nombrePlan;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:neek/widgets/cards/ahorro_card.dart';
-import 'package:neek/widgets/cards/plan_card.dart';
-import 'package:neek/widgets/cards/udi_card.dart';
+import 'package:neek/shared/cards/ahorro_card.dart';
+import 'package:neek/shared/cards/plan_card.dart';
+import 'package:neek/shared/cards/udi_card.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:neek/widgets/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
+import 'package:neek/shared/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
 
 class HomeScreen extends StatelessWidget {
   final Map<String, dynamic> user;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
-import '../screens/activate_plan_intro_screen.dart';
-import '../widgets/cards/card_neek.dart';
-import '../screens/create_beneficiary_screen.dart';
+import '../../core/theme/app_colors.dart';
+import '../plans/activate_plan_intro_screen.dart';
+import '../../shared/cards/card_neek.dart';
+import 'create_beneficiary_screen.dart';
 
 class BeneficiariesScreen extends StatelessWidget {
   final Map<String, dynamic> user;

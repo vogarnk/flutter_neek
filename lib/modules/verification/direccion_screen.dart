@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import '../core/theme/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 import 'profesion_screen.dart'; // ajusta la ruta si está en otra carpeta
-import '../core/api_service.dart';
+import '../../core/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class DireccionScreen extends StatefulWidget {

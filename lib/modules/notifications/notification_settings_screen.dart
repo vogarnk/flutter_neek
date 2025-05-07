@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/settings_tile.dart';
-import 'package:neek/screens/whatsapp_notification_settings_screen.dart';
+import '../../shared/settings_tile.dart';
+import 'package:neek/modules/notifications/whatsapp_notification_settings_screen.dart';
 
 class NotificationSettingsScreen extends StatelessWidget {
   const NotificationSettingsScreen({super.key});

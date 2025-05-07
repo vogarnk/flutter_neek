@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'account_detail_screen.dart'; // 👈 Asegúrate de importar esta vista
-import 'notification_settings_screen.dart';
-import 'package:neek/screens/verificacion_screen.dart';
-import '../screens/verificacion_completada_screen.dart';
-import '../screens/verificacion_exitosa_screen.dart';
-import '../splash_screen.dart';
+import '../notifications/notification_settings_screen.dart';
+import 'package:neek/modules/verification/verificacion_screen.dart';
+import '../verification/verificacion_completada_screen.dart';
+import '../verification/verificacion_exitosa_screen.dart';
+import '../../splash_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AccountScreen extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neek/screens/agent_profile_screen.dart';
+import 'package:neek/modules/agent/agent_profile_screen.dart';
 
 class AgentCard extends StatelessWidget {
   const AgentCard({super.key});

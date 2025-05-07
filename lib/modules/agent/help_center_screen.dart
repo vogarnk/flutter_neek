@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neek/screens/what_is_neek_screen.dart';
+import 'package:neek/modules/plans/what_is_neek_screen.dart';
 
 class HelpCenterScreen extends StatelessWidget {
   const HelpCenterScreen({Key? key}) : super(key: key);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/cards/card_neek.dart';
-import '../widgets/plan_summary_card.dart';
+import '../../shared/cards/card_neek.dart';
+import '../../shared/cards/plan_summary_card.dart';
 
 class PlanSettingsScreen extends StatelessWidget {
   const PlanSettingsScreen({super.key});

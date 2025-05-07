@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
-import '../screens/constancia_screen.dart';
-import '../core/api_service.dart';
+import '../../core/theme/app_colors.dart';
+import 'constancia_screen.dart';
+import '../../core/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class ProfesionScreen extends StatefulWidget {

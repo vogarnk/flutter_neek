@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/agent_card.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
-import '../screens/edit_request_screen.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
+import '../../shared/cards/agent_card.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
+import '../misc/edit_request_screen.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
 
 class AccountDetailScreen extends StatelessWidget {
   final Map<String, dynamic> user;

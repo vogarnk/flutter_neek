@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import '../core/theme/app_colors.dart';
-import '../screens/direccion_screen.dart';
-import '../core/api_service.dart';
+import '../../core/theme/app_colors.dart';
+import 'direccion_screen.dart';
+import '../../core/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class INEUploadScreen extends StatefulWidget {

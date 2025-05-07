@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 
-class VerificacionExitosaScreen extends StatelessWidget {
-  const VerificacionExitosaScreen({super.key});
+class VerificacionCompletadaScreen extends StatelessWidget {
+  const VerificacionCompletadaScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,6 @@ class VerificacionExitosaScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Container(
-          width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -32,13 +31,13 @@ class VerificacionExitosaScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFE8F0FE), // fondo azul claro
+                  color: Color(0xFFE6F4EA),
                 ),
-                child: const Icon(Icons.verified, size: 48, color: AppColors.primary),
+                child: const Icon(Icons.verified, size: 48, color: Colors.green),
               ),
               const SizedBox(height: 24),
               const Text(
-                'Felicidades, has\ncompletado tu verificación',
+                'Completaste tu carga\nde documentos e información',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -48,7 +47,8 @@ class VerificacionExitosaScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Ahora puedes cotizar más de 2\nplanes y activar tus planes cotizados.',
+                'Estamos realizando tu verificación,\neste proceso puede tardar 48 hrs.\n\n'
+                'Si tienes alguna duda puedes\ncontactar a tu agente Neek.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: AppColors.textGray500),
               ),
@@ -63,12 +63,14 @@ class VerificacionExitosaScreen extends StatelessWidget {
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(30), // 👈 más redondeado
                     ),
                   ),
                   child: const Text('Entendido'),
                 ),
               ),
+
+
               const SizedBox(height: 16),
               Text.rich(
                 TextSpan(

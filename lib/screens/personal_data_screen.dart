@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/api_service.dart';
-import '../widgets/ine_upload_screen.dart';
+import '../modules/verification/ine_upload_screen.dart';
 
 class PersonalDataScreen extends StatefulWidget {
   final Map<String, dynamic> user;

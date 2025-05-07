@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neek/widgets/charts/animated_multi_ring_chart.dart';
-import 'package:neek/widgets/common/status_chip.dart';
+import 'package:neek/shared/charts/animated_multi_ring_chart.dart';
+import 'package:neek/shared/common/status_chip.dart';
 import 'package:intl/intl.dart';
 
 class AhorroCard extends StatelessWidget {

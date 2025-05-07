@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import '../core/theme/app_colors.dart';
-import '../screens/verificacion_completada_screen.dart';
-import '../core/api_service.dart';
+import '../../core/theme/app_colors.dart';
+import 'verificacion_completada_screen.dart';
+import '../../core/api_service.dart';
 import 'package:http/http.dart' as http;
 
 class ConstanciaScreen extends StatefulWidget {
