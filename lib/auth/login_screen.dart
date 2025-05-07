@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../core/api_service.dart';
 import 'register_screen.dart';
+import '../splash_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,7 +46,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         await _secureStorage.write(key: 'auth_token', value: data['token']);
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const SplashScreen()),
+        );
       } else {
         final data = jsonDecode(response.body);
         _showError(data['message'] ?? 'Error al iniciar sesión');
@@ -56,31 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    try {
-      final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']);
-      final account = await _googleSignIn.signIn();
-
-      if (account != null) {
-        final response = await ApiService.instance.post('/social-login', body: {
-          'provider': 'google',
-          'email': account.email,
-          'name': account.displayName ?? '',
-        });
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          await _secureStorage.write(key: 'auth_token', value: data['token']);
-          Navigator.pushReplacementNamed(context, '/home');
-        } else {
-          _showError('Fallo al loguearse con Google');
-        }
-      }
-    } catch (e) {
-      _showError('Error en Google Sign-In: $e');
     }
   }
 

@@ -4,6 +4,8 @@ import 'notification_settings_screen.dart';
 import 'package:neek/screens/verificacion_screen.dart';
 import '../screens/verificacion_completada_screen.dart';
 import '../screens/verificacion_exitosa_screen.dart';
+import '../splash_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AccountScreen extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -106,6 +108,37 @@ class AccountScreen extends StatelessWidget {
                   title: 'Legal',
                   subtitle: 'Consulta los aspectos legales de Neek aquí',
                 ),
+                const Divider(),
+
+                // 🔴 Botón de cerrar sesión
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Cerrar sesión'),
+                    onPressed: () async {
+                      final storage = FlutterSecureStorage();
+                      await storage.delete(key: 'auth_token');
+
+                      // Redirige al SplashScreen o Login
+                      if (!context.mounted) return;
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SplashScreen()),
+                        (route) => false,
+                      );
+                    },
+                  ),
+                ),                
               ],
             ),
           ),

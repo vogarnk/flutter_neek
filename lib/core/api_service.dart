@@ -15,9 +15,11 @@ class ApiService {
   // Define aquí tu URL base; se elige automáticamente según plataforma
   String get _baseUrl {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
+      return 'https://app.neek.mx/api';
+      //return 'http://10.0.2.2:8000/api';
     } else {
-      return 'http://192.168.1.69:8000/api';
+      return 'https://app.neek.mx/api';
+      //return 'http://192.168.1.69:8000/api';
     }
   }
 
