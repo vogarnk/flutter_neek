@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:neek/core/theme/app_colors.dart';
+import 'package:neek/shared/tables/udi_plan_summary.dart';
 
 class PlanSummaryScreen extends StatelessWidget {
   final int plazo;
@@ -87,7 +89,7 @@ class PlanSummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text('Detalles de tu plan',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold , color: AppColors.background)),
 
           const SizedBox(height: 20),
           _formField('Plazo del ahorro', '$plazo años'),
@@ -95,45 +97,13 @@ class PlanSummaryCard extends StatelessWidget {
           _formField('Ahorro anual', currencyFormat.format(ahorroAnual)),
 
           const SizedBox(height: 20),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE7F0FF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Ahorro + Protección',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF3B5BFF))),
-                SizedBox(width: 6),
-                Icon(Icons.star, size: 18, color: Color(0xFF3B5BFF))
-              ],
-            ),
-          ),
 
-          const SizedBox(height: 24),
-          _summaryTile('Prima Anual (Ahorro anual)', primaAnual, 662093.16),
-          const SizedBox(height: 16),
-          _summaryTile('Suma Asegurada', sumaAsegurada, 2318400.00,
-              subtitle: 'En caso de fallecimiento'),
-          const SizedBox(height: 16),
-          _summaryTile('Total a retirar en $anioCorto', totalRetirarCorto, 462093.16),
-          const SizedBox(height: 16),
-          _summaryTile('Total a retirar en $anioLargo', totalRetirarLargo, 462093.16),
-
-          const SizedBox(height: 24),
-          _infoTile(Icons.people, '+$beneficiarios Beneficiarios', 'Recomendado'),
-          const SizedBox(height: 16),
-          _infoTile(Icons.verified_user, 'Básica +', 'Coberturas incluidas en tu plan'),
+          UdiPlanSummaryCard(), // 👈 Aquí lo usas
 
           const SizedBox(height: 24),
           const Text(
             'Revisa tu cotización más información a detalle. Toma en cuenta que el total a retirar o el valor de recuperación puede verse afectado por movimientos como préstamos o abonos que realices.',
-            style: TextStyle(fontSize: 12, color: Colors.black54),
+            style: TextStyle(fontSize: 10, color: AppColors.textGray400),
           ),
 
           const SizedBox(height: 24),
@@ -145,28 +115,41 @@ class PlanSummaryCard extends StatelessWidget {
                   icon: const Icon(Icons.tune),
                   label: const Text('Ajustar'),
                   style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
+                    side: const BorderSide(
+                      color: AppColors.textGray200, // 👈 gray50 (muy claro)
+                      width: 1.2,
+                    ),
                   ),
                 ),
               ),
+
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () {}, // TODO: Acción Activar
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Activar mi plan'),
+                  label: const Text(
+                    'Activar',
+                    overflow: TextOverflow.ellipsis, // 👈 evita desbordamiento
+                    softWrap: false,
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E5AFF),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14), // 👈 suficiente espacio
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
+
             ],
           )
         ],
@@ -178,53 +161,33 @@ class PlanSummaryCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textGray900, // Título en gris oscuro
+          ),
+        ),
         const SizedBox(height: 4),
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F6FA),
+            color: AppColors.background50, // 👈 Fondo claro
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.textGray300, // 👈 Borde gris
+              width: 1.0,
+            ),
           ),
-          child: Text(value),
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.textGray500, // Texto oscuro
+              fontSize: 16,
+            ),
+          ),
         ),
-      ],
-    );
-  }
-
-  Widget _summaryTile(String title, double udis, double mxn, {String? subtitle}) {
-    final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: 'MXN');
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        if (subtitle != null)
-          Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
-        const SizedBox(height: 6),
-        Text('${udis.toStringAsFixed(0)} UDIS',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        Text(currencyFormat.format(mxn), style: const TextStyle(fontSize: 14)),
-        const Text('Proyección de UDI al día del hoy',
-            style: TextStyle(fontSize: 12, color: Colors.black54)),
-      ],
-    );
-  }
-
-  Widget _infoTile(IconData icon, String title, String subtitle) {
-    return Row(
-      children: [
-        CircleAvatar(
-          backgroundColor: const Color(0xFFE0ECFF),
-          child: Icon(icon, color: const Color(0xFF3A5BFF)),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.black54)),
-          ],
-        )
       ],
     );
   }

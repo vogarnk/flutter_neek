@@ -21,8 +21,9 @@ class CustomHomeAppBar extends StatelessWidget {
         ),
         Row(
           children: [
-            GestureDetector(
-              onTap: () {
+            _AnimatedIconButton(
+              icon: Icons.headphones,
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -30,11 +31,11 @@ class CustomHomeAppBar extends StatelessWidget {
                   ),
                 );
               },
-              child: const Icon(Icons.headphones, color: Colors.white70),
             ),
-            const SizedBox(width: 16),
-            GestureDetector(
-              onTap: () {
+            const SizedBox(width: 8),
+            _AnimatedIconButton(
+              icon: Icons.notifications_none,
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -42,11 +43,11 @@ class CustomHomeAppBar extends StatelessWidget {
                   ),
                 );
               },
-              child: const Icon(Icons.notifications_none, color: Colors.white70),
             ),
-            const SizedBox(width: 16),
-            GestureDetector(
-              onTap: () {
+            const SizedBox(width: 8),
+            _AnimatedIconButton(
+              icon: Icons.person_outline,
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -54,11 +55,60 @@ class CustomHomeAppBar extends StatelessWidget {
                   ),
                 );
               },
-              child: const Icon(Icons.person_outline, color: Colors.white70),
             ),
           ],
         ),
+
       ],
+    );
+  }
+}
+
+class _AnimatedIconButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  const _AnimatedIconButton({
+    Key? key,
+    required this.icon,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  State<_AnimatedIconButton> createState() => _AnimatedIconButtonState();
+}
+
+class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
+  double _scale = 1.0;
+
+  void _animateTap() {
+    setState(() => _scale = 0.85);
+    Future.delayed(const Duration(milliseconds: 200), () {
+      setState(() => _scale = 1.0);
+      widget.onPressed();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 1.0, end: _scale),
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOutBack,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: _animateTap,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0), // 👈 Más compacto
+              child: Icon(widget.icon, color: Colors.white70),
+            ),
+
+          ),
+        );
+      },
     );
   }
 }

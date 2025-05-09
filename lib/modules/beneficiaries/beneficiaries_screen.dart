@@ -54,7 +54,7 @@ class BeneficiariesScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Tarjeta del plan
-            const CardNeek(nombrePlan: "Mi plan"),
+            CardNeek(nombrePlan: 'Mi plan', mostrarBoton: false),
 
             const SizedBox(height: 16),
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/cards/card_neek.dart';
-import '../../shared/cards/plan_summary_card.dart';
+import 'plan_summary_card.dart';
 
 class PlanSettingsScreen extends StatelessWidget {
   const PlanSettingsScreen({super.key});
@@ -20,33 +20,10 @@ class PlanSettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CardNeek(nombrePlan: 'Familia Monarrez'),
+            CardNeek(nombrePlan: 'Mi plan', mostrarBoton: true),
             const SizedBox(height: 24),
 
-            GestureDetector(
-              onTap: () {
-                // Aquí podrías navegar a una pantalla de edición
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Cambiar nombre del plan',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(Icons.edit, size: 18),
-                  ],
-                ),
-              ),
-            ),
+
 
             const SizedBox(height: 16),
             PlanSummaryCard(
