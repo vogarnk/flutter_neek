@@ -18,12 +18,32 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      title: Text(title, style: titleStyle),
-      subtitle: Text(subtitle, style: subtitleStyle),
-      trailing: const Icon(Icons.chevron_right),
+    return Material(
+      color: Colors.transparent, // Necesario para mostrar splash en fondo blanco
+      child: InkWell(
+        onTap: onTap,
+        splashColor: const Color(0x332B5FF3), // azul translúcido
+        highlightColor: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: titleStyle),
+                    const SizedBox(height: 4),
+                    Text(subtitle, style: subtitleStyle),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.black54),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

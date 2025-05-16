@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/settings_tile.dart';
+import 'package:neek/modules/notifications/app_notification_settings_screen.dart';
+import 'package:neek/modules/notifications/email_notification_settings_screen.dart';
 import 'package:neek/modules/notifications/whatsapp_notification_settings_screen.dart';
 
 class NotificationSettingsScreen extends StatelessWidget {
@@ -46,7 +48,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const WhatsAppNotificationSettingsScreen(),
+                      builder: (context) => const AppNotificationSettingsScreen(),
                     ),
                   );
                 },
@@ -60,6 +62,14 @@ class NotificationSettingsScreen extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                 subtitleStyle: Theme.of(context).textTheme.bodySmall,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EmailNotificationSettingsScreen(),
+                    ),
+                  );
+                },                
               ),
               const Divider(height: 0),
               SettingsTile(
@@ -70,6 +80,14 @@ class NotificationSettingsScreen extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                 subtitleStyle: Theme.of(context).textTheme.bodySmall,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WhatsappNotificationSettingsScreen(),
+                    ),
+                  );
+                },                    
               ),
             ],
           ),

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class WhatsappNotificationSettingsScreen extends StatefulWidget {
-  const WhatsappNotificationSettingsScreen({super.key});
+class EmailNotificationSettingsScreen extends StatefulWidget {
+  const EmailNotificationSettingsScreen({super.key});
 
   @override
-  State<WhatsappNotificationSettingsScreen> createState() =>
-      _WhatsappNotificationSettingsScreenState();
+  State<EmailNotificationSettingsScreen> createState() =>
+      _EmailNotificationSettingsScreenState();
 }
 
-class _WhatsappNotificationSettingsScreenState
-    extends State<WhatsappNotificationSettingsScreen> {
-  bool notificacionesEmergencia = true;
-  bool encuestasSatisfaccion = true;
-  bool promocionesDescuentos = true;
+class _EmailNotificationSettingsScreenState
+    extends State<EmailNotificationSettingsScreen> {
+  bool noticiasNeek = true;
+  bool consejosFinancieros = true;
+  bool eventosWeb = true;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class _WhatsappNotificationSettingsScreenState
       appBar: AppBar(
         backgroundColor: const Color(0xFF0E1320),
         elevation: 0,
-        title: const Text('Notificaciones Whatsapp'),
+        title: const Text('Notificaciones Correo'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
@@ -46,25 +46,26 @@ class _WhatsappNotificationSettingsScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🚨 Notificaciones de Emergencia
+              // 🔘 Noticias Neek
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text(
-                  'Notificaciones de Emergencia',
+                  'Noticias Neek',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
                 ),
                 subtitle: const Text(
-                  'Recibe notificaciones sobre eventos inesperados en tu cuenta',
+                  'Recibe anuncios, actualizaciones de la plataforma y noticias de Neek',
                   style: TextStyle(color: Colors.black54),
                 ),
                 trailing: Switch(
-                  value: notificacionesEmergencia,
+                  value: noticiasNeek,
                   onChanged: (val) {
                     setState(() {
-                      notificacionesEmergencia = val;
+                      noticiasNeek = val;
                     });
                   },
                   activeColor: Colors.white,
@@ -73,25 +74,26 @@ class _WhatsappNotificationSettingsScreenState
               ),
               const Divider(),
 
-              // 📝 Encuestas de Satisfacción
+              // 🔘 Consejos Financieros
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text(
-                  'Encuestas de Satisfacción',
+                  'Consejos Financieros',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
                 ),
                 subtitle: const Text(
-                  'Recopilar retroalimentación y opiniones de los clientes para mejorar los servicios',
+                  'Recibe consejos y recursos sobre planificación financiera, ahorro e inversión',
                   style: TextStyle(color: Colors.black54),
                 ),
                 trailing: Switch(
-                  value: encuestasSatisfaccion,
+                  value: consejosFinancieros,
                   onChanged: (val) {
                     setState(() {
-                      encuestasSatisfaccion = val;
+                      consejosFinancieros = val;
                     });
                   },
                   activeColor: Colors.white,
@@ -100,25 +102,26 @@ class _WhatsappNotificationSettingsScreenState
               ),
               const Divider(),
 
-              // 🎁 Promociones y Descuentos
+              // 🔘 Eventos y Seminarios Web
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text(
-                  'Promociones y Descuentos',
+                  'Eventos y Seminarios Web',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
                 ),
                 subtitle: const Text(
-                  'Recibe notificaciones sobre promociones especiales o descuentos exclusivos',
+                  'Recibe correos sobre eventos web sobre temas financieros y de seguros',
                   style: TextStyle(color: Colors.black54),
                 ),
                 trailing: Switch(
-                  value: promocionesDescuentos,
+                  value: eventosWeb,
                   onChanged: (val) {
                     setState(() {
-                      promocionesDescuentos = val;
+                      eventosWeb = val;
                     });
                   },
                   activeColor: Colors.white,
@@ -127,7 +130,7 @@ class _WhatsappNotificationSettingsScreenState
               ),
               const SizedBox(height: 16),
               const Text(
-                'Seguirás recibiendo notificaciones obligatorias como actualizaciones de tu cuenta.',
+                'Seguirás recibiendo notificaciones obligatorias como cambios en los datos de tu cuenta, recordatorios de pago, actualizaciones de póliza y estado anual de tu ahorro.',
                 style: TextStyle(
                   color: Colors.black54,
                   fontSize: 12,
@@ -140,7 +143,7 @@ class _WhatsappNotificationSettingsScreenState
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Acción al guardar
+                    // Guardar acción
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2B5FF3),

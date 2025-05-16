@@ -10,14 +10,14 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_signin_button: ^2.0.0
-  http: ^0.13.0
+  http: 1.1.0
   flutter_secure_storage: ^9.0.0
   flutter_svg: ^2.0.9
   intl: ^0.18.0
   smooth_page_indicator: ^1.1.0
   image_picker: ^1.0.4
   cupertino_icons: ^1.0.8
-
+  pdfx: ^2.5.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -35,6 +35,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo.svg
+    - assets/icon/flags/mx.svg
   fonts:
     - family: Inter
       fonts:

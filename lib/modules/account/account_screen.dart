@@ -6,7 +6,9 @@ import '../verification/verificacion_completada_screen.dart';
 import '../verification/verificacion_exitosa_screen.dart';
 import '../../splash_screen.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import '../security/security_screen.dart';
+import '../phone/associate_phone_screen.dart';
+import '../legal/legal_screen.dart';
 class AccountScreen extends StatelessWidget {
   final Map<String, dynamic> user;
 
@@ -64,9 +66,17 @@ class AccountScreen extends StatelessWidget {
                   },
                 ),
                 const Divider(),
-                const AccountTile(
+                AccountTile(
                   title: 'Seguridad',
                   subtitle: 'Ajustes de privacidad, información de tu cuenta y acceso',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SecurityScreen(),
+                      ),
+                    );
+                  },                  
                 ),
                 const Divider(),
                 AccountTile(
@@ -99,14 +109,30 @@ class AccountScreen extends StatelessWidget {
                 ),
 
                 const Divider(),
-                const AccountTile(
+                AccountTile(
                   title: 'Asociación de celular',
                   subtitle: 'Agrega tu número de celular a tu cuenta Neek',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AssociatePhoneScreen(),
+                      ),
+                    );
+                  },      
                 ),
                 const Divider(),
-                const AccountTile(
+                AccountTile(
                   title: 'Legal',
                   subtitle: 'Consulta los aspectos legales de Neek aquí',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LegalScreen(),
+                      ),
+                    );
+                  },      
                 ),
                 const Divider(),
 
@@ -148,10 +174,10 @@ class AccountScreen extends StatelessWidget {
   }
 }
 
-class AccountTile extends StatelessWidget {
+class AccountTile extends StatefulWidget {
   final String title;
   final String subtitle;
-  final VoidCallback? onTap; // 👈 Nuevo parámetro opcional
+  final VoidCallback? onTap;
 
   const AccountTile({
     super.key,
@@ -161,30 +187,55 @@ class AccountTile extends StatelessWidget {
   });
 
   @override
+  State<AccountTile> createState() => _AccountTileState();
+}
+
+class _AccountTileState extends State<AccountTile>
+    with SingleTickerProviderStateMixin {
+  double _scale = 1.0;
+
+  void _animateTap(Function() onTap) async {
+    setState(() => _scale = 0.97);
+    await Future.delayed(const Duration(milliseconds: 100));
+    setState(() => _scale = 1.0);
+    await Future.delayed(const Duration(milliseconds: 100));
+    onTap();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-          color: Colors.black,
-        ),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
+    return GestureDetector(
+      onTap: widget.onTap != null
+          ? () => _animateTap(widget.onTap!)
+          : null,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        child: ListTile(
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          title: Text(
+            widget.title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Colors.black,
+            ),
           ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              widget.subtitle,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
         ),
       ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: onTap, // 👈 Aquí se usa
     );
   }
 }
