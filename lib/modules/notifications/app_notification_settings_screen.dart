@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../shared/widgets/notification_switch_tile.dart';
+import '../../core/notification_api_service.dart';
+import '../../models/notification_settings_model.dart'; 
 
 class AppNotificationSettingsScreen extends StatefulWidget {
   const AppNotificationSettingsScreen({super.key});
@@ -12,7 +15,33 @@ class sAppNotificationSettingsScreenState
     extends State<AppNotificationSettingsScreen> {
   bool accountActivity = true;
   bool investmentReturns = true;
+  bool _loading = true;
+  late NotificationSettings _settings;
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
 
+  Future<void> _loadNotifications() async {
+    final data = await NotificationApiService.instance.getNotifications();
+    if (data != null) {
+      setState(() {
+        _settings = NotificationSettings.fromJson(data);
+        _loading = false;
+      });
+    } else {
+      // Evitar que se use _settings sin datos válidos
+      setState(() {
+        _settings = NotificationSettings.empty(); // <- aquí usamos valores default
+        _loading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudieron cargar las preferencias')),
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,10 +55,12 @@ class sAppNotificationSettingsScreenState
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20), // 📦 Margen externo del "card"
-        child: Container(
-          width: double.infinity,
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(20), // 📦 Margen externo del "card"
+              child: Container(
+                width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -46,64 +77,22 @@ class sAppNotificationSettingsScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 🔘 Switch para Actividad de la cuenta
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'Actividad de la cuenta',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color:
-                        Theme.of(context).textTheme.displaySmall?.color,
-                  ),
-                ),
-                subtitle: Text(
-                  'Recibe notificaciones sobre la actividad de tu cuenta',
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                ),
-                trailing: Switch(
-                  value: accountActivity,
-                  onChanged: (val) {
-                    setState(() {
-                      accountActivity = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: Theme.of(context).primaryColor,
-                ),
+              NotificationSwitchTile(
+                title: 'Actividad de la cuenta',
+                subtitle:
+                    'Recibe notificaciones sobre la actividad de tu cuenta',
+                fieldKey: 'app_account_activity',
+                initialValue: _settings.appAccountActivity,
               ),
               const Divider(),
 
               // 🔘 Switch para Rendimiento de Inversiones
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  'Rendimiento de Inversiones',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color:
-                        Theme.of(context).textTheme.displaySmall?.color,
-                  ),
-                ),
-                subtitle: Text(
-                  'Recibe notificaciones sobre la actualización de tu ahorro y por tipo de cambio de UDIs',
-                  style: TextStyle(
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                ),
-                trailing: Switch(
-                  value: investmentReturns,
-                  onChanged: (val) {
-                    setState(() {
-                      investmentReturns = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: Theme.of(context).primaryColor,
-                ),
+              NotificationSwitchTile(
+                title: 'Rendimiento de Inversiones',
+                subtitle:
+                    'Recibe notificaciones sobre la actualización de tu ahorro y por tipo de cambio de UDIs',
+                fieldKey: 'app_investment_performance',
+                initialValue: _settings.appInvestmentPerformance,
               ),
               const Divider(),
 
@@ -115,27 +104,6 @@ class sAppNotificationSettingsScreenState
               ),
 
               const Spacer(),
-
-              // 💾 Botón de guardar
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Guardar cambios aquí
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B5FF3),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text(
-                    'Guardar cambios',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/security_api_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -19,6 +20,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool hasLowercase = false;
   bool hasSpecialChar = false;
   bool hasNumber = false;
+  
+  bool _passwordsDoNotMatch = false;
+  bool _currentPasswordError = false;
+  bool _requirementsInvalid = false;
+  bool _isSubmitting = false;
 
   void validatePassword(String input) {
     setState(() {
@@ -87,26 +93,20 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextField(
                 controller: currentPasswordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                hintText: 'Escribe tu contraseña actual',
-                hintStyle: TextStyle(color: AppColors.textGray500),
-                filled: true,
-                fillColor: AppColors.background50,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.textGray300),
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.textGray300),
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.textGray300),
+                style: const TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  hintText: 'Escribe tu contraseña actual',
+                  hintStyle: const TextStyle(color: AppColors.textGray500),
+                  filled: true,
+                  fillColor: AppColors.background50,
+                  errorText: _currentPasswordError ? 'Contraseña actual incorrecta' : null,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
 
               const Text(
@@ -121,27 +121,26 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextField(
                 controller: newPasswordController,
                 obscureText: true,
-                onChanged: validatePassword,
-                decoration: const InputDecoration(
+                style: const TextStyle(color: Colors.black),
+                onChanged: (value) {
+                  validatePassword(value);
+                  setState(() {
+                    _requirementsInvalid = false;
+                  });
+                },
+                decoration: InputDecoration(
                   hintText: 'Lacontrasena123!',
-                  hintStyle: TextStyle(color: AppColors.textGray500),
+                  hintStyle: const TextStyle(color: AppColors.textGray500),
                   filled: true,
                   fillColor: AppColors.background50,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.textGray300),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.textGray300),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.textGray300),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
+                  errorText: _requirementsInvalid ? 'No cumple con los requisitos' : null,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
                 ),
               ),
+
               const SizedBox(height: 20),
 
               const Text(
@@ -156,26 +155,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextField(
                 controller: confirmPasswordController,
                 obscureText: true,
-                decoration: const InputDecoration(
+                style: const TextStyle(color: Colors.black),
+                decoration: InputDecoration(
                   hintText: 'Lacontrasena123!',
-                  hintStyle: TextStyle(color: AppColors.textGray500),
+                  hintStyle: const TextStyle(color: AppColors.textGray500),
                   filled: true,
                   fillColor: AppColors.background50,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.textGray300),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.textGray300),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.textGray300),
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                    ),
+                  errorText: _passwordsDoNotMatch ? 'Las contraseñas no coinciden' : null,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  border: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
                 ),
               ),
+
+
               const SizedBox(height: 20),
 
               const Text(
@@ -208,9 +202,52 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // acción guardar
-                  },
+                  onPressed: _isSubmitting
+                      ? null
+                      : () async {
+                          setState(() {
+                            _passwordsDoNotMatch = false;
+                            _requirementsInvalid = false;
+                            _currentPasswordError = false;
+                          });
+
+                          final current = currentPasswordController.text;
+                          final newPass = newPasswordController.text;
+                          final confirm = confirmPasswordController.text;
+
+                          if (newPass != confirm) {
+                            setState(() => _passwordsDoNotMatch = true);
+                            return;
+                          }
+
+                          if (!has10Chars || !hasLowercase || !hasSpecialChar || !hasNumber) {
+                            setState(() => _requirementsInvalid = true);
+                            return;
+                          }
+
+                          setState(() => _isSubmitting = true);
+
+                          final result = await SecurityApiService.instance.changePassword(
+                            currentPassword: current,
+                            newPassword: newPass,
+                            confirmPassword: confirm,
+                          );
+
+                          setState(() => _isSubmitting = false);
+
+                          if (result['success']) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Contraseña actualizada con éxito')),
+                            );
+                            Navigator.pop(context);
+                          } else {
+                            setState(() => _currentPasswordError = true);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result['message'])),
+                            );
+                          }
+                        },
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(

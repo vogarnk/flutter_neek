@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../shared/widgets/notification_switch_tile.dart';
+import '../../core/notification_api_service.dart';
+import '../../models/notification_settings_model.dart'; 
 
 class EmailNotificationSettingsScreen extends StatefulWidget {
   const EmailNotificationSettingsScreen({super.key});
@@ -13,7 +16,33 @@ class _EmailNotificationSettingsScreenState
   bool noticiasNeek = true;
   bool consejosFinancieros = true;
   bool eventosWeb = true;
+  bool _loading = true;
+  late NotificationSettings _settings;
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
 
+  Future<void> _loadNotifications() async {
+    final data = await NotificationApiService.instance.getNotifications();
+    if (data != null) {
+      setState(() {
+        _settings = NotificationSettings.fromJson(data);
+        _loading = false;
+      });
+    } else {
+      // Evitar que se use _settings sin datos válidos
+      setState(() {
+        _settings = NotificationSettings.empty(); // <- aquí usamos valores default
+        _loading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudieron cargar las preferencias')),
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,141 +56,64 @@ class _EmailNotificationSettingsScreenState
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🔘 Noticias Neek
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Noticias Neek',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-                subtitle: const Text(
-                  'Recibe anuncios, actualizaciones de la plataforma y noticias de Neek',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                trailing: Switch(
-                  value: noticiasNeek,
-                  onChanged: (val) {
-                    setState(() {
-                      noticiasNeek = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2B5FF3),
-                ),
-              ),
-              const Divider(),
-
-              // 🔘 Consejos Financieros
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Consejos Financieros',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-                subtitle: const Text(
-                  'Recibe consejos y recursos sobre planificación financiera, ahorro e inversión',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                trailing: Switch(
-                  value: consejosFinancieros,
-                  onChanged: (val) {
-                    setState(() {
-                      consejosFinancieros = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2B5FF3),
-                ),
-              ),
-              const Divider(),
-
-              // 🔘 Eventos y Seminarios Web
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Eventos y Seminarios Web',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-                subtitle: const Text(
-                  'Recibe correos sobre eventos web sobre temas financieros y de seguros',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                trailing: Switch(
-                  value: eventosWeb,
-                  onChanged: (val) {
-                    setState(() {
-                      eventosWeb = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2B5FF3),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Seguirás recibiendo notificaciones obligatorias como cambios en los datos de tu cuenta, recordatorios de pago, actualizaciones de póliza y estado anual de tu ahorro.',
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                ),
-              ),
-              const Spacer(),
-
-              // 💾 Botón Guardar Cambios
-              SizedBox(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(20),
+              child: Container(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Guardar acción
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B5FF3),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  child: const Text(
-                    'Guardar cambios',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    NotificationSwitchTile(
+                      title: 'Noticias Neek',
+                      subtitle:
+                          'Recibe anuncios, actualizaciones de la plataforma y noticias de Neek',
+                      fieldKey: 'email_news',
+                      initialValue: _settings.emailNews,
+                    ),
+                    const Divider(),
+                    NotificationSwitchTile(
+                      title: 'Consejos Financieros',
+                      subtitle:
+                          'Recibe consejos y recursos sobre planificación financiera, ahorro e inversión',
+                      fieldKey: 'email_financial_advice',
+                      initialValue: _settings.emailFinancialAdvice,
+                    ),
+                    const Divider(),
+                    NotificationSwitchTile(
+                      title: 'Eventos Web',
+                      subtitle:
+                          'Recibe correos sobre eventos web sobre temas financieros y de seguros',
+                      fieldKey: 'email_events',
+                      initialValue: _settings.emailEvents,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Seguirás recibiendo notificaciones obligatorias como cambios en los datos de tu cuenta, recordatorios de pago, actualizaciones de póliza y estado anual de tu ahorro.',
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
+
 }

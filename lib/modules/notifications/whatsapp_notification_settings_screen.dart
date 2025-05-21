@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../shared/widgets/notification_switch_tile.dart';
+import '../../core/notification_api_service.dart';
+import '../../models/notification_settings_model.dart'; 
 
 class WhatsappNotificationSettingsScreen extends StatefulWidget {
   const WhatsappNotificationSettingsScreen({super.key});
@@ -10,9 +13,35 @@ class WhatsappNotificationSettingsScreen extends StatefulWidget {
 
 class _WhatsappNotificationSettingsScreenState
     extends State<WhatsappNotificationSettingsScreen> {
-  bool notificacionesEmergencia = true;
-  bool encuestasSatisfaccion = true;
-  bool promocionesDescuentos = true;
+  bool _loading = true;
+  late NotificationSettings _settings;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    final data = await NotificationApiService.instance.getNotifications();
+    if (data != null) {
+      setState(() {
+        _settings = NotificationSettings.fromJson(data);
+        _loading = false;
+      });
+    } else {
+      // Evitar que se use _settings sin datos válidos
+      setState(() {
+        _settings = NotificationSettings.empty(); // <- aquí usamos valores default
+        _loading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudieron cargar las preferencias')),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -27,138 +56,68 @@ class _WhatsappNotificationSettingsScreenState
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🚨 Notificaciones de Emergencia
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Notificaciones de Emergencia',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black),
-                ),
-                subtitle: const Text(
-                  'Recibe notificaciones sobre eventos inesperados en tu cuenta',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                trailing: Switch(
-                  value: notificacionesEmergencia,
-                  onChanged: (val) {
-                    setState(() {
-                      notificacionesEmergencia = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2B5FF3),
-                ),
-              ),
-              const Divider(),
-
-              // 📝 Encuestas de Satisfacción
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Encuestas de Satisfacción',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black),
-                ),
-                subtitle: const Text(
-                  'Recopilar retroalimentación y opiniones de los clientes para mejorar los servicios',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                trailing: Switch(
-                  value: encuestasSatisfaccion,
-                  onChanged: (val) {
-                    setState(() {
-                      encuestasSatisfaccion = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2B5FF3),
-                ),
-              ),
-              const Divider(),
-
-              // 🎁 Promociones y Descuentos
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text(
-                  'Promociones y Descuentos',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black),
-                ),
-                subtitle: const Text(
-                  'Recibe notificaciones sobre promociones especiales o descuentos exclusivos',
-                  style: TextStyle(color: Colors.black54),
-                ),
-                trailing: Switch(
-                  value: promocionesDescuentos,
-                  onChanged: (val) {
-                    setState(() {
-                      promocionesDescuentos = val;
-                    });
-                  },
-                  activeColor: Colors.white,
-                  activeTrackColor: const Color(0xFF2B5FF3),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Seguirás recibiendo notificaciones obligatorias como actualizaciones de tu cuenta.',
-                style: TextStyle(
-                  color: Colors.black54,
-                  fontSize: 12,
-                ),
-              ),
-              const Spacer(),
-
-              // 💾 Botón Guardar Cambios
-              SizedBox(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(20),
+              child: Container(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Acción al guardar
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2B5FF3),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                  ),
-                  child: const Text(
-                    'Guardar cambios',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    NotificationSwitchTile(
+                      title: 'Notificaciones de Emergencia',
+                      subtitle:
+                          'Recibe notificaciones sobre eventos inesperados en tu cuenta',
+                      fieldKey: 'whatsapp_emergency',
+                      initialValue: _settings.whatsappEmergency,
+                    ),
+                    const Divider(),
+
+                    NotificationSwitchTile(
+                      title: 'Encuestas de Satisfacción',
+                      subtitle:
+                          'Recopilar retroalimentación y opiniones de los clientes para mejorar los servicios',
+                      fieldKey: 'whatsapp_surveys',
+                      initialValue: _settings.whatsappSurveys,
+                    ),
+                    const Divider(),
+
+                    NotificationSwitchTile(
+                      title: 'Promociones y Descuentos',
+                      subtitle:
+                          'Recibe notificaciones sobre promociones especiales o descuentos exclusivos',
+                      fieldKey: 'whatsapp_promotions',
+                      initialValue: _settings.whatsappPromotions,
+                    ),
+                    const Divider(),
+
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Seguirás recibiendo notificaciones obligatorias como actualizaciones de tu cuenta.',
+                      style: TextStyle(
+                        color: Colors.black54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 }

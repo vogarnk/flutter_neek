@@ -18,6 +18,8 @@ class PlanCard extends StatelessWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
 
+  final String status;
+
   const PlanCard({
     super.key,
     required this.user,
@@ -31,13 +33,21 @@ class PlanCard extends StatelessWidget {
     required this.totalRetirarMxn,
     required this.totalRetirar2065,
     required this.totalRetirar2065Mxn,
-    required this.beneficiarios, // 👈 nuevo
+    required this.beneficiarios,
+    required this.status, // 👈 nuevo campo
   });
+
 
 
   @override
   Widget build(BuildContext context) {
     final montoFinal = NumberFormat('#,###', 'en_US').format(recuperacionFinalUdis);
+  // Estado visual
+  final isCotizado = status == 'cotizado';
+  final estadoTexto = isCotizado ? 'Por Activar' : 'Autorizado';
+  final estadoColor = isCotizado ? const Color(0xFFFFF3C7) : const Color(0xFFD1FAE5);
+  final iconColor = isCotizado ? const Color(0xFFB45309) : const Color(0xFF047857);
+  final textColor = iconColor;
 
     return Container(
       width: MediaQuery.of(context).size.width, // 🔧 Ocupa todo el ancho disponible
@@ -107,24 +117,25 @@ class PlanCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3C7),
+                  color: estadoColor,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.access_time, size: 16, color: Color(0xFFB45309)),
-                    SizedBox(width: 6),
+                  children: [
+                    Icon(Icons.access_time, size: 16, color: iconColor),
+                    const SizedBox(width: 6),
                     Text(
-                      'Por Activar',
+                      estadoTexto,
                       style: TextStyle(
-                        color: Color(0xFFB45309),
+                        color: textColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
+
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -143,6 +154,7 @@ class PlanCard extends StatelessWidget {
                         totalRetirar2065: totalRetirar2065,
                         totalRetirar2065Mxn: totalRetirar2065Mxn,
                         beneficiarios: beneficiarios,
+                        status: status,
                       ),
                     ),
                   );

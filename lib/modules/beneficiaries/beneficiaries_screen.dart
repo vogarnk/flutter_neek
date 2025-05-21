@@ -182,7 +182,6 @@ class BeneficiariesScreen extends StatelessWidget {
                   ...[
                     for (var b in beneficiarios)
                       _beneficiarioRow(
-                        avatarPath: b['avatar_url'] ?? 'assets/avatars/default.png',
                         nombre: b['nombre'] ?? 'Desconocido',
                         tipo: b['tipo'] ?? 'Tipo no definido',
                         acceso: b['acceso'] ?? 'N/A',
@@ -222,7 +221,6 @@ class BeneficiariesScreen extends StatelessWidget {
   }
 
   Widget _beneficiarioRow({
-    required String avatarPath,
     required String nombre,
     required String tipo,
     required String acceso,
@@ -236,9 +234,13 @@ class BeneficiariesScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 20,
-            backgroundImage: AssetImage(avatarPath),
+            backgroundColor: Color(0xFFE5E7EB), // gris claro de fondo
+            child: Icon(
+              Icons.person,
+              color: Color(0xFF9CA3AF), // gris medio para el ícono
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -285,6 +287,7 @@ class BeneficiariesScreen extends StatelessWidget {
       ),
     );
   }
+
 
   void _mostrarAlerta(BuildContext context, String mensaje) {
     showDialog(
