@@ -210,10 +210,10 @@ class PlanDetailScreen extends StatelessWidget {
     }
 
     if (status == 'autorizado_por_pagar_1') {
-      return const [
-        PlanAuthorizedCard(),
-        SizedBox(height: 16),
-        SumaAseguradaChartCard(
+      return [
+        const PlanAuthorizedCard(),
+        const SizedBox(height: 16),
+        const SumaAseguradaChartCard(
           sumaUdis: 50198,
           sumaMxn: 422165.18,
           beneficiarios: [
@@ -221,9 +221,29 @@ class PlanDetailScreen extends StatelessWidget {
             { 'nombre': 'Sofia', 'porcentaje': 10, 'color': Colors.lightBlue },
             { 'nombre': 'Julia', 'porcentaje': 10, 'color': Colors.indigo },
           ],
-        )
-
-
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity, // Ocupa todo el ancho disponible
+          child: ElevatedButton(
+            onPressed: () {
+              // Acción al presionar
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center, // Centra el contenido del botón
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Text('Activar mi plan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                SizedBox(width: 8),
+                Icon(Icons.arrow_forward, size: 20),
+              ],
+            ),
+          ),
+        ),
       ];
     }
 

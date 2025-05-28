@@ -1,7 +1,7 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '12.0'
+# Definir la plataforma mínima de iOS para tu proyecto
+platform :ios, '13.0'
 
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+# Desactivar las estadísticas de CocoaPods para mejorar la latencia de compilación
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
@@ -10,34 +10,43 @@ project 'Runner', {
   'Release' => :release,
 }
 
+# Función para obtener la ruta raíz de Flutter
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
   unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+    raise "#{generated_xcode_build_settings_path} debe existir. Si estás ejecutando pod install manualmente, asegúrate de ejecutar flutter pub get primero"
   end
 
   File.foreach(generated_xcode_build_settings_path) do |line|
     matches = line.match(/FLUTTER_ROOT\=(.*)/)
     return matches[1].strip if matches
   end
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+  raise "FLUTTER_ROOT no encontrado en #{generated_xcode_build_settings_path}. Intenta eliminar Generated.xcconfig y luego ejecuta flutter pub get"
 end
 
+# Requerir el helper de Flutter para CocoaPods
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
+# Configuración de pods de Flutter
 flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+
   target 'RunnerTests' do
     inherit! :search_paths
   end
 end
 
+# Configuración adicional después de la instalación de pods
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # Establecer la versión mínima de despliegue de iOS para cada target
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+    end
   end
 end
