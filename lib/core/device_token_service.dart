@@ -38,6 +38,7 @@ class DeviceTokenService {
       );
 
       if (response.statusCode == 200) {
+        await _storage.write(key: 'device_token', value: fcmToken); // ✅ guarda aquí
         debugPrint('✅ Token FCM registrado correctamente.');
       } else {
         debugPrint('❌ Error al registrar token FCM: ${response.statusCode} ${response.body}');
