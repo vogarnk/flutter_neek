@@ -9,10 +9,12 @@ import '../verification/verificacion_completada_screen.dart';
 import 'package:neek/modules/verification/verificacion_screen.dart';
 import '../beneficiaries/beneficiaries_screen.dart';
 import 'plan_settings_screen.dart';
-import 'package:neek/shared/cards/autorizado/plan_authorized_card.dart'; // 👈 Asegúrate de importar esta
+import 'package:neek/shared/cards/autorizado/plan_authorized_card.dart';
 import '../../shared/charts/suma_asegurada_chart_card.dart';
+import 'package:neek/shared/buttons/plan_actions_row.dart';
+import '../../core/theme/app_colors.dart';
 
-class PlanDetailScreen extends StatelessWidget {
+class PlanDetailScreen extends StatefulWidget {
   final String nombrePlan;
   final int duracion;
   final double recuperacionFinalUdis;
@@ -45,13 +47,28 @@ class PlanDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<PlanDetailScreen> createState() => _PlanDetailScreenState();
+}
+
+class _PlanDetailScreenState extends State<PlanDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Mostrar modal solo si el status es 'autorizado_por_pagar_1'
+    if (widget.status == 'autorizado_por_pagar_1') {
+      Future.microtask(() => showPlanAuthorizedDialog(context));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: 'MXN \$');
     final numberFormat = NumberFormat('#,###', 'es_MX');
     final currentYear = DateTime.now().year;
-    final retiroEnAnio = currentYear + duracion;
+    final retiroEnAnio = currentYear + widget.duracion;
 
-    final isCotizado = status == 'cotizado';
+    final isCotizado = widget.status == 'cotizado';
     final estadoTexto = isCotizado ? 'Por Activar' : 'Autorizado';
     final estadoColor = isCotizado ? const Color(0xFFFFF3C7) : const Color(0xFFD1FAE5);
     final textColor = isCotizado ? const Color(0xFFB45309) : const Color(0xFF047857);
@@ -62,7 +79,7 @@ class PlanDetailScreen extends StatelessWidget {
         automaticallyImplyLeading: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
-        title: CustomHomeAppBar(user: user),
+        title: CustomHomeAppBar(user: widget.user),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -70,7 +87,7 @@ class PlanDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              nombrePlan,
+              widget.nombrePlan,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 26,
@@ -94,14 +111,19 @@ class PlanDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // 🧩 Componentes condicionales por status
-            ..._buildStatusWidgets(context, status, numberFormat, currencyFormat, retiroEnAnio),
+            ..._buildStatusWidgets(
+              context,
+              widget.status,
+              numberFormat,
+              currencyFormat,
+              retiroEnAnio,
+            ),
 
             const SizedBox(height: 24),
             DetailCard(
               title: 'Retira en año 2065',
-              udis: '${numberFormat.format(totalRetirar2065)} UDIS',
-              mxn: currencyFormat.format(totalRetirar2065Mxn),
+              udis: '${numberFormat.format(widget.totalRetirar2065)} UDIS',
+              mxn: currencyFormat.format(widget.totalRetirar2065Mxn),
               icon: Icons.lock,
             ),
             const SizedBox(height: 24),
@@ -114,7 +136,6 @@ class PlanDetailScreen extends StatelessWidget {
     );
   }
 
-
   List<Widget> _buildStatusWidgets(
     BuildContext context,
     String status,
@@ -126,15 +147,15 @@ class PlanDetailScreen extends StatelessWidget {
       return [
         DetailCard(
           title: 'Suma Asegurada',
-          udis: '${numberFormat.format(sumaAsegurada)} UDIS',
-          mxn: currencyFormat.format(sumaAseguradaMxn),
+          udis: '${numberFormat.format(widget.sumaAsegurada)} UDIS',
+          mxn: currencyFormat.format(widget.sumaAseguradaMxn),
           icon: Icons.lock,
         ),
         const SizedBox(height: 16),
         DetailCard(
           title: 'Total a Retirar en $retiroEnAnio',
-          udis: '${numberFormat.format(totalRetirar)} UDIS',
-          mxn: currencyFormat.format(totalRetirarMxn),
+          udis: '${numberFormat.format(widget.totalRetirar)} UDIS',
+          mxn: currencyFormat.format(widget.totalRetirarMxn),
           icon: Icons.lock,
         ),
         const SizedBox(height: 24),
@@ -142,16 +163,16 @@ class PlanDetailScreen extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              final verificacion = user['verificacion'];
-              final perfilCompleto = user['perfil_completo'] == 1;
+              final verificacion = widget.user['verificacion'];
+              final perfilCompleto = widget.user['perfil_completo'] == 1;
 
               if (perfilCompleto) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => BeneficiariesScreen(
-                      user: user,
-                      beneficiarios: beneficiarios,
+                      user: widget.user,
+                      beneficiarios: widget.beneficiarios,
                     ),
                   ),
                 );
@@ -163,7 +184,7 @@ class PlanDetailScreen extends StatelessWidget {
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => VerificacionScreen(user: user)),
+                  MaterialPageRoute(builder: (_) => VerificacionScreen(user: widget.user)),
                 );
               }
             },
@@ -185,27 +206,7 @@ class PlanDetailScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            PlanActionButton(icon: Icons.calculate, label: 'Cotización'),
-            PlanActionButton(icon: Icons.settings, label: 'Ajustes', onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PlanSettingsScreen()),
-              );
-            }),
-            PlanActionButton(icon: Icons.people, label: 'Beneficiarios', onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => BeneficiariesScreen(user: user, beneficiarios: beneficiarios),
-                ),
-              );
-            }),
-            PlanActionButton(icon: Icons.description, label: 'Legal'),
-          ],
-        ),
+        PlanActionsRow(user: widget.user, beneficiarios: widget.beneficiarios),
       ];
     }
 
@@ -217,14 +218,21 @@ class PlanDetailScreen extends StatelessWidget {
           sumaUdis: 50198,
           sumaMxn: 422165.18,
           beneficiarios: [
-            { 'nombre': 'Maria', 'porcentaje': 80, 'color': Colors.blue },
-            { 'nombre': 'Sofia', 'porcentaje': 10, 'color': Colors.lightBlue },
-            { 'nombre': 'Julia', 'porcentaje': 10, 'color': Colors.indigo },
+            {'nombre': 'Maria', 'porcentaje': 80, 'color': Colors.blue},
+            {'nombre': 'Sofia', 'porcentaje': 10, 'color': Colors.lightBlue},
+            {'nombre': 'Julia', 'porcentaje': 10, 'color': Colors.indigo},
           ],
         ),
         const SizedBox(height: 16),
+        DetailCard(
+          title: 'Total a Retirar en $retiroEnAnio',
+          udis: '${numberFormat.format(widget.totalRetirar)} UDIS',
+          mxn: currencyFormat.format(widget.totalRetirarMxn),
+          icon: Icons.lock,
+        ),
+        const SizedBox(height: 16),
         SizedBox(
-          width: double.infinity, // Ocupa todo el ancho disponible
+          width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
               // Acción al presionar
@@ -234,20 +242,81 @@ class PlanDetailScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             ),
             child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center, // Centra el contenido del botón
-              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Activar mi plan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Comenzar y pagar primera aportación',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 SizedBox(width: 8),
                 Icon(Icons.arrow_forward, size: 20),
               ],
             ),
           ),
         ),
+        const SizedBox(height: 16),
+        PlanActionsRow(user: widget.user, beneficiarios: widget.beneficiarios),
       ];
     }
 
     return [];
   }
-
 }
+
+void showPlanAuthorizedDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.verified, color: Colors.green, size: 48),
+            const SizedBox(height: 16),
+            const Text(
+              'Tu plan ha sido autorizado',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textGray900,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Tu plan ha sido autorizado por un periodo de 30 días\n\n'
+              'Al contestar los cuestionarios y revisar tu plan cotizado, has autorizado tu plan.\n\n'
+              'Para activar tu plan por completo y tener acceso a todas las herramientas que Neek tiene para ti, '
+              'debes revisar tu póliza y realizar la primera aportación.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AppColors.textGray500,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Entendido',
+                style: TextStyle(
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
