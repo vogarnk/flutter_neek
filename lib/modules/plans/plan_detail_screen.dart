@@ -206,7 +206,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        PlanActionsRow(user: widget.user, beneficiarios: widget.beneficiarios),
+        PlanActionsRow(user: widget.user, beneficiarios: widget.beneficiarios, status: widget.status),
       ];
     }
 
@@ -253,9 +253,64 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        PlanActionsRow(user: widget.user, beneficiarios: widget.beneficiarios),
+        PlanActionsRow(
+          user: widget.user,
+          beneficiarios: widget.beneficiarios,
+          status: widget.status,
+        ),        
       ];
     }
+
+    if (status == 'autorizado') {
+      return [
+        const PlanAuthorizedCard(),
+        const SizedBox(height: 16),
+        const SumaAseguradaChartCard(
+          sumaUdis: 50198,
+          sumaMxn: 422165.18,
+          beneficiarios: [
+            {'nombre': 'Maria', 'porcentaje': 80, 'color': Colors.blue},
+            {'nombre': 'Sofia', 'porcentaje': 10, 'color': Colors.lightBlue},
+            {'nombre': 'Julia', 'porcentaje': 10, 'color': Colors.indigo},
+          ],
+        ),
+        const SizedBox(height: 16),
+        DetailCard(
+          title: 'Total a Retirar en $retiroEnAnio',
+          udis: '${numberFormat.format(widget.totalRetirar)} UDIS',
+          mxn: currencyFormat.format(widget.totalRetirarMxn),
+          icon: Icons.lock,
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              // Acción al presionar
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Comenzar y pagar primera aportación',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                SizedBox(width: 8),
+                Icon(Icons.arrow_forward, size: 20),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        PlanActionsRow(
+          user: widget.user,
+          beneficiarios: widget.beneficiarios,
+          status: widget.status,
+        ),        
+      ];
+    }    
 
     return [];
   }
