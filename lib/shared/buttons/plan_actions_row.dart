@@ -6,7 +6,7 @@ import '../../modules/plans/plan_quote_details_screen.dart';
 import '../../modules/legal/legal_screen.dart';
 import '../../modules/plans/contributions_screen.dart';
 import '../../modules/plans/movements_screen.dart';
-import '../../modules/plans/stats_screen.dart';
+import '../../modules/plans/stats/stats_screen.dart';
 
 class PlanActionsRow extends StatelessWidget {
   final Map<String, dynamic> user;
