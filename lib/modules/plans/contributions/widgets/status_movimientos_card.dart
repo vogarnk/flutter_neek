@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 
 class StatusMovimientosCard extends StatelessWidget {
@@ -7,24 +6,29 @@ class StatusMovimientosCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(symbol: '', decimalDigits: 2);
-
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.contrastBackground,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           const Row(
             children: [
-              Icon(Icons.compare_arrows_rounded, color: AppColors.textWhite),
+              Icon(Icons.compare_arrows_rounded, color: AppColors.primary),
               SizedBox(width: 8),
               Text(
                 'Estatus de movimientos',
                 style: TextStyle(
-                  color: AppColors.textWhite,
+                  color: AppColors.textGray900,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -39,10 +43,10 @@ class StatusMovimientosCard extends StatelessWidget {
               child: Center(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: AppColors.contrastBackground,
+                    color: Colors.white,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.shield_outlined, color: AppColors.textWhite, size: 32),
+                  child: const Icon(Icons.shield_outlined, color: AppColors.primary, size: 32),
                 ),
               ),
             ),
@@ -159,8 +163,7 @@ class ArcPainter extends CustomPainter {
       ..strokeWidth = 20
       ..strokeCap = StrokeCap.round;
 
-    // Primera sección (izquierda)
-    paint.color = const Color(0xFF2563EB); // azul fuerte
+    paint.color = const Color(0xFF2563EB);
     canvas.drawArc(
       Rect.fromCircle(center: size.center(Offset.zero), radius: 50),
       startAngle,
@@ -169,8 +172,7 @@ class ArcPainter extends CustomPainter {
       paint,
     );
 
-    // Segunda sección (medio)
-    paint.color = const Color(0xFFBFDBFE); // azul claro
+    paint.color = const Color(0xFFBFDBFE);
     canvas.drawArc(
       Rect.fromCircle(center: size.center(Offset.zero), radius: 50),
       startAngle + sweepAngle * 0.33,
@@ -179,8 +181,7 @@ class ArcPainter extends CustomPainter {
       paint,
     );
 
-    // Tercera sección (derecha)
-    paint.color = const Color(0xFF1E40AF); // azul profundo
+    paint.color = const Color(0xFF1E40AF);
     canvas.drawArc(
       Rect.fromCircle(center: size.center(Offset.zero), radius: 50),
       startAngle + sweepAngle * 0.66,
