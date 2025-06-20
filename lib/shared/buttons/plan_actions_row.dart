@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neek/shared/buttons/plan_action_button.dart';
 import '../../modules/plans/plan_settings_screen.dart';
 import '../../modules/beneficiaries/beneficiaries_screen.dart';
+import '../../modules/beneficiaries/confirmed_beneficiaries_screen.dart'; // <-- Nuevo import
 import '../../modules/plans/plan_quote_details_screen.dart';
 import '../../modules/legal/legal_screen.dart';
 import '../../modules/plans/contributions_screen.dart';
@@ -38,7 +39,6 @@ class PlanActionsRow extends StatelessWidget {
                     icon: Icons.policy,
                     label: 'Póliza',
                     onTap: () {
-                      // Navegar a la póliza
                       Navigator.pushNamed(context, '/mi-poliza');
                     },
                   ),
@@ -79,7 +79,7 @@ class PlanActionsRow extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => BeneficiariesScreen(
+                          builder: (_) => ConfirmedBeneficiariesScreen(
                             user: user,
                             beneficiarios: beneficiarios,
                           ),

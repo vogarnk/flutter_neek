@@ -17,6 +17,7 @@ class PlanCard extends StatelessWidget {
   final double totalRetirar2065Mxn;
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
+  final int userPlanId;
 
   final String status;
 
@@ -34,7 +35,8 @@ class PlanCard extends StatelessWidget {
     required this.totalRetirar2065,
     required this.totalRetirar2065Mxn,
     required this.beneficiarios,
-    required this.status, // 👈 nuevo campo
+    required this.status,
+    required this.userPlanId,
   });
 
 
@@ -155,6 +157,7 @@ class PlanCard extends StatelessWidget {
                         totalRetirar2065Mxn: totalRetirar2065Mxn,
                         beneficiarios: beneficiarios,
                         status: status,
+                        userPlanId: userPlanId
                       ),
                     ),
                   );

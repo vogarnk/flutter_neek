@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class PlanContributionsTable extends StatefulWidget {
-  const PlanContributionsTable({super.key});
+  final List<dynamic> cotizaciones;
+  final String status;
+
+  const PlanContributionsTable({
+    super.key,
+    required this.cotizaciones,
+    required this.status,
+  });
 
   @override
   State<PlanContributionsTable> createState() => _PlanContributionsTableState();
@@ -9,19 +17,11 @@ class PlanContributionsTable extends StatefulWidget {
 
 class _PlanContributionsTableState extends State<PlanContributionsTable> {
   bool isUdiSelected = true; // Estado del switch
+  final Set<int> indicesPagados = {1,2,3};
 
   @override
   Widget build(BuildContext context) {
-    final contributions = List.generate(10, (index) {
-      final year = 2023 + index;
-      return {
-        'index': index + 1,
-        'year': year,
-        'amount': '2,238',
-        'status': index == 0 ? 'Completado' : 'Pendiente',
-      };
-    });
-
+    final contributions = widget.cotizaciones;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       decoration: BoxDecoration(
@@ -118,14 +118,33 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
             ),
           ),
           const Divider(height: 1),
-          ...contributions.map((item) {
+          ...contributions
+              .takeWhile((item) =>
+                  double.tryParse(item['aportacion_anual_udis'] ?? '0') != 0)
+              .toList()
+              .asMap()
+              .entries
+              .map((entry) {
+            final index = entry.key + 1;
+            final item = entry.value;
+
+            final year = item['year'];
+            final udis = double.tryParse(item['udis'] ?? '0') ?? 0;
+            final aportacionUdis = double.tryParse(item['aportacion_anual_udis'] ?? '0') ?? 0;
+
+            final aportacion = isUdiSelected
+                ? '\$${NumberFormat('#,###.00', 'es_MX').format(aportacionUdis * udis)}'
+                : NumberFormat('#,###', 'es_MX').format(aportacionUdis);
+
+            final status = indicesPagados.contains(index) ? 'Completado' : 'Pendiente';
+
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
-                      '${item['index']}  ${item['year']}',
+                      '$index  $year',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             fontSize: 14,
                           ),
@@ -133,7 +152,7 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                   ),
                   Expanded(
                     child: Text(
-                      item['amount'] as String,
+                      aportacion,
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
                             fontSize: 14,
                           ),
@@ -143,16 +162,16 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: item['status'] == 'Completado'
+                        color: status == 'Completado'
                             ? Colors.green.shade100
                             : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        item['status'] as String,
+                        status,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: item['status'] == 'Completado'
+                          color: status == 'Completado'
                               ? Colors.green
                               : Colors.black45,
                           fontWeight: FontWeight.bold,
@@ -164,24 +183,47 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                 ],
               ),
             );
-          }).toList(),
+          }),
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Activar mi plan'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2B5FF3),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          )
+          _buildPlanActionButton(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlanActionButton() {
+    late String label;
+
+    switch (widget.status) {
+      case 'cotizado':
+        label = 'Activar mi plan';
+        break;
+      case 'autorizado_por_pagar_1':
+        label = 'Pagar primera aportación';
+        break;
+      case 'autorizado':
+        label = 'Pagar primera aportación';
+        break;
+      default:
+        label = 'Acción no disponible';
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          // TODO: Implementar acción para "$label"
+          debugPrint('🔘 Acción pendiente para estado: ${widget.status}');
+        },
+        icon: const Icon(Icons.arrow_forward),
+        label: Text(label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2B5FF3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
       ),
     );
   }

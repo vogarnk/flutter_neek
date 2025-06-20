@@ -73,6 +73,7 @@ class HomeScreen extends StatelessWidget {
                     final totalRetirar2065Mxn = (plan['total_a_retirar_2065_mxn'] ?? 0).toDouble();
                     final duracion = (plan['duracion'] ?? 0).toInt();
                     final status = plan['status'] ?? 'Sin status';
+                    final userPlanId = plan['id'] ?? 'Sin id';
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: PlanCard(
@@ -89,6 +90,7 @@ class HomeScreen extends StatelessWidget {
                         totalRetirar2065Mxn: totalRetirar2065Mxn,
                         beneficiarios: beneficiarios, // ✅ agregado
                         status: status,
+                        userPlanId: userPlanId,
                       ),
                     );
                   },

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../plans/activate_plan_intro_screen.dart';
 import '../../shared/cards/card_neek.dart';
-import 'create_beneficiary_screen.dart';
+import 'package:neek/shared/cards/beneficiaries_card.dart';
 
 class BeneficiariesScreen extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -96,124 +96,10 @@ class BeneficiariesScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Tabla de beneficiarios
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Mis beneficiarios',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppColors.textGray900,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Administra tus beneficiarios',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textGray400,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Divider(),
-                  const SizedBox(height: 8),
-
-                  // Títulos
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: const [
-                        Expanded(
-                          flex: 3,
-                          child: Text(
-                            'BENEFICIARIO',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Color(0xFF6B7280),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            'TIPO',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Color(0xFF6B7280),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            'ACCESO',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: Color(0xFF6B7280),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          '%',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  const SizedBox(height: 8),
-
-                  // Beneficiarios renderizados
-                  ...[
-                    for (var b in beneficiarios)
-                      _beneficiarioRow(
-                        nombre: b['nombre'] ?? 'Desconocido',
-                        tipo: b['tipo'] ?? 'Tipo no definido',
-                        acceso: b['acceso'] ?? 'N/A',
-                        porcentaje: int.tryParse(b['porcentaje'].toString()) ?? 0,
-                      ),
-                  ],
-
-                  const SizedBox(height: 16),
-
-                  // Botón añadir beneficiarios
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CreateBeneficiaryScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: const Text('Añadir beneficiarios'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            BeneficiariesCard(
+              beneficiarios: beneficiarios,
+              mostrarBoton: true, // o false en ConfirmedBeneficiariesScreen
+            ),            
           ],
         ),
       ),

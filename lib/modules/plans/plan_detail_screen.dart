@@ -13,6 +13,7 @@ import 'package:neek/shared/cards/autorizado/plan_authorized_card.dart';
 import '../../shared/charts/suma_asegurada_chart_card.dart';
 import 'package:neek/shared/buttons/plan_actions_row.dart';
 import '../../core/theme/app_colors.dart';
+import 'package:neek/core/cotizacion_service.dart'; // Asegúrate de importar correctamente
 
 class PlanDetailScreen extends StatefulWidget {
   final String nombrePlan;
@@ -28,6 +29,7 @@ class PlanDetailScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
   final String status;
+  final int userPlanId;
 
   const PlanDetailScreen({
     super.key,
@@ -44,6 +46,7 @@ class PlanDetailScreen extends StatefulWidget {
     required this.totalRetirar2065,
     required this.totalRetirar2065Mxn,
     required this.status,
+    required this.userPlanId
   });
 
   @override
@@ -51,14 +54,20 @@ class PlanDetailScreen extends StatefulWidget {
 }
 
 class _PlanDetailScreenState extends State<PlanDetailScreen> {
+  List<dynamic>? cotizaciones;
   @override
   void initState() {
     super.initState();
 
-    // Mostrar modal solo si el status es 'autorizado_por_pagar_1'
     if (widget.status == 'autorizado_por_pagar_1') {
       Future.microtask(() => showPlanAuthorizedDialog(context));
     }
+
+    CotizacionService.obtenerCotizaciones(widget.userPlanId).then((result) {
+      setState(() {
+        cotizaciones = result;
+      });
+    });
   }
 
   @override
@@ -129,7 +138,10 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             const SizedBox(height: 24),
             const UdiCard(),
             const SizedBox(height: 24),
-            const PlanContributionsTable(),
+            PlanContributionsTable(
+              cotizaciones: cotizaciones!,
+              status: widget.status,
+            )
           ],
         ),
       ),
@@ -214,14 +226,19 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       return [
         const PlanAuthorizedCard(),
         const SizedBox(height: 16),
-        const SumaAseguradaChartCard(
-          sumaUdis: 50198,
-          sumaMxn: 422165.18,
-          beneficiarios: [
-            {'nombre': 'Maria', 'porcentaje': 80, 'color': Colors.blue},
-            {'nombre': 'Sofia', 'porcentaje': 10, 'color': Colors.lightBlue},
-            {'nombre': 'Julia', 'porcentaje': 10, 'color': Colors.indigo},
-          ],
+        SumaAseguradaChartCard(
+          sumaUdis: widget.sumaAsegurada,
+          sumaMxn: widget.sumaAseguradaMxn,
+          beneficiarios: widget.beneficiarios.asMap().entries.map((entry) {
+            final index = entry.key;
+            final b = entry.value;
+            final colores = [Colors.blue, Colors.lightBlue, Colors.indigo, Colors.green, Colors.orange];
+            return {
+              'nombre': b['nombre'] ?? 'Sin nombre',
+              'porcentaje': b['porcentaje'] ?? 0,
+              'color': colores[index % colores.length],
+            };
+          }).toList(),
         ),
         const SizedBox(height: 16),
         DetailCard(
@@ -265,14 +282,19 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       return [
         const PlanAuthorizedCard(),
         const SizedBox(height: 16),
-        const SumaAseguradaChartCard(
-          sumaUdis: 50198,
-          sumaMxn: 422165.18,
-          beneficiarios: [
-            {'nombre': 'Maria', 'porcentaje': 80, 'color': Colors.blue},
-            {'nombre': 'Sofia', 'porcentaje': 10, 'color': Colors.lightBlue},
-            {'nombre': 'Julia', 'porcentaje': 10, 'color': Colors.indigo},
-          ],
+        SumaAseguradaChartCard(
+          sumaUdis: widget.sumaAsegurada,
+          sumaMxn: widget.sumaAseguradaMxn,
+          beneficiarios: widget.beneficiarios.asMap().entries.map((entry) {
+            final index = entry.key;
+            final b = entry.value;
+            final colores = [Colors.blue, Colors.lightBlue, Colors.indigo, Colors.green, Colors.orange];
+            return {
+              'nombre': b['nombre'] ?? 'Sin nombre',
+              'porcentaje': b['porcentaje'] ?? 0,
+              'color': colores[index % colores.length],
+            };
+          }).toList(),
         ),
         const SizedBox(height: 16),
         DetailCard(
