@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
 
 import 'core/api_service.dart';
-import 'package:neek/auth/login_screen.dart';
+import 'auth/login_screen.dart';
 import 'home_screen.dart';
+import 'core/theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,16 +15,30 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
     super.initState();
+
+    // Configura el parpadeo
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true); // Repite de ida y vuelta
+
+    _opacityAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(_controller);
+
+    // Inicia la lógica de navegación después de un tiempo
     _checkToken();
   }
 
   Future<void> _checkToken() async {
+    await Future.delayed(const Duration(seconds: 3)); // deja que "parpadee" unos segundos
+
     final token = await _secureStorage.read(key: 'auth_token');
 
     if (token == null) {
@@ -69,9 +85,24 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose(); // ✅ única llamada válida
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: FadeTransition(
+          opacity: _opacityAnimation,
+          child: SvgPicture.asset(
+            'assets/images/second_logo.svg',
+            height: 80,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -44,6 +44,8 @@ flutter:
   assets:
     - assets/logo.svg
     - assets/icon/flags/mx.svg
+    - assets/images/first_logo.svg
+    - assets/images/second_logo.svg    
   fonts:
     - family: Inter
       fonts:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -6,105 +7,96 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // Círculo decorativo (puedes reemplazar por SVG o animación)
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    width: 3,
+                    color: AppColors.primary.withOpacity(0.8),
+                  ),
+                ),
+              ),
               const SizedBox(height: 40),
 
-              // Logo
-              SizedBox(
-                height: 100,
-                child: Image.asset('assets/logo.png'),
-              ),
-
-              const SizedBox(height: 24),
-
+              // Título
               const Text(
-                "Crea tu cuenta",
+                '¡Bienvenido a Neek!',
                 style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: AppColors.textWhite,
+                  fontWeight: FontWeight.w600,
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Nombre
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Nombre completo",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: 16),
 
-              // Email
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Correo electrónico",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              // Subtítulo
+              const Text(
+                'Comencemos a crear un plan de ahorro y seguro de vida en UDIS que cumpla tus metas, es el primer paso a la tranquilidad que mereces.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: AppColors.textGray300,
+                  fontWeight: FontWeight.w500,
+                  height: 1.5,
                 ),
+                textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 48),
 
-              // Contraseña
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Contraseña",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Confirmar contraseña
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Confirmar contraseña",
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Botón de registro
+              // Botón "Continuar"
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: lógica de registro
+                    Navigator.pushNamed(context, '/register/form'); // o ruta del siguiente step
                   },
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(32),
                     ),
                   ),
-                  child: const Text("Registrarme"),
+                  child: const Text(
+                    'Continuar',
+                    style: TextStyle(color: AppColors.textWhite),
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-              // ¿Ya tienes cuenta?
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("¿Ya tienes cuenta?"),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // vuelve al login
-                    },
-                    child: const Text("Inicia sesión"),
-                  )
-                ],
+              // Botón "Regresar"
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.textGray300),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                  ),
+                  child: const Text(
+                    'Regresar',
+                    style: TextStyle(color: AppColors.textWhite),
+                  ),
+                ),
               ),
             ],
           ),
