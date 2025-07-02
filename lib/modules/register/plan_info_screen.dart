@@ -3,12 +3,10 @@ import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/modules/register/plan_verification_screen.dart';
 
 class PlanInfoScreen extends StatefulWidget {
-  final Map<String, dynamic> selectedPlan;
   final Map<String, dynamic> userData;
 
   const PlanInfoScreen({
     super.key,
-    required this.selectedPlan,
     required this.userData,
   });
 
@@ -33,23 +31,22 @@ class _PlanInfoScreenState extends State<PlanInfoScreen> {
     if (_formKey.currentState!.validate()) {
       final personalData = {
         ...widget.userData,
-        'nombre1': _name1Controller.text.trim(),
-        'nombre2': _name2Controller.text.trim(),
-        'apellidoPaterno': _lastName1Controller.text.trim(),
-        'apellidoMaterno': _lastName2Controller.text.trim(),
+        'primer_nombre': _name1Controller.text.trim(),
+        'segundo_nombre': _name2Controller.text.trim(),
+        'apellido_paterno': _lastName1Controller.text.trim(),
+        'apellido_materno': _lastName2Controller.text.trim(),
         'dia': selectedDate?.day,
         'mes': selectedDate?.month,
         'year': selectedDate?.year,
-        'genero': genero,
-        'salud': salud,
-        'fumador': fumador,
+        'genero': genero.toLowerCase(), // 👈 en minúsculas
+        'estado_salud': _mapSaludToEnglish(salud), // 👈 traducido a inglés
+        'fumador': fumador == 'Sí' ? 'yes' : 'no',
       };
 
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => PlanVerificationScreen(
-            selectedPlan: widget.selectedPlan,
             userData: personalData,
           ),
         ),
@@ -277,6 +274,18 @@ class _PlanInfoScreenState extends State<PlanInfoScreen> {
         selectedDate = picked;
         _birthDateController.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
       });
+    }
+  }  
+  String _mapSaludToEnglish(String valor) {
+    switch (valor) {
+      case 'Excelente':
+        return 'excelente';
+      case 'Regular':
+        return 'regular';
+      case 'Malo':
+        return 'mal';
+      default:
+        return 'unknown';
     }
   }  
 }

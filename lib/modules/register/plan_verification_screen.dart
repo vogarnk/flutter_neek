@@ -3,12 +3,10 @@ import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/modules/register/plan_referral_screen.dart';
 
 class PlanVerificationScreen extends StatefulWidget {
-  final Map<String, dynamic> selectedPlan;
   final Map<String, dynamic> userData;
 
   const PlanVerificationScreen({
     super.key,
-    required this.selectedPlan,
     required this.userData,
   });
 
@@ -25,7 +23,12 @@ class _PlanVerificationScreenState extends State<PlanVerificationScreen> {
   String horario = '5:00 pm - 8:00 pm';
 
   void _continuar() {
-    final code = _codeControllers.map((c) => c.text.trim()).join();
+    final code_1 = _codeControllers[0].text.trim();
+    final code_2 = _codeControllers[1].text.trim();
+    final code_3 = _codeControllers[2].text.trim();
+    final code_4 = _codeControllers[3].text.trim();
+
+    final code = code_1 + code_2 + code_3 + code_4;
     if (code.length < 4 || code.contains(RegExp(r'\D'))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Por favor ingresa el código completo de 4 dígitos')),
@@ -33,19 +36,24 @@ class _PlanVerificationScreenState extends State<PlanVerificationScreen> {
       return;
     }
 
+    // 🟡 Normaliza horario para ENUM
+    final String? horarioEnum = _mapHorarioToEnum(horario);
+
     final dataCompleta = {
       ...widget.userData,
-      'codigoVerificacion': code,
+      'code_1': code_1,
+      'code_2': code_2,
+      'code_3': code_3,
+      'code_4': code_4,
       'deseaLlamadas': deseaLlamadas,
-      'deseaMensajes': deseaMensajes,
-      'horarioLlamada': deseaLlamadas ? horario : null,
+      'recibir_mensajes': deseaMensajes ? 1 : 0, // 👈 como 1 o 0
+      if (deseaLlamadas && horarioEnum != null) 'preferred_call_time': horarioEnum, // 👈 solo si aplica
     };
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PlanReferralScreen(
-          selectedPlan: widget.selectedPlan,
           userData: dataCompleta,
         ),
       ),
@@ -160,7 +168,7 @@ class _PlanVerificationScreenState extends State<PlanVerificationScreen> {
                     Column(
                       children: [
                         _radioOption('10:00 am - 12:00 pm'),
-                        _radioOption('1:00 pm - 4:00 pm'),
+                        _radioOption('12:00 pm - 4:00 pm'),
                         _radioOption('5:00 pm - 8:00 pm'),
                       ],
                     ),
@@ -243,4 +251,16 @@ class _PlanVerificationScreenState extends State<PlanVerificationScreen> {
       contentPadding: EdgeInsets.zero,
     );
   }
+  String? _mapHorarioToEnum(String input) {
+    switch (input) {
+      case '10:00 am - 12:00 pm':
+        return '10:00 am - 12:00 pm';
+      case '12:00 pm - 4:00 pm':
+        return '12:00 pm - 4:00 pm'; // 👈 mapeo a ENUM correcto
+      case '5:00 pm - 8:00 pm':
+        return '5:00 pm - 8:00 pm';
+      default:
+        return null;
+    }
+  }  
 }

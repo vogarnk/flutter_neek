@@ -3,12 +3,10 @@ import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/modules/register/plan_success_screen.dart';
 
 class PlanReferralScreen extends StatefulWidget {
-  final Map<String, dynamic> selectedPlan;
   final Map<String, dynamic> userData;
 
   const PlanReferralScreen({
     super.key,
-    required this.selectedPlan,
     required this.userData,
   });
 
@@ -40,7 +38,7 @@ class _PlanReferralScreenState extends State<PlanReferralScreen> {
     final allUserData = {
       ...widget.userData,
       'referenciaOrigen': selectedOption,
-      'codigoAgente': selectedOption == 'Agente Neek'
+      'referral_slug': selectedOption == 'Agente Neek'
           ? codigoController.text.trim()
           : null,
     };
@@ -49,7 +47,6 @@ class _PlanReferralScreenState extends State<PlanReferralScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => PlanSuccessScreen(
-          selectedPlan: widget.selectedPlan,
           userData: allUserData,
         ),
       ),

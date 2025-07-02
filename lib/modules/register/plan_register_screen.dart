@@ -5,11 +5,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PlanRegisterScreen extends StatefulWidget {
-  final Map<String, dynamic> selectedPlan;
-
+  final Map<String, dynamic> userData;
   const PlanRegisterScreen({
     super.key,
-    required this.selectedPlan,
+    required this.userData,
   });
 
   @override
@@ -28,11 +27,12 @@ class _PlanRegisterScreenState extends State<PlanRegisterScreen> {
       setState(() => isLoading = true);
 
       final userData = {
+        ...widget.userData,
         'email': _emailController.text.trim(),
-        'telefono': _phoneController.text.trim(),
+        'celular': _phoneController.text.trim(),
       };
 
-      final codeSent = await sendVerificationCode(userData['telefono']!);
+      final codeSent = await sendVerificationCode(userData['celular']!);
       setState(() => isLoading = false);
 
       if (codeSent) {
@@ -40,7 +40,6 @@ class _PlanRegisterScreenState extends State<PlanRegisterScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => PlanInfoScreen(
-              selectedPlan: widget.selectedPlan,
               userData: userData,
             ),
           ),

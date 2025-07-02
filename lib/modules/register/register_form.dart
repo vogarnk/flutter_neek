@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:neek/core/theme/app_colors.dart';
-import 'package:neek/shared/tables/udi_plan_summary.dart';
 import 'package:neek/modules/register/plan_register_screen.dart';
 import 'package:neek/shared/cards/register_card.dart';
+import 'package:neek/shared/tables/udi_plan_summary_card.dart'; // <-- NUEVO
+
 class PlanSummaryScreen extends StatefulWidget {
   const PlanSummaryScreen({super.key});
 
@@ -19,13 +20,17 @@ class _PlanSummaryScreenState extends State<PlanSummaryScreen> {
   int selectedPlazo = 10;
   double? selectedPrimaAnual;
   bool isLoading = true;
-
+  final TextEditingController _planNameController = TextEditingController();
   @override
   void initState() {
     super.initState();
     fetchPlans();
   }
-
+  @override
+  void dispose() {
+    _planNameController.dispose();
+    super.dispose();
+  }
   Future<void> fetchPlans() async {
     final response = await http.get(Uri.parse('https://app.neek.mx/api/getPlans'));
     if (response.statusCode == 200) {
@@ -140,6 +145,7 @@ class _PlanSummaryScreenState extends State<PlanSummaryScreen> {
                             availablePrimas: _getPrimasAnuales(selectedPlazo),
                             onPlazoChanged: onPlazoChanged,
                             onPrimaChanged: onPrimaChanged,
+                            planNameController: _planNameController, // 👈 agregado
                           ),
                   ),
                 ),
@@ -155,6 +161,7 @@ class PlanSummaryCard extends StatelessWidget {
   final List<double> availablePrimas;
   final ValueChanged<int> onPlazoChanged;
   final ValueChanged<double> onPrimaChanged;
+  final TextEditingController planNameController; // 👈 nuevo
 
   const PlanSummaryCard({
     Key? key,
@@ -163,6 +170,7 @@ class PlanSummaryCard extends StatelessWidget {
     required this.availablePrimas,
     required this.onPlazoChanged,
     required this.onPrimaChanged,
+    required this.planNameController, // 👈 nuevo
   }) : super(key: key);
 
   @override
@@ -189,10 +197,10 @@ class PlanSummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          RegisterCard(controller: TextEditingController(),),          
+          RegisterCard(controller: planNameController),    
           const SizedBox(height: 20),
 
-          UdiPlanSummaryCard(),
+          UdiPlanSummaryCard(planData: planData),
           const SizedBox(height: 24),
           const Text(
             'Revisa tu cotización para más información detallada. Los valores pueden variar con préstamos o abonos.',
@@ -212,11 +220,19 @@ class PlanSummaryCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 onPressed: () {
+                  final nombrePlan = planNameController.text.trim();
+
+                  final userData = {
+                    'plazo_ahorro': planData['duracion_plan'],
+                    'ahorro_mensual': planData['prima_mensual_pesos'],
+                    'nombre_proyecto': nombrePlan.isNotEmpty ? nombrePlan : 'Mi plan de ahorro',
+                  };
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => PlanRegisterScreen(
-                        selectedPlan: planData,
+                        userData: userData,
                       ),
                     ),
                   );

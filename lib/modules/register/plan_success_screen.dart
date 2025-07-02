@@ -4,12 +4,10 @@ import 'package:http/http.dart' as http;
 import 'package:neek/core/theme/app_colors.dart';
 
 class PlanSuccessScreen extends StatefulWidget {
-  final Map<String, dynamic> selectedPlan;
   final Map<String, dynamic> userData;
 
   const PlanSuccessScreen({
     super.key,
-    required this.selectedPlan,
     required this.userData,
   });
 
@@ -29,36 +27,44 @@ class _PlanSuccessScreenState extends State<PlanSuccessScreen> {
 
   Future<void> _enviarDatos() async {
     try {
-      final body = {
-        ...widget.userData,
-        'plan_id': widget.selectedPlan['id'], // O ajusta según backend
-        'nombre_plan': widget.selectedPlan['nombre_plan'],
-        'prima_anual': widget.selectedPlan['prima_anual_pesos'],
-        'prima_mensual': widget.selectedPlan['prima_mensual_pesos'],
-        'duracion_plan': widget.selectedPlan['duracion_plan'].toString(),
-      };
-      // 👇 Imprimir el JSON antes de enviarlo
+      final body = {...widget.userData};
       print('📤 Enviando datos a Neek:');
       print(jsonEncode(body));
+
       final response = await http.post(
-        Uri.parse('https://app.neek.mx/api/guardar-plan'), // ✅ ajusta tu endpoint
+        Uri.parse('https://app.neek.mx/api/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(body),
       );
+
+      final responseBody = jsonDecode(response.body);
+      final mensaje = responseBody['message'] ?? 'Error desconocido';
 
       if (response.statusCode == 200) {
         setState(() {
           success = true;
           isLoading = false;
         });
-      } else {
+      } else if (response.statusCode == 400 && mensaje.contains('código')) {
+        // Código incorrecto → regresar al paso de verificación
+        Navigator.pop(context); // o Navigator.pushReplacement para pantalla específica
+      } else if (response.statusCode == 409 || mensaje.contains('correo')) {
+        // Email duplicado
         setState(() {
           success = false;
           isLoading = false;
         });
-        // Opcional: mostrar error
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al enviar datos: ${response.body}')),
+          SnackBar(content: Text(mensaje)),
+        );
+      } else {
+        // Otro error
+        setState(() {
+          success = false;
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al enviar datos: $mensaje')),
         );
       }
     } catch (e) {
