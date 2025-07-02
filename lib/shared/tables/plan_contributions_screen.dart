@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:neek/modules/plans/contributions/next_contribution_screen.dart';
 class PlanContributionsTable extends StatefulWidget {
   final List<dynamic> cotizaciones;
   final String status;
@@ -211,10 +211,14 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        onPressed: () {
-          // TODO: Implementar acción para "$label"
-          debugPrint('🔘 Acción pendiente para estado: ${widget.status}');
-        },
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NextContributionScreen(),
+                          ),
+                        );
+                      },
         icon: const Icon(Icons.arrow_forward),
         label: Text(label),
         style: ElevatedButton.styleFrom(

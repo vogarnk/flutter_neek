@@ -138,10 +138,12 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             const SizedBox(height: 24),
             const UdiCard(),
             const SizedBox(height: 24),
-            PlanContributionsTable(
-              cotizaciones: cotizaciones!,
-              status: widget.status,
-            )
+            cotizaciones == null
+                ? const Center(child: CircularProgressIndicator())
+                : PlanContributionsTable(
+                    cotizaciones: cotizaciones!,
+                    status: widget.status,
+                  ),
           ],
         ),
       ),

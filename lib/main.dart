@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:io';
@@ -36,19 +37,19 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    // Espera a que el árbol de widgets esté construido antes de ejecutar
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupFCM();
     });
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('📬 Notificación recibida en primer plano');
 
-    final notification = message.notification;
-    if (notification != null) {
-      print('🔔 Título: ${notification.title}');
-      print('📝 Mensaje: ${notification.body}');
-    }
-  });    
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('📬 Notificación recibida en primer plano');
+
+      final notification = message.notification;
+      if (notification != null) {
+        print('🔔 Título: ${notification.title}');
+        print('📝 Mensaje: ${notification.body}');
+      }
+    });
   }
 
   Future<void> _setupFCM() async {
@@ -96,6 +97,16 @@ class _MyAppState extends State<MyApp> {
       title: 'Neek',
       debugShowCheckedModeBanner: false,
       theme: appTheme,
+      locale: const Locale('es', 'MX'),
+      supportedLocales: const [
+        Locale('es', 'MX'),
+        Locale('en', 'US'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const SplashScreen(),
       onGenerateRoute: (settings) {
         if (settings.name == '/login') {
