@@ -20,10 +20,11 @@ class _PlanReferralScreenState extends State<PlanReferralScreen> {
   String? selectedOption = 'Agente Neek';
   final List<String> opciones = [
     'Agente Neek',
-    'Redes Sociales',
-    'Recomendación',
+    'Instagram',
+    'X',
+    'TikTok',
+    'Youtube',
     'Publicidad',
-    'Otro',
   ];
 
   final TextEditingController codigoController = TextEditingController();
