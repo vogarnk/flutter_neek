@@ -92,7 +92,7 @@ class _PlanInfoScreenState extends State<PlanInfoScreen> {
                       children: [
                         Expanded(child: _inputLabel('Primer Nombre', _name1Controller)),
                         const SizedBox(width: 12),
-                        Expanded(child: _inputLabel('Segundo Nombre', _name2Controller)),
+                        Expanded(child: _inputLabel('Segundo Nombre', _name2Controller, required: false)),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -101,7 +101,7 @@ class _PlanInfoScreenState extends State<PlanInfoScreen> {
                       children: [
                         Expanded(child: _inputLabel('Apellido paterno', _lastName1Controller)),
                         const SizedBox(width: 12),
-                        Expanded(child: _inputLabel('Apellido materno', _lastName2Controller)),
+                        Expanded(child: _inputLabel('Apellido materno', _lastName2Controller, required: false)),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -198,13 +198,13 @@ class _PlanInfoScreenState extends State<PlanInfoScreen> {
     color: AppColors.textGray900,
   );
 
-  Widget _inputLabel(String label, TextEditingController controller) {
+  Widget _inputLabel(String label, TextEditingController controller, {bool required = true}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: _labelStyle),
         const SizedBox(height: 6),
-        _inputField(controller: controller),
+        _inputField(controller: controller, required: required),
       ],
     );
   }
@@ -213,11 +213,12 @@ class _PlanInfoScreenState extends State<PlanInfoScreen> {
     required TextEditingController controller,
     String? hint,
     TextInputType keyboard = TextInputType.text,
+    bool required = true,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboard,
-      validator: (val) => val == null || val.trim().isEmpty ? 'Requerido' : null,
+      validator: (val) => required && (val == null || val.trim().isEmpty) ? 'Requerido' : null,
       style: const TextStyle(color: AppColors.textGray900),
       decoration: InputDecoration(
         hintText: hint ?? '',
