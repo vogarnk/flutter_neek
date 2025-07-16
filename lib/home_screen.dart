@@ -329,7 +329,9 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 20),
 
               // TARJETA UDI
-              const UdiCard(),
+              UdiCard(
+                udisActual: widget.user['udis_actual']?.toDouble(),
+              ),
               const SizedBox(height: 40),
             ],
           ),

@@ -147,7 +147,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
               icon: Icons.lock,
             ),
             const SizedBox(height: 24),
-            const UdiCard(),
+            UdiCard(
+              udisActual: widget.user['udis_actual']?.toDouble(),
+            ),
             const SizedBox(height: 24),
             _buildTableWidget(),
           ],

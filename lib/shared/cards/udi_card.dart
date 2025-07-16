@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:neek/shared/charts/udi_line_chart.dart';
+import 'package:intl/intl.dart';
 
 class UdiCard extends StatelessWidget {
-  const UdiCard({super.key});
+  final double? udisActual;
+
+  const UdiCard({
+    super.key,
+    this.udisActual,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,17 +24,19 @@ class UdiCard extends StatelessWidget {
           // Texto
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                '8.42 MXN 🇲🇽',
-                style: TextStyle(
+                udisActual != null 
+                    ? '${NumberFormat('#,##0.00', 'es_MX').format(udisActual!)} MXN 🇲🇽'
+                    : '-- MXN 🇲🇽',
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0F172A),
                 ),
               ),
-              SizedBox(height: 4),
-              Text(
+              const SizedBox(height: 4),
+              const Text(
                 'Valor del UDI al día de hoy',
                 style: TextStyle(
                   color: Color(0xFF94A3B8),
