@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:neek/shared/app_bars/custom_home_app_bar.dart';
 import 'package:neek/shared/cards/detail_card.dart';
-import 'package:neek/shared/buttons/plan_action_button.dart';
 import 'package:intl/intl.dart';
 import 'package:neek/shared/cards/udi_card.dart';
 import 'package:neek/shared/tables/plan_contributions_screen.dart' show PlanContributionsTable;
+import 'package:neek/shared/tables/plan_movements_table.dart' show PlanMovementsTable;
 import '../verification/verificacion_completada_screen.dart';
 import 'package:neek/modules/verification/verificacion_screen.dart';
 import '../beneficiaries/beneficiaries_screen.dart';
-import 'plan_settings_screen.dart';
 import 'package:neek/shared/cards/autorizado/plan_authorized_card.dart';
 import '../../shared/charts/suma_asegurada_chart_card.dart';
 import 'package:neek/shared/buttons/plan_actions_row.dart';
 import '../../core/theme/app_colors.dart';
-import 'package:neek/core/cotizacion_service.dart'; // Asegúrate de importar correctamente
+import 'package:neek/core/cotizacion_service.dart';
+import 'package:neek/core/movimientos_service.dart';
 
 class PlanDetailScreen extends StatefulWidget {
   final String nombrePlan;
@@ -55,6 +55,8 @@ class PlanDetailScreen extends StatefulWidget {
 
 class _PlanDetailScreenState extends State<PlanDetailScreen> {
   List<dynamic>? cotizaciones;
+  List<dynamic>? movimientos;
+  
   @override
   void initState() {
     super.initState();
@@ -63,11 +65,20 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       Future.microtask(() => showPlanAuthorizedDialog(context));
     }
 
-    CotizacionService.obtenerCotizaciones(widget.userPlanId).then((result) {
-      setState(() {
-        cotizaciones = result;
+    // Cargar datos según el estado del plan
+    if (widget.status == 'cotizado') {
+      CotizacionService.obtenerCotizaciones(widget.userPlanId).then((result) {
+        setState(() {
+          cotizaciones = result;
+        });
       });
-    });
+    } else if (widget.status == 'autorizado' || widget.status == 'autorizado_por_pagar_1') {
+      MovimientosService.obtenerMovimientos(widget.userPlanId).then((result) {
+        setState(() {
+          movimientos = result;
+        });
+      });
+    }
   }
 
   @override
@@ -138,12 +149,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             const SizedBox(height: 24),
             const UdiCard(),
             const SizedBox(height: 24),
-            cotizaciones == null
-                ? const Center(child: CircularProgressIndicator())
-                : PlanContributionsTable(
-                    cotizaciones: cotizaciones!,
-                    status: widget.status,
-                  ),
+            _buildTableWidget(),
           ],
         ),
       ),
@@ -337,6 +343,26 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     }    
 
     return [];
+  }
+
+  Widget _buildTableWidget() {
+    if (widget.status == 'cotizado') {
+      return cotizaciones == null
+          ? const Center(child: CircularProgressIndicator())
+          : PlanContributionsTable(
+              cotizaciones: cotizaciones!,
+              status: widget.status,
+            );
+    } else if (widget.status == 'autorizado' || widget.status == 'autorizado_por_pagar_1') {
+      return movimientos == null
+          ? const Center(child: CircularProgressIndicator())
+          : PlanMovementsTable(
+              movimientos: movimientos!,
+              status: widget.status,
+            );
+    }
+    
+    return const SizedBox.shrink();
   }
 }
 
