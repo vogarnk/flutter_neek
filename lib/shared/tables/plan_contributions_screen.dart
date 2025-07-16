@@ -48,9 +48,11 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Revisa y planea tus aportaciones',
-                      style: TextStyle(
+                    Text(
+                      widget.status == 'cotizado' 
+                          ? 'Proyección de tus aportaciones futuras'
+                          : 'Revisa y planea tus aportaciones',
+                      style: const TextStyle(
                         color: Colors.black54,
                         fontSize: 14,
                       ),
@@ -136,7 +138,8 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                 ? '\$${NumberFormat('#,###.00', 'es_MX').format(aportacionUdis * udis)}'
                 : NumberFormat('#,###', 'es_MX').format(aportacionUdis);
 
-            final status = indicesPagados.contains(index) ? 'Completado' : 'Pendiente';
+            // Si el plan está cotizado, todas las aportaciones son pendientes (son solo proyecciones)
+            final status = widget.status == 'cotizado' ? 'Pendiente' : (indicesPagados.contains(index) ? 'Completado' : 'Pendiente');
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
