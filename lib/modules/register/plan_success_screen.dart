@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:neek/core/theme/app_colors.dart';
+import 'package:neek/modules/register/change_password_screen.dart';
 
 class PlanSuccessScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -18,6 +20,7 @@ class PlanSuccessScreen extends StatefulWidget {
 class _PlanSuccessScreenState extends State<PlanSuccessScreen> {
   bool isLoading = true;
   bool success = false;
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -41,10 +44,46 @@ class _PlanSuccessScreenState extends State<PlanSuccessScreen> {
       final mensaje = responseBody['message'] ?? 'Error desconocido';
 
       if (response.statusCode == 200) {
-        setState(() {
-          success = true;
-          isLoading = false;
-        });
+        // Verificar si la respuesta incluye token y requiere cambio de contraseña
+        final data = responseBody;
+        
+        if (data['token'] != null) {
+          // Guardar el token inmediatamente
+          await _secureStorage.write(key: 'auth_token', value: data['token']);
+          
+          // Verificar si necesita cambiar contraseña
+          if (data['requires_password_change'] == true) {
+            setState(() {
+              success = true;
+              isLoading = false;
+            });
+            
+            // Redirigir a pantalla de cambio de contraseña
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ChangePasswordScreen(),
+              ),
+            );
+            return;
+          } else {
+            // No requiere cambio de contraseña, ir directamente al home
+            setState(() {
+              success = true;
+              isLoading = false;
+            });
+            
+            // Redirigir a splash screen para que maneje la navegación
+            Navigator.pushReplacementNamed(context, '/');
+            return;
+          }
+        } else {
+          // Respuesta exitosa pero sin token (flujo tradicional)
+          setState(() {
+            success = true;
+            isLoading = false;
+          });
+        }
       } else if (response.statusCode == 400 && mensaje.contains('código')) {
         // Código incorrecto → regresar al paso de verificación
         Navigator.pop(context); // o Navigator.pushReplacement para pantalla específica

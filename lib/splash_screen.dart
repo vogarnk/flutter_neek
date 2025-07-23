@@ -4,8 +4,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
 
 import 'core/api_service.dart';
+import 'core/first_login_service.dart';
 import 'auth/login_screen.dart';
 import 'home_screen.dart';
+import 'modules/register/change_password_screen.dart';
 import 'core/theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -47,15 +49,41 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     }
 
     try {
-      final response = await ApiService.instance.get('/user');
+      // Primero verificar el estado del primer login
+      final firstLoginStatus = await FirstLoginService.instance.checkFirstLoginStatus();
+      
+      if (firstLoginStatus['success']) {
+        final requiresPasswordChange = firstLoginStatus['requires_password_change'] ?? false;
+        
+        if (requiresPasswordChange) {
+          // Usuario necesita cambiar su contraseña
+          _goToChangePassword();
+          return;
+        } else {
+          // Usuario ya cambió su contraseña, verificar datos del usuario
+          final response = await ApiService.instance.get('/user');
 
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        final userData = decoded['data'];
-        _goToHome(userData);
+          if (response.statusCode == 200) {
+            final decoded = jsonDecode(response.body);
+            final userData = decoded['data'];
+            _goToHome(userData);
+          } else {
+            await _secureStorage.delete(key: 'auth_token');
+            _goToLogin();
+          }
+        }
       } else {
-        await _secureStorage.delete(key: 'auth_token');
-        _goToLogin();
+        // Error al verificar estado del primer login, intentar obtener datos del usuario
+        final response = await ApiService.instance.get('/user');
+
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(response.body);
+          final userData = decoded['data'];
+          _goToHome(userData);
+        } else {
+          await _secureStorage.delete(key: 'auth_token');
+          _goToLogin();
+        }
       }
     } catch (e) {
       await _secureStorage.delete(key: 'auth_token');
@@ -74,6 +102,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       MaterialPageRoute(
         builder: (_) => HomeScreen(user: userData, planNames: planNames),
       ),
+    );
+  }
+
+  void _goToChangePassword() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
     );
   }
 
