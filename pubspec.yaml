@@ -26,6 +26,7 @@ dependencies:
   share_plus: ^7.2.1
   permission_handler: ^11.3.0
   device_info_plus: ^10.0.0
+  local_auth: ^2.1.8
   flutter_localizations:
     sdk: flutter
 dev_dependencies:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../security/change_password_screen.dart';
+import '../security/biometric_setup_screen.dart';
 import '../../core/security_api_service.dart';
 import '../../models/user_session_model.dart';
 
@@ -103,6 +104,63 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   const Text(
                     'Por tu seguridad tu cuenta puede estar conectada a máximo 5 dispositivos',
                     style: TextStyle(color: AppColors.textGray500, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 🔐 Autenticación biométrica
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.textWhite,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Autenticación biométrica',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: AppColors.textGray900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Face ID o huella dactilar',
+                    style: TextStyle(
+                      color: AppColors.textGray400,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BiometricSetupScreen(),
+                        ),
+                      );
+                    },
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Configurar biometría',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: AppColors.textGray900,
+                          ),
+                        ),
+                        Icon(Icons.chevron_right),
+                      ],
+                    ),
                   ),
                 ],
               ),

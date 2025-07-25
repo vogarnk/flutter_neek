@@ -12,17 +12,26 @@ import 'home_screen.dart';
 import 'core/theme/app_theme.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   try {
-    await Firebase.initializeApp();
-    print('✅ Firebase inicializado correctamente');
-  } catch (e, stack) {
-    print("🔥 Error inicializando Firebase: $e");
-    print(stack);
-  }
+    WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(const MyApp());
+    try {
+      await Firebase.initializeApp();
+      print('✅ Firebase inicializado correctamente');
+    } catch (e, stack) {
+      print("🔥 Error inicializando Firebase: $e");
+      print("🔥 Stack trace: $stack");
+      // Continuar sin Firebase si falla
+    }
+
+    runApp(const MyApp());
+  } catch (e, stack) {
+    print("🔥 Error crítico en main: $e");
+    print("🔥 Stack trace: $stack");
+    
+    // Intentar ejecutar la app de todas formas
+    runApp(const MyApp());
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -37,19 +46,24 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setupFCM();
-    });
+    try {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _setupFCM();
+      });
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('📬 Notificación recibida en primer plano');
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        print('📬 Notificación recibida en primer plano');
 
-      final notification = message.notification;
-      if (notification != null) {
-        print('🔔 Título: ${notification.title}');
-        print('📝 Mensaje: ${notification.body}');
-      }
-    });
+        final notification = message.notification;
+        if (notification != null) {
+          print('🔔 Título: ${notification.title}');
+          print('📝 Mensaje: ${notification.body}');
+        }
+      });
+    } catch (e, stack) {
+      print("🔥 Error en initState de MyApp: $e");
+      print("🔥 Stack trace: $stack");
+    }
   }
 
   Future<void> _setupFCM() async {
