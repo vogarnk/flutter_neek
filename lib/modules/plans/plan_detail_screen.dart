@@ -354,6 +354,14 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           : PlanContributionsTable(
               cotizaciones: cotizaciones!,
               status: widget.status,
+              user: widget.user,
+              currentPlan: {
+                'id': widget.userPlanId,
+                'nombre_plan': widget.nombrePlan,
+                'status': widget.status,
+                'duracion': widget.duracion,
+                'beneficiarios': widget.beneficiarios,
+              },
             );
     } else if (widget.status == 'autorizado' || widget.status == 'autorizado_por_pagar_1') {
       return movimientos == null

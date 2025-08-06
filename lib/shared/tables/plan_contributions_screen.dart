@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:neek/modules/plans/contributions/next_contribution_screen.dart';
+import 'package:neek/modules/verification/verificacion_screen.dart';
+import 'package:neek/modules/beneficiaries/beneficiaries_screen.dart';
+import 'package:neek/modules/plans/questionnaire_stepper_screen.dart';
+
 class PlanContributionsTable extends StatefulWidget {
   final List<dynamic> cotizaciones;
   final String status;
+  final Map<String, dynamic>? user;
+  final Map<String, dynamic>? currentPlan; // Plan específico que se está mostrando
 
   const PlanContributionsTable({
     super.key,
     required this.cotizaciones,
     required this.status,
+    this.user,
+    this.currentPlan,
   });
 
   @override
@@ -196,33 +204,96 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
 
   Widget _buildPlanActionButton() {
     late String label;
+    late VoidCallback onPressed;
+    late IconData icon;
 
     switch (widget.status) {
       case 'cotizado':
-        label = 'Activar mi plan';
+        final perfilCompleto = widget.user?['perfil_completo'] == 1;
+        final beneficiarios = widget.currentPlan?['beneficiarios'] ?? [];
+        final tieneBeneficiarios = beneficiarios.isNotEmpty;
+
+        if (perfilCompleto) {
+          // Tiene perfil completo
+          if (!tieneBeneficiarios) {
+            // No tiene beneficiarios - ir a agregar beneficiarios
+            label = 'Agregar beneficiarios';
+            icon = Icons.person_add;
+            onPressed = () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BeneficiariesScreen(
+                    user: widget.user ?? {},
+                    beneficiarios: beneficiarios,
+                  ),
+                ),
+              );
+            };
+          } else {
+            // Tiene beneficiarios - ir al cuestionario
+            label = 'Continuar con cuestionario';
+            icon = Icons.quiz;
+            onPressed = () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const QuestionnaireStepperScreen(),
+                ),
+              );
+            };
+          }
+        } else {
+          // No tiene perfil completo - ir a verificación
+          label = 'Verificar mi cuenta';
+          icon = Icons.verified_user;
+          onPressed = () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VerificacionScreen(
+                  user: widget.user ?? {},
+                ),
+              ),
+            );
+          };
+        }
         break;
       case 'autorizado_por_pagar_1':
         label = 'Pagar primera aportación';
+        icon = Icons.arrow_forward;
+        onPressed = () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NextContributionScreen(),
+            ),
+          );
+        };
         break;
       case 'autorizado':
         label = 'Pagar primera aportación';
+        icon = Icons.arrow_forward;
+        onPressed = () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NextContributionScreen(),
+            ),
+          );
+        };
         break;
       default:
         label = 'Acción no disponible';
+        icon = Icons.arrow_forward;
+        onPressed = () {};
     }
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NextContributionScreen(),
-                          ),
-                        );
-                      },
-        icon: const Icon(Icons.arrow_forward),
+        onPressed: onPressed,
+        icon: Icon(icon),
         label: Text(label),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF2B5FF3),
