@@ -8,6 +8,51 @@ class AccountDetailScreen extends StatelessWidget {
 
   const AccountDetailScreen({super.key, required this.user});
 
+  // Función para convertir códigos de estado a nombres completos
+  String _getEstadoNacimiento(String? estadoCode) {
+    if (estadoCode == null || estadoCode.isEmpty) {
+      return 'No especificado';
+    }
+
+    const Map<String, String> estados = {
+      'AS': 'Aguascalientes',
+      'BC': 'Baja California',
+      'BS': 'Baja California Sur',
+      'CC': 'Campeche',
+      'CL': 'Coahuila de Zaragoza',
+      'CM': 'Colima',
+      'CS': 'Chiapas',
+      'CH': 'Chihuahua',
+      'DF': 'Ciudad de México',
+      'DG': 'Durango',
+      'GT': 'Guanajuato',
+      'GR': 'Guerrero',
+      'HG': 'Hidalgo',
+      'JC': 'Jalisco',
+      'MC': 'México',
+      'MN': 'Michoacán de Ocampo',
+      'MS': 'Morelos',
+      'NT': 'Nayarit',
+      'NL': 'Nuevo León',
+      'OC': 'Oaxaca',
+      'PL': 'Puebla',
+      'QT': 'Querétaro',
+      'QR': 'Quintana Roo',
+      'SP': 'San Luis Potosí',
+      'SL': 'Sinaloa',
+      'SR': 'Sonora',
+      'TC': 'Tabasco',
+      'TS': 'Tamaulipas',
+      'TL': 'Tlaxcala',
+      'VZ': 'Veracruz',
+      'YN': 'Yucatán',
+      'ZS': 'Zacatecas',
+      'NE': 'Nacido en el Extranjero',
+    };
+
+    return estados[estadoCode.toUpperCase()] ?? estadoCode;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,7 +212,7 @@ class AccountDetailScreen extends StatelessWidget {
                   //Mostrar la fecha entendible para mexico y si no tiene fecha de nacimiento mostrar un texto que diga "No especificado"
                   _userRow(label: 'Fecha de Nacimiento', value: user['dateBirth'] != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(user['dateBirth'])) : 'No especificado'),
                   //De acuerdo a la curp puede ser SP, DF, CH, NL, etc. mostrar correctamente el estado de nacimiento
-                  _userRow(label: 'Lugar de Nacimiento', value: user['estadoNacimiento'] ?? ''),
+                  _userRow(label: 'Lugar de Nacimiento', value: _getEstadoNacimiento(user['estadoNacimiento'])),
                   //Si el curp es null mostrar un texto que diga "No especificado"
                   _userRow(label: 'CURP', value: user['curp'] ?? 'No especificado'),
                   //Si el rfc es null mostrar un texto que diga "No especificado"

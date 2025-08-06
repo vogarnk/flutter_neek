@@ -170,7 +170,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final plans = List<Map<String, dynamic>>.from(widget.user['user_plans'] ?? []);    
+    final plans = List<Map<String, dynamic>>.from(widget.user['user_plans'] ?? [])
+      ..sort((a, b) {
+        final statusA = (a['status'] ?? '').toString().toLowerCase();
+        final statusB = (b['status'] ?? '').toString().toLowerCase();
+        
+        // Si ambos tienen el mismo status, mantener el orden original
+        if (statusA == statusB) return 0;
+        
+        // Definir jerarquía de estados (mayor prioridad = menor número)
+        final Map<String, int> statusPriority = {
+          'autorizado': 1,
+          'autorizado_por_pagar_1': 2,
+          'cotizado': 3,
+          'pendiente': 4,
+          'cancelado': 5,
+        };
+        
+        // Obtener prioridades, si no existe en el mapa, usar prioridad baja (999)
+        final priorityA = statusPriority[statusA] ?? 999;
+        final priorityB = statusPriority[statusB] ?? 999;
+        
+        // Ordenar por prioridad (menor número = mayor prioridad)
+        return priorityA.compareTo(priorityB);
+      });
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
