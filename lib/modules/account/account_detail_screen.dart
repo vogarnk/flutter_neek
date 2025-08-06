@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../shared/cards/agent_card.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
 import '../misc/edit_request_screen.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
 
@@ -150,7 +151,9 @@ class AccountDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _userRow(label: 'Usuario', value: 'andreamarquezneek'),
+                  _userRow(label: 'Usuario', value: '${user['name'] ?? ''} ${user['lName'] ?? ''}'.toLowerCase().replaceAll(' ', '')),
+                  //si el usuario tiene perfil_completo con el valor 1, mostrar el icono de verificado
+                  if (user['perfil_completo'] == 1)
                   _userRow(
                     label: 'Estado',
                     value: 'Verificado',
@@ -159,11 +162,16 @@ class AccountDetailScreen extends StatelessWidget {
                   _userRow(label: 'Número de cliente', value: 'NK-2310-01-W857567'),
                   _userRow(label: 'Nombre(s)', value: '${user['name'] ?? ''} ${user['sName'] ?? ''}' ),
                   _userRow(label: 'Apellidos', value: '${user['lName'] ?? ''} ${user['lName2'] ?? ''}'),
-                  _userRow(label: 'Género', value: user['genero'] ?? ''),
-                  _userRow(label: 'Fecha de Nacimiento', value: user['dateBirth'] ?? ''),
+                  //Genero mostrarlo correctamente puede ser male o masculino o female o femenino, si no tiene genero mostrar un texto que diga "No especificado" y considerar acentos y primer letra mayusculas
+                  _userRow(label: 'Género', value: user['genero'] == 'masculini' ? 'Masculino' : user['genero'] == 'femenino' ? 'Femenino' : 'No especificado'),
+                  //Mostrar la fecha entendible para mexico y si no tiene fecha de nacimiento mostrar un texto que diga "No especificado"
+                  _userRow(label: 'Fecha de Nacimiento', value: user['dateBirth'] != null ? DateFormat('dd/MM/yyyy').format(DateTime.parse(user['dateBirth'])) : 'No especificado'),
+                  //De acuerdo a la curp puede ser SP, DF, CH, NL, etc. mostrar correctamente el estado de nacimiento
                   _userRow(label: 'Lugar de Nacimiento', value: user['estadoNacimiento'] ?? ''),
-                  _userRow(label: 'CURP', value: user['curp'] ?? ''),
-                  _userRow(label: 'RFC', value: user['rfc'] ?? ''),
+                  //Si el curp es null mostrar un texto que diga "No especificado"
+                  _userRow(label: 'CURP', value: user['curp'] ?? 'No especificado'),
+                  //Si el rfc es null mostrar un texto que diga "No especificado"
+                  _userRow(label: 'RFC', value: user['rfc'] ?? 'No especificado'),
                   _userRow(label: 'Correo', value: user['email'] ?? ''),
 
                   const SizedBox(height: 20),
