@@ -27,6 +27,7 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
   final TextEditingController ciudadController = TextEditingController();
   final TextEditingController paisController = TextEditingController(text: 'México');
   final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _tutorDobController = TextEditingController(); // 👈 Agregar controlador para tutor
 
   double porcentaje = 25;
   String tipoBeneficiario = 'Tradicional';
@@ -34,6 +35,7 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
   bool mismoDomicilio = true;
   bool tutorRequerido = false;
   DateTime? _selectedDate;
+  DateTime? _tutorSelectedDate; // 👈 Agregar fecha del tutor
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +102,20 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
                 ],
               ),
               const SizedBox(height: 4),
-              const Text('Tipo de beneficiario', style: TextStyle(color: Colors.black)),
+              Row(
+                children: [
+                  const Text('Tipo de beneficiario', style: TextStyle(color: Colors.black)),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => _showBeneficiaryTypeInfo(context),
+                    child: const Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
               Row(
                 children: [
                   _radioOption('Tradicional', tipoBeneficiario, (val) => setState(() => tipoBeneficiario = val!)),
@@ -138,19 +153,33 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
                 ],
               ),
               _sectionTitle('Tutor del Beneficiario'),
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                value: tutorRequerido,
-                onChanged: (val) => setState(() => tutorRequerido = val ?? false),
-                title: const Text('Es el mismo que el del asegurado', style: TextStyle(color: Colors.black)),
-              ),
-              if (tutorRequerido) ...[
-                _textField('Nombre Completo'),
-                _dobField(context),
-                _textField('Parentesco'),
-                _textField('Ocupación'),
-                _textField('Calle'),
-                _textField('Colonia'),
+              if (_selectedDate != null) ...[
+                Text('Debug: Edad = ${_calculateAge(_selectedDate!)} años'), // 👈 Debug temporal
+                if (_isMinor(_selectedDate!)) ...[
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: tutorRequerido,
+                    onChanged: (val) => setState(() => tutorRequerido = val ?? false),
+                    title: const Text('Es el mismo que el del asegurado', style: TextStyle(color: Colors.black)),
+                  ),
+                  if (tutorRequerido) ...[
+                    _textField('Nombre Completo'),
+                    _dobField(context, isTutor: true),
+                    _textField('Parentesco'),
+                    _textField('Ocupación'),
+                    _textField('Calle'),
+                    _textField('Colonia'),
+                  ],
+                ] else ...[
+                  const Text(
+                    'El beneficiario es mayor de edad, no requiere tutor',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ],
               const SizedBox(height: 24),
               SizedBox(
@@ -201,28 +230,47 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
         ),
       );
 
-  Widget _dobField(BuildContext context) {
+  Widget _dobField(BuildContext context, {bool isTutor = false}) {
     return TextFormField(
-      controller: _dobController,
+      controller: isTutor ? _tutorDobController : _dobController, // 👈 Usar el controlador correcto
       readOnly: true,
+      style: const TextStyle(color: Colors.black),
       onTap: () async {
         final now = DateTime.now();
         final DateTime? picked = await showDatePicker(
           context: context,
-          initialDate: DateTime(now.year - 18),
+          initialDate: isTutor ? DateTime(now.year - 25) : DateTime(now.year - 18),
           firstDate: DateTime(1900),
           lastDate: now,
           locale: const Locale('es', 'MX'),
         );
         if (picked != null) {
-          _selectedDate = picked;
-          _dobController.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+          if (isTutor) {
+            // Para tutor, validar que sea mayor de edad
+            if (_isMinor(picked)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('El tutor debe ser mayor de edad'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+            _tutorSelectedDate = picked; // 👈 Guardar fecha del tutor
+          } else {
+            // Para beneficiario, actualizar la fecha seleccionada
+            _selectedDate = picked;
+            setState(() {}); // 👈 Forzar rebuild para mostrar/ocultar sección de tutor
+          }
+          final controller = isTutor ? _tutorDobController : _dobController;
+          controller.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
         }
       },
-      decoration: const InputDecoration(
-        labelText: 'Fecha de nacimiento',
-        border: OutlineInputBorder(),
-        suffixIcon: Icon(Icons.calendar_today),
+      decoration: InputDecoration(
+        labelText: isTutor ? 'Fecha de nacimiento del tutor' : 'Fecha de nacimiento',
+        labelStyle: const TextStyle(color: Colors.black),
+        border: const OutlineInputBorder(),
+        suffixIcon: const Icon(Icons.calendar_today),
       ),
     );
   }
@@ -239,11 +287,158 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
       ),
       Text(
         label,
-        style: const TextStyle(color: Colors.black ,fontSize: 13), // 👈 Letra más pequeña
+        style: const TextStyle(color: Colors.black, fontSize: 13),
       ),
     ],
   );
 }
+
+  void _showBeneficiaryTypeInfo(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.background, // 👈 Usar AppColors.background
+                  AppColors.contrastBackground, // 👈 Usar AppColors.contrastBackground
+                ],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Título
+                const Text(
+                  '¿Qué es un beneficiario?',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textWhite, // 👈 Usar AppColors.textWhite
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Descripción
+                const Text(
+                  'Un beneficiario es la persona que el "Asegurado" selecciona en caso de hacer valida la cobertura básica. Neek te ofrece personalizar el nivel de acceso a la información de tu seguro.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textWhite, // 👈 Usar AppColors.textWhite
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Subtítulo
+                const Text(
+                  'Tipo de beneficiario',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textWhite, // 👈 Usar AppColors.textWhite
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Opción Tradicional
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.background50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Tradicional',
+                    textAlign: TextAlign.center, // 👈 Centrar el texto
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Este nivel incluye los dos niveles anteriores más: Información completa de todos los beneficiarios y porcentajes de cada uno.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textWhite,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // Opción Irrevocable
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.background50,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Irrevocable',
+                    textAlign: TextAlign.center, // 👈 Centrar el texto
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Este nivel incluye los dos niveles anteriores más: Información completa de todos los beneficiarios y porcentajes de cada uno.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textWhite, // 👈 Usar AppColors.textWhite
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                // Botón cerrar
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.textWhite, // 👈 Usar AppColors.textWhite
+                      foregroundColor: AppColors.background, // 👈 Usar AppColors.background
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text(
+                      'Entendido',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Widget _fileUploaderWidget() => Container(
         width: double.infinity,
@@ -266,4 +461,17 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
           ],
         ),
       );
+
+  int _calculateAge(DateTime birthDate) {
+    final now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month || (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
+
+  bool _isMinor(DateTime birthDate) {
+    return _calculateAge(birthDate) < 18;
+  }
 }
