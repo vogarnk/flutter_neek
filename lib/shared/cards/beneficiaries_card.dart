@@ -187,22 +187,45 @@ class BeneficiariesCard extends StatelessWidget {
   }
 
   String _nombreDesdeEstructura(Map<String, dynamic> b) {
-    // Si viene anidado en 'usuario'
-    if (b['usuario'] is Map<String, dynamic>) {
-      final u = b['usuario'] as Map<String, dynamic>;
-      final partes = [u['name'], u['sName'], u['lName'], u['lName2']]
+    String _joinParts(List<dynamic> parts) {
+      return parts
           .where((p) => p != null && p.toString().trim().isNotEmpty)
           .map((p) => p.toString().trim())
-          .toList();
-      if (partes.isNotEmpty) return partes.join(' ');
+          .join(' ');
     }
 
-    // Si viene plano
-    final partesPlanas = [b['name'], b['sName'], b['lName'], b['lName2']]
-        .where((p) => p != null && p.toString().trim().isNotEmpty)
-        .map((p) => p.toString().trim())
-        .toList();
-    if (partesPlanas.isNotEmpty) return partesPlanas.join(' ');
+    Map<String, dynamic>? u;
+    if (b['usuario'] is Map) {
+      u = Map<String, dynamic>.from(b['usuario'] as Map);
+    } else if (b['user'] is Map) {
+      u = Map<String, dynamic>.from(b['user'] as Map);
+    } else if (b['user_beneficiario'] is Map) {
+      u = Map<String, dynamic>.from(b['user_beneficiario'] as Map);
+    }
+
+    if (u != null) {
+      final nombreAnidado = _joinParts([
+        u['name'] ?? u['nombres'] ?? u['first_name'] ?? u['nombre'],
+        u['sName'] ?? u['segundo_nombre'] ?? u['middle_name'],
+        u['lName'] ?? u['apellido_paterno'] ?? u['last_name'],
+        u['lName2'] ?? u['apellido_materno'],
+      ]);
+      if (nombreAnidado.isNotEmpty) return nombreAnidado;
+    }
+
+    final nombrePlano = _joinParts([
+      b['name'] ?? b['nombres'] ?? b['first_name'] ?? b['nombre'],
+      b['sName'] ?? b['segundo_nombre'] ?? b['middle_name'],
+      b['lName'] ?? b['apellido_paterno'] ?? b['last_name'],
+      b['lName2'] ?? b['apellido_materno'],
+    ]);
+    if (nombrePlano.isNotEmpty) return nombrePlano;
+
+    if (b['email'] is String && (b['email'] as String).isNotEmpty) {
+      final email = b['email'] as String;
+      final beforeAt = email.split('@').first;
+      if (beforeAt.trim().isNotEmpty) return beforeAt.trim();
+    }
 
     return 'Desconocido';
   }

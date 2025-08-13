@@ -7,11 +7,13 @@ import 'package:neek/shared/cards/beneficiaries_card.dart';
 class BeneficiariesScreen extends StatelessWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
+  final int? userPlanId;
 
   const BeneficiariesScreen({
     super.key,
     required this.user,
     required this.beneficiarios,
+    this.userPlanId,
   });
 
   @override
@@ -99,6 +101,7 @@ class BeneficiariesScreen extends StatelessWidget {
             BeneficiariesCard(
               beneficiarios: beneficiarios,
               mostrarBoton: true, // o false en ConfirmedBeneficiariesScreen
+              userPlanId: userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
             ),            
           ],
         ),
