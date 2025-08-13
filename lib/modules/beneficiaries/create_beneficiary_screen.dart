@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/beneficiario_service.dart';
 
 class CreateBeneficiaryScreen extends StatefulWidget {
-  const CreateBeneficiaryScreen({super.key});
+  final int? userPlanId;
+  
+  const CreateBeneficiaryScreen({
+    super.key,
+    this.userPlanId,
+  });
 
   @override
   State<CreateBeneficiaryScreen> createState() => _CreateBeneficiaryScreenState();
@@ -18,6 +29,7 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
   final TextEditingController yearController = TextEditingController();
   final TextEditingController parentescoController = TextEditingController();
   final TextEditingController ocupacionController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
   final TextEditingController calleController = TextEditingController();
   final TextEditingController coloniaController = TextEditingController();
   final TextEditingController cpController = TextEditingController();
@@ -31,11 +43,14 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
 
   double porcentaje = 25;
   String tipoBeneficiario = 'Tradicional';
-  String categoria = 'Básico';
+  String categoria = 'basico'; // Cambiar a minúsculas para coincidir con el factory
   bool mismoDomicilio = true;
   bool tutorRequerido = false;
+  bool isLoading = false;
   DateTime? _selectedDate;
   DateTime? _tutorSelectedDate; // 👈 Agregar fecha del tutor
+  File? _selectedFile; // 👈 Archivo INE seleccionado
+  String? _fileName; // 👈 Nombre del archivo
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +98,7 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
               ),
               _dobField(context),
               _textField('Parentesco', controller: parentescoController),
+              _textField('Email', controller: emailController),
               _textField('Ocupación', controller: ocupacionController),
               const SizedBox(height: 8),
               const Text('Porcentaje', style: TextStyle(color: Colors.black)),
@@ -140,20 +156,20 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
                 _textField('Ciudad', controller: ciudadController),
                 _textField('País', controller: paisController),
               ],
-              _sectionTitle('INE del Beneficiario'),
-              _fileUploaderWidget(),
+                             _sectionTitle('INE del Beneficiario'),
+               _fileUploaderWidget(),
               _sectionTitle('Categoría de acceso a la información'),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _radioOption('Básico', categoria, (val) => setState(() => categoria = val!)),
-                  _radioOption('Intermedio', categoria, (val) => setState(() => categoria = val!)),
-                  _radioOption('Avanzado', categoria, (val) => setState(() => categoria = val!)),
+                  _radioOption('basico', categoria, (val) => setState(() => categoria = val!)),
+                  _radioOption('intermedio', categoria, (val) => setState(() => categoria = val!)),
+                  _radioOption('avanzado', categoria, (val) => setState(() => categoria = val!)),
                 ],
               ),
-              _sectionTitle('Tutor del Beneficiario'),
               if (_selectedDate != null) ...[
+                _sectionTitle('Tutor del Beneficiario'),
                 Text('Debug: Edad = ${_calculateAge(_selectedDate!)} años'), // 👈 Debug temporal
                 if (_isMinor(_selectedDate!)) ...[
                   CheckboxListTile(
@@ -185,7 +201,7 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: isLoading ? null : _guardarBeneficiario,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -193,7 +209,16 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  child: const Text('Guardar beneficiario'),
+                  child: isLoading 
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text('Guardar beneficiario'),
                 ),
               )
             ],
@@ -276,6 +301,12 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
   }
 
 Widget _radioOption(String label, String groupValue, Function(String?) onChanged) {
+  // Mapear valores internos a etiquetas de visualización
+  String displayLabel = label;
+  if (label == 'basico') displayLabel = 'Básico';
+  if (label == 'intermedio') displayLabel = 'Intermedio';
+  if (label == 'avanzado') displayLabel = 'Avanzado';
+  
   return Row(
     mainAxisSize: MainAxisSize.min,
     children: [
@@ -286,7 +317,7 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       Text(
-        label,
+        displayLabel,
         style: const TextStyle(color: Colors.black, fontSize: 13),
       ),
     ],
@@ -440,27 +471,175 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
     );
   }
 
-  Widget _fileUploaderWidget() => Container(
-        width: double.infinity,
-        margin: const EdgeInsets.symmetric(vertical: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFD6DADF)),
-        ),
-        child: Column(
-          children: const [
-            Icon(Icons.upload_file, size: 32, color: AppColors.primary),
-            SizedBox(height: 8),
-            Text('Haz click para subir la imagen\no busca el archivo en tu dispositivo',
-                textAlign: TextAlign.center, style: TextStyle(color: Colors.black)),
-            SizedBox(height: 4),
-            Text('Archivos compatibles JPG PNG o PDF\nTamaño máximo del archivo 30 MB',
-                textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Colors.black54)),
-          ],
+  Widget _fileUploaderWidget() => GestureDetector(
+        onTap: _pickFile,
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFD6DADF)),
+          ),
+          child: Column(
+            children: [
+              if (_selectedFile != null) ...[
+                Row(
+                  children: [
+                    const Icon(Icons.file_present, size: 24, color: AppColors.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _fileName ?? 'Archivo seleccionado',
+                        style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _selectedFile = null;
+                          _fileName = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Archivo seleccionado correctamente',
+                  style: TextStyle(color: Colors.green, fontSize: 12),
+                ),
+              ] else ...[
+                const Icon(Icons.upload_file, size: 32, color: AppColors.primary),
+                const SizedBox(height: 8),
+                const Text(
+                  'Haz click para seleccionar el archivo INE',
+                  textAlign: TextAlign.center, 
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500)
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Puedes usar cámara, galería o explorador de archivos',
+                  textAlign: TextAlign.center, 
+                  style: TextStyle(fontSize: 12, color: Colors.black54)
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Formatos: JPG, PNG, PDF • Máximo: 30 MB',
+                  textAlign: TextAlign.center, 
+                  style: TextStyle(fontSize: 11, color: Colors.black45)
+                ),
+              ],
+            ],
+          ),
         ),
       );
+
+  Future<void> _pickFile() async {
+    try {
+      print('🔍 [CreateBeneficiaryScreen] Iniciando selección de archivo...');
+      
+      // Mostrar diálogo para elegir método de selección
+      final String? method = await showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Seleccionar archivo INE'),
+            content: const Text('¿Cómo deseas seleccionar el archivo?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop('camera'),
+                child: const Text('Cámara'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop('gallery'),
+                child: const Text('Galería'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop('file_picker'),
+                child: const Text('Explorador de archivos'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(null),
+                child: const Text('Cancelar'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (method == null) return;
+
+      if (method == 'camera' || method == 'gallery') {
+        await _pickImage(method);
+      } else if (method == 'file_picker') {
+        await _pickFileWithFilePicker();
+      }
+    } catch (e) {
+      print('💥 [CreateBeneficiaryScreen] Error al seleccionar archivo: $e');
+      _mostrarError('Error al seleccionar archivo: $e');
+    }
+  }
+
+  Future<void> _pickImage(String source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: source == 'camera' ? ImageSource.camera : ImageSource.gallery,
+        maxWidth: 1920,
+        maxHeight: 1080,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _selectedFile = File(image.path);
+          _fileName = image.name;
+        });
+        print('✅ [CreateBeneficiaryScreen] Imagen seleccionada: ${image.name}');
+      }
+    } catch (e) {
+      print('💥 [CreateBeneficiaryScreen] Error al seleccionar imagen: $e');
+      _mostrarError('Error al seleccionar imagen: $e');
+    }
+  }
+
+  Future<void> _pickFileWithFilePicker() async {
+    try {
+      print('🔍 [CreateBeneficiaryScreen] Usando FilePicker...');
+      
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        allowMultiple: false,
+      );
+
+      print('📁 [CreateBeneficiaryScreen] Resultado de FilePicker: ${result != null ? 'Archivo seleccionado' : 'Cancelado'}');
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        print('📁 [CreateBeneficiaryScreen] Archivo seleccionado: ${file.name}');
+        print('📁 [CreateBeneficiaryScreen] Ruta del archivo: ${file.path}');
+        
+        if (file.path != null) {
+          setState(() {
+            _selectedFile = File(file.path!);
+            _fileName = file.name;
+          });
+          
+          print('✅ [CreateBeneficiaryScreen] Archivo configurado correctamente');
+        } else {
+          print('❌ [CreateBeneficiaryScreen] La ruta del archivo es null');
+          _mostrarError('No se pudo obtener la ruta del archivo seleccionado');
+        }
+      }
+    } catch (e) {
+      print('💥 [CreateBeneficiaryScreen] Error con FilePicker: $e');
+      _mostrarError('Error con explorador de archivos: $e');
+    }
+  }
 
   int _calculateAge(DateTime birthDate) {
     final now = DateTime.now();
@@ -473,5 +652,149 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
 
   bool _isMinor(DateTime birthDate) {
     return _calculateAge(birthDate) < 18;
+  }
+
+  // Método para guardar el beneficiario
+  Future<void> _guardarBeneficiario() async {
+    // Validaciones básicas
+    if (nombresController.text.trim().isEmpty) {
+      _mostrarError('El nombre es obligatorio');
+      return;
+    }
+
+    if (apellidoPaternoController.text.trim().isEmpty) {
+      _mostrarError('El apellido paterno es obligatorio');
+      return;
+    }
+
+    if (_selectedDate == null) {
+      _mostrarError('La fecha de nacimiento es obligatoria');
+      return;
+    }
+
+    if (parentescoController.text.trim().isEmpty) {
+      _mostrarError('El parentesco es obligatorio');
+      return;
+    }
+
+    if (porcentaje <= 0) {
+      _mostrarError('El porcentaje debe ser mayor a 0');
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      // Preparar datos del domicilio
+      Map<String, dynamic>? domicilio;
+      if (!mismoDomicilio) {
+        domicilio = {
+          'calle': calleController.text.trim(),
+          'colonia': coloniaController.text.trim(),
+          'codigo_postal': cpController.text.trim(),
+          'estado': estadoController.text.trim(),
+          'numero_exterior': numeroExtController.text.trim(),
+          'numero_interior': numeroIntController.text.trim(),
+          'ciudad': ciudadController.text.trim(),
+          'pais': paisController.text.trim(),
+        };
+      }
+
+      // Preparar datos del tutor si es necesario
+      Map<String, dynamic>? tutor;
+      if (_isMinor(_selectedDate!) && tutorRequerido) {
+        tutor = {
+          'nombre_completo': '', // TODO: Agregar campo para nombre del tutor
+          'fecha_nacimiento': _tutorSelectedDate?.toIso8601String(),
+          'parentesco': '', // TODO: Agregar campo para parentesco del tutor
+          'ocupacion': '', // TODO: Agregar campo para ocupación del tutor
+          'domicilio': {
+            'calle': '', // TODO: Agregar campos para domicilio del tutor
+            'colonia': '',
+          },
+        };
+      }
+
+      // Convertir archivo a base64 si existe
+      String? ineFileBase64;
+      if (_selectedFile != null) {
+        try {
+          final bytes = await _selectedFile!.readAsBytes();
+          ineFileBase64 = base64Encode(bytes);
+        } catch (e) {
+          _mostrarError('Error al procesar el archivo INE: $e');
+          return;
+        }
+      }
+
+      // Crear el beneficiario usando el servicio
+      final beneficiario = await BeneficiarioService.createBeneficiario(
+        nombres: nombresController.text.trim(),
+        segundoNombre: segundoNombreController.text.trim().isEmpty 
+            ? null 
+            : segundoNombreController.text.trim(),
+        apellidoPaterno: apellidoPaternoController.text.trim(),
+        apellidoMaterno: apellidoMaternoController.text.trim().isEmpty 
+            ? null 
+            : apellidoMaternoController.text.trim(),
+        fechaNacimiento: _selectedDate!,
+        parentesco: parentescoController.text.trim(),
+        email: emailController.text.trim().isEmpty 
+            ? null 
+            : emailController.text.trim(),
+        ocupacion: ocupacionController.text.trim().isEmpty 
+            ? null 
+            : ocupacionController.text.trim(),
+        porcentaje: porcentaje,
+        tipo: categoria, // Usar la categoría como tipo
+        mismoDomicilio: mismoDomicilio,
+        domicilio: domicilio,
+        ineFile: ineFileBase64,
+        tutor: tutor,
+        userPlanId: widget.userPlanId,
+      );
+
+      setState(() {
+        isLoading = false;
+      });
+
+      // Mostrar mensaje de éxito y regresar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Beneficiario guardado exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context, beneficiario);
+      }
+
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      
+      if (mounted) {
+        _mostrarError('Error al guardar beneficiario: ${e.toString()}');
+      }
+    }
+  }
+
+  // Método para mostrar errores
+  void _mostrarError(String mensaje) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  // Método de prueba para verificar la selección de archivos
+  void _testFileSelection() {
+    print('🧪 [CreateBeneficiaryScreen] Iniciando prueba de selección de archivo...');
+    _pickFile();
   }
 }

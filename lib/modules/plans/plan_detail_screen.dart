@@ -195,6 +195,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                     builder: (_) => BeneficiariesScreen(
                       user: widget.user,
                       beneficiarios: widget.beneficiarios,
+                      userPlanId: widget.userPlanId,
                     ),
                   ),
                 );
@@ -228,7 +229,12 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        PlanActionsRow(user: widget.user, beneficiarios: widget.beneficiarios, status: widget.status),
+        PlanActionsRow(
+          user: widget.user, 
+          beneficiarios: widget.beneficiarios, 
+          status: widget.status,
+          userPlanId: widget.userPlanId,
+        ),
       ];
     }
 
@@ -284,6 +290,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           user: widget.user,
           beneficiarios: widget.beneficiarios,
           status: widget.status,
+          userPlanId: widget.userPlanId,
         ),        
       ];
     }
@@ -340,6 +347,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           user: widget.user,
           beneficiarios: widget.beneficiarios,
           status: widget.status,
+          userPlanId: widget.userPlanId,
         ),        
       ];
     }    

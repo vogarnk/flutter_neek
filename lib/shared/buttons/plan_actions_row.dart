@@ -13,12 +13,14 @@ class PlanActionsRow extends StatelessWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
   final String status;
+  final int? userPlanId;
 
   const PlanActionsRow({
     super.key,
     required this.user,
     required this.beneficiarios,
     required this.status,
+    this.userPlanId,
   });
 
   @override
@@ -82,6 +84,7 @@ class PlanActionsRow extends StatelessWidget {
                           builder: (_) => ConfirmedBeneficiariesScreen(
                             user: user,
                             beneficiarios: beneficiarios,
+                            userPlanId: userPlanId,
                           ),
                         ),
                       );
@@ -178,6 +181,7 @@ class PlanActionsRow extends StatelessWidget {
                 builder: (_) => BeneficiariesScreen(
                   user: user,
                   beneficiarios: beneficiarios,
+                  userPlanId: userPlanId,
                 ),
               ),
             );

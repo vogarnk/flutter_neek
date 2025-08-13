@@ -5,11 +5,13 @@ import 'package:neek/modules/beneficiaries/create_beneficiary_screen.dart';
 class BeneficiariesCard extends StatelessWidget {
   final List<dynamic> beneficiarios;
   final bool mostrarBoton;
+  final int? userPlanId;
 
   const BeneficiariesCard({
     super.key,
     required this.beneficiarios,
     this.mostrarBoton = true,
+    this.userPlanId,
   });
 
   @override
@@ -92,14 +94,31 @@ class BeneficiariesCard extends StatelessWidget {
           const Divider(height: 1),
 
           const SizedBox(height: 8),
+
+          // Estado vacío
+          if (beneficiarios.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: const [
+                  Icon(Icons.info_outline, color: AppColors.textGray400),
+                  SizedBox(height: 8),
+                  Text(
+                    'Aún no tienes beneficiarios',
+                    style: TextStyle(color: AppColors.textGray500),
+                  ),
+                ],
+              ),
+            )
+          else
           ...beneficiarios.map((b) {
             return Column(
               children: [
                 _beneficiarioRow(
-                  avatar: b['avatar_url'],
-                  nombre: b['nombre'] ?? 'Desconocido',
+                  avatar: (b['usuario'] != null ? b['usuario']['avatar'] : null) ?? b['avatar_url'],
+                  nombre: _nombreDesdeEstructura(b),
                   tipo: 'Tradicional',
-                  acceso: b['tipo'] ?? 'Sin tipo',
+                  acceso: (b['tipo'] ?? 'Sin tipo').toString(),
                   porcentaje: int.tryParse(b['porcentaje'].toString()) ?? 0,
                 ),
                 const Divider(height: 24),
@@ -114,11 +133,26 @@ class BeneficiariesCard extends StatelessWidget {
               ? SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CreateBeneficiaryScreen()),
+                        MaterialPageRoute(builder: (_) => CreateBeneficiaryScreen(userPlanId: userPlanId)),
                       );
+                      
+                      // Si se agregó un beneficiario exitosamente, actualizar la lista
+                      if (result != null) {
+                        // Notificar al padre que se agregó un beneficiario
+                        if (context.mounted) {
+                          // Aquí podrías usar un callback o un provider para actualizar la lista
+                          // Por ahora, solo mostramos un mensaje
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Beneficiario agregado exitosamente'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -152,6 +186,27 @@ class BeneficiariesCard extends StatelessWidget {
     );
   }
 
+  String _nombreDesdeEstructura(Map<String, dynamic> b) {
+    // Si viene anidado en 'usuario'
+    if (b['usuario'] is Map<String, dynamic>) {
+      final u = b['usuario'] as Map<String, dynamic>;
+      final partes = [u['name'], u['sName'], u['lName'], u['lName2']]
+          .where((p) => p != null && p.toString().trim().isNotEmpty)
+          .map((p) => p.toString().trim())
+          .toList();
+      if (partes.isNotEmpty) return partes.join(' ');
+    }
+
+    // Si viene plano
+    final partesPlanas = [b['name'], b['sName'], b['lName'], b['lName2']]
+        .where((p) => p != null && p.toString().trim().isNotEmpty)
+        .map((p) => p.toString().trim())
+        .toList();
+    if (partesPlanas.isNotEmpty) return partesPlanas.join(' ');
+
+    return 'Desconocido';
+  }
+
   Widget _beneficiarioRow({
     String? avatar,
     required String nombre,
@@ -160,7 +215,7 @@ class BeneficiariesCard extends StatelessWidget {
     required int porcentaje,
   }) {
     final accesoLower = acceso.toLowerCase();
-    final bool esBasico = accesoLower == 'básico';
+    final bool esBasico = accesoLower == 'básico' || accesoLower == 'basico';
     final bool esIntermedio = accesoLower == 'intermedio';
     final bool esAvanzado = accesoLower == 'avanzado';
 
