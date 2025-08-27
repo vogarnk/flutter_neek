@@ -17,6 +17,8 @@ import 'package:neek/core/movimientos_service.dart';
 import 'package:neek/core/api_service.dart';
 import 'dart:convert';
 import 'contributions/next_contribution_screen.dart';
+import 'package:neek/shared/cards/autorizado/plan_authorized_card2.dart';
+import 'package:neek/modules/plans/widgets/progress_bar_card.dart';
 
 class PlanDetailScreen extends StatefulWidget {
   final String nombrePlan;
@@ -363,7 +365,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
     if (status == 'autorizado') {
       return [
-        PlanAuthorizedCard(polizaUrl: widget.polizaUrl),
+        PlanAuthorizedCard2(user: widget.user),
+        const SizedBox(height: 16),
+        ProgressBarCard(title: 'Porcentaje de avance', progress: 0.1),
         const SizedBox(height: 16),
         SumaAseguradaChartCard(
           sumaUdis: widget.sumaAsegurada,
