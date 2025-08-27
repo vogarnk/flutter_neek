@@ -78,26 +78,6 @@ class PlanActionsRow extends StatelessWidget {
                     },
                   ),
                   PlanActionButton(
-                    icon: Icons.account_balance_wallet,
-                    label: 'Movimientos',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const MovementsScreen()),
-                      );
-                    },
-                  ),
-                  PlanActionButton(
-                    icon: Icons.show_chart,
-                    label: 'Stats',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const StatsScreen()),
-                      );
-                    },
-                  ),
-                  PlanActionButton(
                     icon: Icons.people,
                     label: 'Beneficiarios',
                     onTap: () {
@@ -121,13 +101,6 @@ class PlanActionsRow extends StatelessWidget {
                         context,
                         MaterialPageRoute(builder: (_) => const PlanSettingsScreen()),
                       );
-                    },
-                  ),
-                  PlanActionButton(
-                    icon: Icons.picture_as_pdf,
-                    label: 'Estados',
-                    onTap: () {
-                      Navigator.pushNamed(context, '/estados');
                     },
                   ),
                   PlanActionButton(
