@@ -27,7 +27,15 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
 
   @override
   Widget build(BuildContext context) {
-    final movements = widget.movimientos;
+    // Ordenar movimientos cronológicamente (más antiguos primero) y mostrar los primeros 10
+    final sortedMovements = List.from(widget.movimientos)
+      ..sort((a, b) {
+        final fechaA = DateTime.tryParse(a['periodo'] ?? '') ?? DateTime(1900);
+        final fechaB = DateTime.tryParse(b['periodo'] ?? '') ?? DateTime(1900);
+        return fechaA.compareTo(fechaB);
+      });
+    
+    final movements = sortedMovements.take(10).toList();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       decoration: BoxDecoration(
@@ -137,14 +145,16 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
             )
           else
             ...movements.map((movement) {
-              final fecha = movement['fecha'] ?? '';
-              final montoUdi = double.tryParse(movement['monto_udi']?.toString() ?? '0') ?? 0;
-              final montoMxn = double.tryParse(movement['monto_mxn']?.toString() ?? '0') ?? 0;
-              final status = movement['status'] ?? 'Pendiente';
+              final fecha = movement['periodo'] ?? '';
+              final valorUdi = double.tryParse(movement['valor_udis']?.toString() ?? '0') ?? 0;
+              final valorPesos = double.tryParse(movement['valor_pesos']?.toString() ?? '0') ?? 0;
+              final tieneFactura = movement['factura'] != null;
 
               final monto = isUdiSelected
-                  ? NumberFormat('#,###.00', 'es_MX').format(montoUdi)
-                  : NumberFormat('#,###.00', 'es_MX').format(montoMxn);
+                  ? NumberFormat('#,###.00', 'es_MX').format(valorUdi)
+                  : NumberFormat('#,###.00', 'es_MX').format(valorPesos);
+
+              final status = tieneFactura ? 'Completado' : 'Pendiente';
 
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -172,9 +182,7 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
                         decoration: BoxDecoration(
                           color: status == 'Completado'
                               ? Colors.green.shade100
-                              : status == 'Procesando'
-                                  ? Colors.orange.shade100
-                                  : Colors.grey.shade200,
+                              : Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -183,9 +191,7 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
                           style: TextStyle(
                             color: status == 'Completado'
                                 ? Colors.green
-                                : status == 'Procesando'
-                                    ? Colors.orange
-                                    : Colors.black45,
+                                : Colors.black45,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                           ),
