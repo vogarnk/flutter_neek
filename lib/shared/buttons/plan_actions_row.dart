@@ -69,10 +69,12 @@ class PlanActionsRow extends StatelessWidget {
                     icon: Icons.credit_card,
                     label: 'Aportaciones',
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const ContributionsScreen()),
-                      );
+                      if (userPlanId != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => ContributionsScreen(userPlanId: userPlanId!)),
+                        );
+                      }
                     },
                   ),
                   PlanActionButton(
