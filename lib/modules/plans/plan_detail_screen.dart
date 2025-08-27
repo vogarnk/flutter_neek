@@ -356,13 +356,16 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // Crear userPlan con los datos necesarios
-              final Map<String, dynamic> userPlan = {
-                'numero_poliza': userPlanInfo?['numero_poliza'],
-                'duracion': widget.duracion,
-                'periodicidad': 'anual', // Valor por defecto, se puede obtener del API
-                'udis': widget.sumaAsegurada,
+              // Crear currentPlan con la misma estructura que se pasa a PlanContributionsTable
+              final Map<String, dynamic> currentPlan = {
+                'id': widget.userPlanId,
+                'nombre_plan': widget.nombrePlan,
                 'status': widget.status,
+                'duracion': widget.duracion,
+                'numero_poliza': userPlanInfo?['numero_poliza'],
+                'periodicidad': userPlanInfo?['periodicidad'],
+                'udis': userPlanInfo?['udis'],
+                'beneficiarios': widget.beneficiarios,
               };
               
               Navigator.push(
@@ -370,7 +373,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 MaterialPageRoute(
                   builder: (context) => NextContributionScreen(
                     user: widget.user,
-                    userPlan: userPlan,
+                    userPlan: currentPlan,
                     cotizaciones: cotizaciones ?? [],
                     userPlanId: widget.userPlanId,
                   ),
@@ -435,13 +438,16 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // Crear userPlan con los datos necesarios
-              final Map<String, dynamic> userPlan = {
-                'numero_poliza': userPlanInfo?['numero_poliza'],
-                'duracion': widget.duracion,
-                'periodicidad': 'anual', // Valor por defecto, se puede obtener del API
-                'udis': widget.sumaAsegurada,
+              // Crear currentPlan con la misma estructura que se pasa a PlanContributionsTable
+              final Map<String, dynamic> currentPlan = {
+                'id': widget.userPlanId,
+                'nombre_plan': widget.nombrePlan,
                 'status': widget.status,
+                'duracion': widget.duracion,
+                'numero_poliza': userPlanInfo?['numero_poliza'],
+                'periodicidad': userPlanInfo?['periodicidad'],
+                'udis': userPlanInfo?['udis'],
+                'beneficiarios': widget.beneficiarios,
               };
               
               Navigator.push(
@@ -449,7 +455,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 MaterialPageRoute(
                   builder: (context) => NextContributionScreen(
                     user: widget.user,
-                    userPlan: userPlan,
+                    userPlan: currentPlan,
                     cotizaciones: cotizaciones ?? [],
                     userPlanId: widget.userPlanId,
                   ),
