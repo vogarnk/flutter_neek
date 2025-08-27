@@ -29,7 +29,11 @@ class MovimientosService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         debugPrint('✅ Movimientos obtenidos.');
-        return data['movimientos'] ?? [];
+        
+        // Extraer los movimientos de la estructura correcta
+        final movimientosData = data['data']?['movimientos']?['data'] ?? [];
+        
+        return movimientosData;
       } else {
         debugPrint('❌ Error al obtener movimientos: ${response.statusCode} ${response.body}');
         return [];

@@ -65,6 +65,46 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   List<dynamic>? movimientos;
   Map<String, dynamic>? userPlanInfo;
   
+  double _calculateProgress() {
+    if (movimientos == null || movimientos!.isEmpty) {
+      return 0.0;
+    }
+    
+    // Obtener la periodicidad del plan (por defecto anual si no está disponible)
+    final periodicidad = userPlanInfo?['periodicidad'] ?? 'anual';
+    
+    // Calcular el número total de aportaciones esperadas
+    int totalAportaciones;
+    switch (periodicidad) {
+      case 'mensual':
+        totalAportaciones = widget.duracion * 12;
+        break;
+      case 'trimestral':
+        totalAportaciones = widget.duracion * 4;
+        break;
+      case 'semestral':
+        totalAportaciones = widget.duracion * 2;
+        break;
+      case 'anual':
+      default:
+        totalAportaciones = widget.duracion;
+        break;
+    }
+        
+    // Contar las aportaciones realizadas (movimientos con tipo "aportacion" Y que tengan factura)
+    int aportacionesRealizadas = movimientos!
+        .where((movimiento) => 
+          movimiento['tipo'] == 'aportacion' && 
+          movimiento['factura'] != null
+        )
+        .length;
+    
+    // Calcular el porcentaje
+    double progress = aportacionesRealizadas / totalAportaciones;
+    
+    return progress.clamp(0.0, 1.0);
+  }
+  
   @override
   void initState() {
     super.initState();
@@ -367,7 +407,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       return [
         PlanAuthorizedCard2(user: widget.user),
         const SizedBox(height: 16),
-        ProgressBarCard(title: 'Porcentaje de avance', progress: 0.1),
+        ProgressBarCard(title: 'Porcentaje de avance', progress: _calculateProgress()),
         const SizedBox(height: 16),
         SumaAseguradaChartCard(
           sumaUdis: widget.sumaAsegurada,
