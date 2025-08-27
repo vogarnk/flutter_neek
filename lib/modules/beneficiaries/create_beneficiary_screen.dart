@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
@@ -52,6 +51,40 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
   File? _selectedFile; // 👈 Archivo INE seleccionado
   String? _fileName; // 👈 Nombre del archivo
 
+  // Dropdowns Parentesco/Ocupación
+  String? parentescoSeleccionado;
+  String? ocupacionSeleccionada;
+  bool mostrarParentescoOtro = false;
+  bool mostrarOcupacionOtro = false;
+  final TextEditingController parentescoOtroController = TextEditingController();
+  final TextEditingController ocupacionOtroController = TextEditingController();
+
+  final List<String> opcionesParentesco = <String>[
+    'Cónyuge',
+    'Hijo/a',
+    'Padre',
+    'Madre',
+    'Hermano/a',
+    'Abuelo/a',
+    'Nieto/a',
+    'Tío/a',
+    'Sobrino/a',
+    'Primo/a',
+    'Otro',
+  ];
+
+  final List<String> opcionesOcupacion = <String>[
+    'Estudiante',
+    'Empleado/a',
+    'Profesionista',
+    'Comerciante',
+    'Empresario/a',
+    'Jubilado/a',
+    'Ama de casa',
+    'Desempleado/a',
+    'Otro',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,9 +130,9 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
                 ],
               ),
               _dobField(context),
-              _textField('Parentesco', controller: parentescoController),
+              _parentescoDropdown(),
               _textField('Email', controller: emailController),
-              _textField('Ocupación', controller: ocupacionController),
+              _ocupacionDropdown(),
               const SizedBox(height: 8),
               const Text('Porcentaje', style: TextStyle(color: Colors.black)),
               Row(
@@ -252,6 +285,108 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
               borderSide: const BorderSide(color: Color(0xFFD6DADF)),
             ),
           ),
+        ),
+      );
+
+  Widget _parentescoDropdown() => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DropdownButtonFormField<String>(
+              value: parentescoSeleccionado,
+              decoration: InputDecoration(
+                labelText: 'Parentesco',
+                labelStyle: const TextStyle(color: Colors.black),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFD6DADF)),
+                ),
+              ),
+              items: opcionesParentesco.map((String value) => DropdownMenuItem<String>(value: value, child: Text(value))).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  parentescoSeleccionado = newValue;
+                  mostrarParentescoOtro = newValue == 'Otro';
+                  if (newValue != 'Otro') {
+                    parentescoOtroController.clear();
+                  }
+                });
+              },
+            ),
+            if (mostrarParentescoOtro)
+              const SizedBox(height: 8),
+            if (mostrarParentescoOtro)
+              TextField(
+                controller: parentescoOtroController,
+                style: const TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: 'Especificar parentesco',
+                  labelStyle: const TextStyle(color: Colors.black),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFD6DADF)),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+
+  Widget _ocupacionDropdown() => Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            DropdownButtonFormField<String>(
+              value: ocupacionSeleccionada,
+              decoration: InputDecoration(
+                labelText: 'Ocupación',
+                labelStyle: const TextStyle(color: Colors.black),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFD6DADF)),
+                ),
+              ),
+              items: opcionesOcupacion.map((String value) => DropdownMenuItem<String>(value: value, child: Text(value))).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  ocupacionSeleccionada = newValue;
+                  mostrarOcupacionOtro = newValue == 'Otro';
+                  if (newValue != 'Otro') {
+                    ocupacionOtroController.clear();
+                  }
+                });
+              },
+            ),
+            if (mostrarOcupacionOtro)
+              const SizedBox(height: 8),
+            if (mostrarOcupacionOtro)
+              TextField(
+                controller: ocupacionOtroController,
+                style: const TextStyle(color: Colors.black),
+                decoration: InputDecoration(
+                  labelText: 'Especificar ocupación',
+                  labelStyle: const TextStyle(color: Colors.black),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Color(0xFFD6DADF)),
+                  ),
+                ),
+              ),
+          ],
         ),
       );
 
@@ -672,7 +807,16 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
       return;
     }
 
-    if (parentescoController.text.trim().isEmpty) {
+    // Validación parentesco (dropdown + "Otro")
+    final String parentescoFinal = (() {
+      if (parentescoSeleccionado == null) return '';
+      if (parentescoSeleccionado == 'Otro') {
+        return parentescoOtroController.text.trim();
+      }
+      return parentescoSeleccionado ?? '';
+    })();
+
+    if (parentescoFinal.isEmpty) {
       _mostrarError('El parentesco es obligatorio');
       return;
     }
@@ -740,13 +884,18 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
             ? null 
             : apellidoMaternoController.text.trim(),
         fechaNacimiento: _selectedDate!,
-        parentesco: parentescoController.text.trim(),
+        parentesco: parentescoFinal,
         email: emailController.text.trim().isEmpty 
             ? null 
             : emailController.text.trim(),
-        ocupacion: ocupacionController.text.trim().isEmpty 
-            ? null 
-            : ocupacionController.text.trim(),
+        ocupacion: (() {
+          if (ocupacionSeleccionada == null) return null;
+          if (ocupacionSeleccionada == 'Otro') {
+            final val = ocupacionOtroController.text.trim();
+            return val.isEmpty ? null : val;
+          }
+          return ocupacionSeleccionada;
+        })(),
         porcentaje: porcentaje,
         tipo: categoria, // Usar la categoría como tipo
         mismoDomicilio: mismoDomicilio,
@@ -792,9 +941,5 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
     );
   }
 
-  // Método de prueba para verificar la selección de archivos
-  void _testFileSelection() {
-    print('🧪 [CreateBeneficiaryScreen] Iniciando prueba de selección de archivo...');
-    _pickFile();
-  }
+  // Método de prueba eliminado por no ser utilizado
 }
