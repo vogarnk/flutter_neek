@@ -7,12 +7,14 @@ class ConfirmedBeneficiariesScreen extends StatelessWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
   final int? userPlanId;
+  final Map<String, dynamic>? currentPlan;
 
   const ConfirmedBeneficiariesScreen({
     super.key,
     required this.user,
     required this.beneficiarios,
     this.userPlanId,
+    this.currentPlan,
   });
 
   @override

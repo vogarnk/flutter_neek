@@ -10,6 +10,7 @@ class BeneficiariesScreen extends StatelessWidget {
   final List<dynamic> beneficiarios;
   final int? userPlanId;
   final String status;
+  final Map<String, dynamic>? currentPlan;
 
   const BeneficiariesScreen({
     super.key,
@@ -17,6 +18,7 @@ class BeneficiariesScreen extends StatelessWidget {
     required this.beneficiarios,
     this.userPlanId,
     required this.status,
+    this.currentPlan,
   });
 
   @override
@@ -84,21 +86,21 @@ class BeneficiariesScreen extends StatelessWidget {
                   }
 
                   if (status == 'autorizado_por_pagar_1') {
-                    // Crear userPlan con los datos necesarios
-                    final Map<String, dynamic> userPlan = {
-                      'numero_poliza': 'N/A', // Se puede obtener del API si está disponible
-                      'duracion': 5, // Valor por defecto, se puede obtener del API
-                      'periodicidad': 'anual', // Valor por defecto, se puede obtener del API
-                      'udis': 100000, // Valor por defecto, se puede obtener del API
-                      'status': status,
-                    };
-                    
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => NextContributionScreen(
                           user: user,
-                          userPlan: userPlan,
+                          userPlan: currentPlan ?? {
+                            'id': userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
+                            'nombre_plan': 'Mi Plan',
+                            'status': status,
+                            'duracion': 5,
+                            'numero_poliza': 'N/A',
+                            'periodicidad': 'anual',
+                            'udis': 100000,
+                            'beneficiarios': beneficiarios,
+                          },
                           cotizaciones: [], // Lista vacía por defecto
                           userPlanId: userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
                         ),

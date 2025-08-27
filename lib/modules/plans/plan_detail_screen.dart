@@ -322,6 +322,16 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           beneficiarios: widget.beneficiarios, 
           status: widget.status,
           userPlanId: widget.userPlanId,
+          currentPlan: {
+            'id': widget.userPlanId,
+            'nombre_plan': widget.nombrePlan,
+            'status': widget.status,
+            'duracion': widget.duracion,
+            'numero_poliza': userPlanInfo?['numero_poliza'],
+            'periodicidad': userPlanInfo?['periodicidad'],
+            'udis': userPlanInfo?['udis'],
+            'beneficiarios': widget.beneficiarios,
+          },
         ),
       ];
     }
@@ -402,6 +412,16 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           status: widget.status,
           userPlanId: widget.userPlanId,
           polizaUrl: widget.polizaUrl,
+          currentPlan: {
+            'id': widget.userPlanId,
+            'nombre_plan': widget.nombrePlan,
+            'status': widget.status,
+            'duracion': widget.duracion,
+            'numero_poliza': userPlanInfo?['numero_poliza'],
+            'periodicidad': userPlanInfo?['periodicidad'],
+            'udis': userPlanInfo?['udis'],
+            'beneficiarios': widget.beneficiarios,
+          },
         ),        
       ];
     }
@@ -484,6 +504,16 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           status: widget.status,
           userPlanId: widget.userPlanId,
           polizaUrl: widget.polizaUrl,
+          currentPlan: {
+            'id': widget.userPlanId,
+            'nombre_plan': widget.nombrePlan,
+            'status': widget.status,
+            'duracion': widget.duracion,
+            'numero_poliza': userPlanInfo?['numero_poliza'],
+            'periodicidad': userPlanInfo?['periodicidad'],
+            'udis': userPlanInfo?['udis'],
+            'beneficiarios': widget.beneficiarios,
+          },
         ),        
       ];
     }    

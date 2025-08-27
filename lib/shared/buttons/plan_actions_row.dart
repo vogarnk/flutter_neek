@@ -16,6 +16,7 @@ class PlanActionsRow extends StatelessWidget {
   final String status;
   final int? userPlanId;
   final String? polizaUrl;
+  final Map<String, dynamic>? currentPlan;
 
   const PlanActionsRow({
     super.key,
@@ -24,6 +25,7 @@ class PlanActionsRow extends StatelessWidget {
     required this.status,
     this.userPlanId,
     this.polizaUrl,
+    this.currentPlan,
   });
 
   @override
@@ -88,6 +90,7 @@ class PlanActionsRow extends StatelessWidget {
                             user: user,
                             beneficiarios: beneficiarios,
                             userPlanId: userPlanId,
+                            currentPlan: currentPlan,
                           ),
                         ),
                       );
@@ -185,6 +188,7 @@ class PlanActionsRow extends StatelessWidget {
                   beneficiarios: beneficiarios,
                   userPlanId: userPlanId,
                   status: status,
+                  currentPlan: currentPlan,
                 ),
               ),
             );

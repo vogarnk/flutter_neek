@@ -41,6 +41,10 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
   }
 
   void _calculateValues() {
+    print('NextContributionScreen: Iniciando cálculo de valores');
+    print('NextContributionScreen: userPlan = ${widget.userPlan}');
+    print('NextContributionScreen: cotizaciones = ${widget.cotizaciones}');
+    
     // Establecer valores por defecto inmediatamente
     setState(() {
       _numeroPoliza = 'Cargando...';
@@ -52,8 +56,9 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
       _importeTotal = 'Cargando...';
     });
     
-    // Validar que los datos requeridos estén disponibles
-    if (widget.userPlan.isEmpty || widget.cotizaciones.isEmpty) {
+    // Validar que los datos del plan estén disponibles
+    if (widget.userPlan.isEmpty) {
+      print('NextContributionScreen: userPlan está vacío, retornando');
       return;
     }
     
@@ -95,6 +100,25 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
         }
         _importe = _formatCurrency(importeNum);
       }
+    } else {
+      // Si no hay cotizaciones, usar un valor por defecto o calcular basado en el plan
+      final udis = widget.userPlan['udis'];
+      if (udis != null) {
+        // Calcular aportación anual basada en las UDIS del plan
+        double udisNum;
+        if (udis is String) {
+          udisNum = double.tryParse(udis) ?? 0.0;
+        } else if (udis is num) {
+          udisNum = udis.toDouble();
+        } else {
+          udisNum = 0.0;
+        }
+        // Aproximar la aportación anual como un porcentaje de las UDIS
+        final aportacionAnual = udisNum * 0.1; // 10% como ejemplo
+        _importe = _formatCurrency(aportacionAnual);
+      } else {
+        _importe = '0.00';
+      }
     }
     
     // TC: valor de udis del plan
@@ -127,6 +151,14 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
     
     // Actualizar la UI con todos los valores calculados
     setState(() {});
+    
+    print('NextContributionScreen: Valores calculados:');
+    print('NextContributionScreen: _numeroPoliza = $_numeroPoliza');
+    print('NextContributionScreen: _nombreCompleto = $_nombreCompleto');
+    print('NextContributionScreen: _recibo = $_recibo');
+    print('NextContributionScreen: _importe = $_importe');
+    print('NextContributionScreen: _tc = $_tc');
+    print('NextContributionScreen: _importeTotal = $_importeTotal');
   }
 
   int _getPeriodicidadMultiplier(String periodicidad) {
