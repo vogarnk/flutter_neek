@@ -240,6 +240,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                       user: widget.user,
                       beneficiarios: widget.beneficiarios,
                       userPlanId: widget.userPlanId,
+                      status: widget.status,
                     ),
                   ),
                 );

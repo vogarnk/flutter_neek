@@ -3,17 +3,20 @@ import '../../core/theme/app_colors.dart';
 import '../plans/activate_plan_intro_screen.dart';
 import '../../shared/cards/card_neek.dart';
 import 'package:neek/shared/cards/beneficiaries_card.dart';
+import '../plans/contributions/next_contribution_screen.dart';
 
 class BeneficiariesScreen extends StatelessWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
   final int? userPlanId;
+  final String status;
 
   const BeneficiariesScreen({
     super.key,
     required this.user,
     required this.beneficiarios,
     this.userPlanId,
+    required this.status,
   });
 
   @override
@@ -80,10 +83,33 @@ class BeneficiariesScreen extends StatelessWidget {
                     return;
                   }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ActivatePlanIntroScreen()),
-                  );
+                  if (status == 'autorizado_por_pagar_1') {
+                    // Crear userPlan con los datos necesarios
+                    final Map<String, dynamic> userPlan = {
+                      'numero_poliza': 'N/A', // Se puede obtener del API si está disponible
+                      'duracion': 5, // Valor por defecto, se puede obtener del API
+                      'periodicidad': 'anual', // Valor por defecto, se puede obtener del API
+                      'udis': 100000, // Valor por defecto, se puede obtener del API
+                      'status': status,
+                    };
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NextContributionScreen(
+                          user: user,
+                          userPlan: userPlan,
+                          cotizaciones: [], // Lista vacía por defecto
+                        ),
+                      ),
+                    );
+                  } else {
+                    // Navegar a activate_plan_intro_screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ActivatePlanIntroScreen()),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
@@ -92,7 +118,20 @@ class BeneficiariesScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text('Activar mi plan'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      status == 'autorizado_por_pagar_1' 
+                          ? 'Comenzar y pagar primera aportación'
+                          : 'Activar mi plan'
+                    ),
+                    if (status == 'autorizado_por_pagar_1') ...[
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward, size: 20),
+                    ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -100,7 +139,7 @@ class BeneficiariesScreen extends StatelessWidget {
             // Tabla de beneficiarios
             BeneficiariesCard(
               beneficiarios: beneficiarios,
-              mostrarBoton: true, // o false en ConfirmedBeneficiariesScreen
+              mostrarBoton: status != 'autorizado_por_pagar_1', // No mostrar botón si está autorizado por pagar
               userPlanId: userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
             ),            
           ],

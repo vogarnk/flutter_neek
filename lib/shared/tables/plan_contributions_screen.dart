@@ -228,6 +228,7 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                   builder: (context) => BeneficiariesScreen(
                     user: widget.user ?? {},
                     beneficiarios: beneficiarios,
+                    status: widget.currentPlan?['status'] ?? 'cotizado',
                   ),
                 ),
               );

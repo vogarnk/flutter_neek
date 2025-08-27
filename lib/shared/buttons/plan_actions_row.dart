@@ -209,6 +209,7 @@ class PlanActionsRow extends StatelessWidget {
                   user: user,
                   beneficiarios: beneficiarios,
                   userPlanId: userPlanId,
+                  status: status,
                 ),
               ),
             );
