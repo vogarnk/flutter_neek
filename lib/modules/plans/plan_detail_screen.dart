@@ -312,7 +312,25 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // Acción al presionar
+              // Crear userPlan con los datos necesarios
+              final Map<String, dynamic> userPlan = {
+                'numero_poliza': userPlanInfo?['numero_poliza'],
+                'duracion': widget.duracion,
+                'periodicidad': 'anual', // Valor por defecto, se puede obtener del API
+                'udis': widget.sumaAsegurada,
+                'status': widget.status,
+              };
+              
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NextContributionScreen(
+                    user: widget.user,
+                    userPlan: userPlan,
+                    cotizaciones: cotizaciones ?? [],
+                  ),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -370,7 +388,25 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // Acción al presionar
+              // Crear userPlan con los datos necesarios
+              final Map<String, dynamic> userPlan = {
+                'numero_poliza': userPlanInfo?['numero_poliza'],
+                'duracion': widget.duracion,
+                'periodicidad': 'anual', // Valor por defecto, se puede obtener del API
+                'udis': widget.sumaAsegurada,
+                'status': widget.status,
+              };
+              
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NextContributionScreen(
+                    user: widget.user,
+                    userPlan: userPlan,
+                    cotizaciones: cotizaciones ?? [],
+                  ),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
