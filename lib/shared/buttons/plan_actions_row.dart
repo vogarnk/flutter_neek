@@ -18,6 +18,8 @@ class PlanActionsRow extends StatelessWidget {
   final String? polizaUrl;
   final Map<String, dynamic>? currentPlan;
   final List<dynamic>? cotizaciones;
+  final double? udisActual;
+  final int? edadUsuario;
 
   const PlanActionsRow({
     super.key,
@@ -28,6 +30,8 @@ class PlanActionsRow extends StatelessWidget {
     this.polizaUrl,
     this.currentPlan,
     this.cotizaciones,
+    this.udisActual,
+    this.edadUsuario,
   });
 
   @override
@@ -106,12 +110,16 @@ class PlanActionsRow extends StatelessWidget {
                       print('🔍 PlanActionsRow: status = $status');
                       print('🔍 PlanActionsRow: cotizaciones antes de navegar = $cotizaciones');
                       print('🔍 PlanActionsRow: cotizaciones length = ${cotizaciones?.length}');
+                      print('🔍 PlanActionsRow: udisActual = $udisActual');
+                      print('🔍 PlanActionsRow: edadUsuario = $edadUsuario');
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => PlanSettingsScreen(
                             userPlan: currentPlan,
                             cotizaciones: cotizaciones,
+                            udisActual: udisActual,
+                            edadUsuario: edadUsuario,
                           ),
                         ),
                       );
@@ -183,12 +191,16 @@ class PlanActionsRow extends StatelessWidget {
           onTap: () {
             print('🔍 PlanActionsRow: cotizaciones antes de navegar = $cotizaciones');
             print('🔍 PlanActionsRow: cotizaciones length = ${cotizaciones?.length}');
+            print('🔍 PlanActionsRow: udisActual = $udisActual');
+            print('🔍 PlanActionsRow: edadUsuario = $edadUsuario');
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => PlanSettingsScreen(
                   userPlan: currentPlan,
                   cotizaciones: cotizaciones,
+                  udisActual: udisActual,
+                  edadUsuario: edadUsuario,
                 ),
               ),
             );

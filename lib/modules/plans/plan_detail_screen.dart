@@ -64,6 +64,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   List<dynamic>? cotizaciones;
   List<dynamic>? movimientos;
   Map<String, dynamic>? userPlanInfo;
+  double? udisActual;
+  int? edadUsuario;
   
   double _calculateProgress() {
     if (movimientos == null || movimientos!.isEmpty) {
@@ -156,6 +158,32 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         final userData = data['data'];
         final userPlans = userData['user_plans'] as List?;
         
+        // Calcular edad del usuario
+        final dateBirth = widget.user['dateBirth'];
+        int birthYear;
+        
+        if (dateBirth != null) {
+          // Si dateBirth es una fecha completa, extraer el año
+          final fechaStr = dateBirth.toString();
+          if (fechaStr.length >= 4) {
+            birthYear = int.tryParse(fechaStr.substring(0, 4)) ?? DateTime.now().year;
+          } else {
+            birthYear = DateTime.now().year;
+          }
+        } else {
+          birthYear = DateTime.now().year;
+        }
+        
+        final currentYear = DateTime.now().year;
+        final edad = currentYear - birthYear;
+        
+        print('🔍 PlanDetailScreen: dateBirth = $dateBirth');
+        print('🔍 PlanDetailScreen: birthYear = $birthYear');
+        print('🔍 PlanDetailScreen: edad calculada = $edad');
+        
+        // Obtener valor actual de UDIS (puede venir del userData o usar un valor por defecto)
+        final udisActual = userData['udis_actual'] ?? 8.54; // Valor por defecto
+        
         if (userPlans != null) {
           // Buscar el plan que coincida con el userPlanId
           final currentPlan = userPlans.firstWhere(
@@ -165,6 +193,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           
           setState(() {
             userPlanInfo = currentPlan;
+            edadUsuario = edad as int;
+            this.udisActual = udisActual.toDouble();
           });
         }
       }
@@ -340,6 +370,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             'beneficiarios': widget.beneficiarios,
           },
           cotizaciones: cotizaciones,
+          udisActual: udisActual,
+          edadUsuario: edadUsuario,
         ),
       ];
     }
@@ -431,6 +463,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             'beneficiarios': widget.beneficiarios,
           },
           cotizaciones: cotizaciones,
+          udisActual: udisActual,
+          edadUsuario: edadUsuario,
         ),        
       ];
     }
@@ -524,6 +558,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             'beneficiarios': widget.beneficiarios,
           },
           cotizaciones: cotizaciones,
+          udisActual: udisActual,
+          edadUsuario: edadUsuario,
         ),        
       ];
     }    
