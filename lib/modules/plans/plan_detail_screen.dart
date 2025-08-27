@@ -133,7 +133,8 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
     final isCotizado = widget.status == 'cotizado';
     final isAutorizadoPorPagar = widget.status == 'autorizado_por_pagar_1';
-    final estadoTexto = isCotizado ? 'Por Activar' : (isAutorizadoPorPagar ? 'Pago Pendiente' : 'Autorizado');
+    final isAutorizado = widget.status == 'autorizado';
+    final estadoTexto = isCotizado ? 'Por Activar' : (isAutorizadoPorPagar ? 'Pago Pendiente' : (isAutorizado ? 'Activo' : 'Autorizado'));
     final estadoColor = isCotizado ? const Color(0xFFFFF3C7) : (isAutorizadoPorPagar ? const Color(0xFFFFF3C7) : const Color(0xFFD1FAE5));
     final textColor = isCotizado ? const Color(0xFFB45309) : (isAutorizadoPorPagar ? const Color(0xFFB45309) : const Color(0xFF047857));
 
