@@ -4,19 +4,37 @@ import 'plan_summary_card.dart';
 
 class PlanSettingsScreen extends StatelessWidget {
   final Map<String, dynamic>? userPlan;
+  final List<dynamic>? cotizaciones;
+  
   const PlanSettingsScreen({
     super.key,
     this.userPlan,
+    this.cotizaciones,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Log para ver qué contiene userPlan
+    print('🔍 PlanSettingsScreen: userPlan = $userPlan');
+    print('🔍 PlanSettingsScreen: userPlan keys = ${userPlan?.keys.toList()}');
+    print('🔍 PlanSettingsScreen: cotizaciones = $cotizaciones');
     final nombrePlan = userPlan?['nombre_plan'] ?? 'Mi plan';
     final duracion = userPlan?['duracion'] ?? 0;
     final periodicidad = userPlan?['periodicidad'] ?? '';
     final numeroPoliza = userPlan?['numero_poliza'] ?? '';
     final udis = userPlan?['udis'] ?? 0.0;
     final status = userPlan?['status'] ?? '';
+    
+    // Log de valores extraídos
+    print('🔍 PlanSettingsScreen: nombrePlan = $nombrePlan');
+    print('🔍 PlanSettingsScreen: duracion = $duracion');
+    print('🔍 PlanSettingsScreen: periodicidad = $periodicidad');
+    print('🔍 PlanSettingsScreen: numeroPoliza = $numeroPoliza');
+    print('🔍 PlanSettingsScreen: udis = $udis');
+    print('🔍 PlanSettingsScreen: status = $status');
+    print('🔍 PlanSettingsScreen: beneficiarios = ${userPlan?['beneficiarios']}');
+    print('🔍 PlanSettingsScreen: cotizaciones = $cotizaciones');
+    print('🔍 PlanSettingsScreen: cotizaciones length = ${cotizaciones?.length}');
 
     return Scaffold(
       backgroundColor: const Color(0xFF111928),

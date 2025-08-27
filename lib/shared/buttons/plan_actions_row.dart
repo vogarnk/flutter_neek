@@ -103,11 +103,15 @@ class PlanActionsRow extends StatelessWidget {
                     icon: Icons.settings,
                     label: 'Ajustes',
                     onTap: () {
+                      print('🔍 PlanActionsRow: status = $status');
+                      print('🔍 PlanActionsRow: cotizaciones antes de navegar = $cotizaciones');
+                      print('🔍 PlanActionsRow: cotizaciones length = ${cotizaciones?.length}');
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => PlanSettingsScreen(
                             userPlan: currentPlan,
+                            cotizaciones: cotizaciones,
                           ),
                         ),
                       );
@@ -177,11 +181,14 @@ class PlanActionsRow extends StatelessWidget {
           icon: Icons.settings,
           label: 'Ajustes',
           onTap: () {
+            print('🔍 PlanActionsRow: cotizaciones antes de navegar = $cotizaciones');
+            print('🔍 PlanActionsRow: cotizaciones length = ${cotizaciones?.length}');
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => PlanSettingsScreen(
                   userPlan: currentPlan,
+                  cotizaciones: cotizaciones,
                 ),
               ),
             );

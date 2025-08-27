@@ -126,9 +126,16 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         });
       });
     } else if (widget.status == 'autorizado') {
+      // Cargar tanto movimientos como cotizaciones para estado autorizado
       MovimientosService.obtenerMovimientos(widget.userPlanId).then((result) {
         setState(() {
           movimientos = result;
+        });
+      });
+      
+      CotizacionService.obtenerCotizaciones(widget.userPlanId).then((result) {
+        setState(() {
+          cotizaciones = result;
         });
       });
     } else if (widget.status == 'autorizado_por_pagar_1') {
