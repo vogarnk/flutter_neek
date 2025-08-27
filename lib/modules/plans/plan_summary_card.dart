@@ -98,7 +98,16 @@ class PlanSummaryCard extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          UdiPlanSummaryCard(), // 👈 Aquí lo usas
+          UdiPlanSummaryCard(
+            primaAnual: primaAnual,
+            sumaAsegurada: sumaAsegurada,
+            totalRetirarCorto: totalRetirarCorto,
+            totalRetirarLargo: totalRetirarLargo,
+            anioCorto: anioCorto,
+            anioLargo: anioLargo,
+            beneficiarios: beneficiarios,
+            udisActual: 8.54, // Valor por defecto, idealmente debería venir como parámetro
+          ),
 
           const SizedBox(height: 24),
           const Text(

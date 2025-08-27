@@ -1,12 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:neek/core/theme/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class UdiPlanSummaryCard extends StatelessWidget {
-  const UdiPlanSummaryCard({super.key});
+  final double primaAnual;
+  final double sumaAsegurada;
+  final double totalRetirarCorto;
+  final double totalRetirarLargo;
+  final int anioCorto;
+  final int anioLargo;
+  final int beneficiarios;
+  final double? udisActual;
+
+  const UdiPlanSummaryCard({
+    super.key,
+    required this.primaAnual,
+    required this.sumaAsegurada,
+    required this.totalRetirarCorto,
+    required this.totalRetirarLargo,
+    required this.anioCorto,
+    required this.anioLargo,
+    required this.beneficiarios,
+    this.udisActual,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: 'MXN');
+    final numberFormat = NumberFormat('#,###', 'es_MX');
+    
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -43,8 +66,8 @@ class UdiPlanSummaryCard extends StatelessWidget {
           ),
           _udiRow(
             title: 'Prima Anual (Ahorro anual)',
-            amountUdis: '62,093 UDIS',
-            amountMxn: '\$662,093.16',
+            amountUdis: '${numberFormat.format(primaAnual.toInt())} UDIS',
+            amountMxn: udisActual != null ? currencyFormat.format(primaAnual * udisActual!) : 'N/A',
             note: 'Proyección de UDI al día del hoy',
             isDarkBackground: true,
           ),
@@ -52,32 +75,32 @@ class UdiPlanSummaryCard extends StatelessWidget {
           _udiRow(
             title: 'Suma Asegurada',
             subtitle: 'En caso de fallecimiento',
-            amountUdis: '280,000 UDIS',
-            amountMxn: '\$2,318,400',
+            amountUdis: '${numberFormat.format(sumaAsegurada.toInt())} UDIS',
+            amountMxn: udisActual != null ? currencyFormat.format(sumaAsegurada * udisActual!) : 'N/A',
             note: 'Proyección de UDI al día del hoy',
             icon: Icons.shield_outlined,
             highlightSubtitle: true,
           ),
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
           _udiRow(
-            title: 'Total a retirar en 2029',
-            amountUdis: '32,093 UDIS',
-            amountMxn: '\$462,093.16',
+            title: 'Total a retirar en $anioCorto',
+            amountUdis: '${numberFormat.format(totalRetirarCorto.toInt())} UDIS',
+            amountMxn: udisActual != null ? currencyFormat.format(totalRetirarCorto * udisActual!) : 'N/A',
             note: 'Proyección de UDI al día del hoy',
             isDarkBackground: true,
           ),
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
           _udiRow(
-            title: 'Total a retirar en 2050',
-            amountUdis: '32,093 UDIS',
-            amountMxn: '\$462,093.16',
+            title: 'Total a retirar en $anioLargo',
+            amountUdis: '${numberFormat.format(totalRetirarLargo.toInt())} UDIS',
+            amountMxn: udisActual != null ? currencyFormat.format(totalRetirarLargo * udisActual!) : 'N/A',
             note: 'Proyección de UDI al día del hoy',
           ),
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
           _infoBadgeRow(
             title: 'Beneficiarios',
             icon: Icons.groups_3_outlined,
-            badgeText: '+3 Beneficiarios',
+            badgeText: '+$beneficiarios Beneficiarios',
             note: 'Recomendado',
             isDarkBackground: true,
           ),
@@ -229,7 +252,7 @@ class UdiPlanSummaryCard extends StatelessWidget {
             children: [
               const Text("🇲🇽 ", style: TextStyle(fontSize: 16)),
               Text(
-                'MXN $amountMxn',
+                amountMxn,
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF374151),

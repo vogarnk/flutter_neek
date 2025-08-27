@@ -150,18 +150,63 @@ class PlanSettingsScreen extends StatelessWidget {
     return (udisPlan * 2.0); // Fallback
   }
 
-  // Función para calcular total retirar corto: recuperacion_udis del índice de duración * udis de ese índice
+  // Función para calcular total retirar corto: recuperacion_udis del año objetivo (duración + año actual)
   double _calculateTotalRetirarCorto() {
     final udisPlan = userPlan?['udis'] ?? 0.0;
     if (cotizaciones == null || cotizaciones!.isEmpty || udisActual == null) {
       return (udisPlan * 0.8); // Fallback
     }
     
+    // Calcular el año objetivo: duración del plan + año actual
     final duracion = userPlan?['duracion'] ?? 0;
-    if (duracion > 0 && duracion <= cotizaciones!.length) {
-      final cotizacion = cotizaciones![duracion - 1]; // Índice basado en duración
-      final recuperacionUdis = cotizacion['recuperacion_udis'];
-      final udisIndex = cotizacion['udis'];
+    final anioActual = DateTime.now().year;
+    final anioObjetivo = anioActual + duracion;
+    
+    print('🔍 _calculateTotalRetirarCorto: duracion = $duracion');
+    print('🔍 _calculateTotalRetirarCorto: anioActual = $anioActual');
+    print('🔍 _calculateTotalRetirarCorto: anioObjetivo = $anioObjetivo');
+    print('🔍 _calculateTotalRetirarCorto: cotizaciones length = ${cotizaciones!.length}');
+    
+    // Buscar la cotización que corresponda al año objetivo
+    Map<String, dynamic>? cotizacionObjetivo;
+    for (int i = 0; i < cotizaciones!.length; i++) {
+      final cotizacion = cotizaciones![i];
+      print('🔍 _calculateTotalRetirarCorto: cotizacion[$i] = $cotizacion');
+      
+      // Buscar por el campo 'year' si existe
+      final year = cotizacion['year'];
+      if (year != null) {
+        int yearValue;
+        if (year is String) {
+          yearValue = int.tryParse(year) ?? 0;
+        } else if (year is num) {
+          yearValue = year.toInt();
+        } else {
+          yearValue = 0;
+        }
+        
+        print('🔍 _calculateTotalRetirarCorto: year[$i] = $yearValue');
+        
+        if (yearValue == anioObjetivo) {
+          cotizacionObjetivo = cotizacion;
+          print('🔍 _calculateTotalRetirarCorto: ¡Encontrada cotización para año $anioObjetivo!');
+          break;
+        }
+      }
+    }
+    
+    // Si no se encontró por year, usar el índice basado en duración como fallback
+    if (cotizacionObjetivo == null && duracion > 0 && duracion <= cotizaciones!.length) {
+      cotizacionObjetivo = cotizaciones![duracion - 1];
+      print('🔍 _calculateTotalRetirarCorto: Usando fallback por índice duracion-1 = ${duracion - 1}');
+    }
+    
+    if (cotizacionObjetivo != null) {
+      final recuperacionUdis = cotizacionObjetivo['recuperacion_udis'];
+      final udisIndex = cotizacionObjetivo['udis'];
+      
+      print('🔍 _calculateTotalRetirarCorto: recuperacionUdis = $recuperacionUdis');
+      print('🔍 _calculateTotalRetirarCorto: udisIndex = $udisIndex');
       
       if (recuperacionUdis != null && udisIndex != null) {
         double recuperacion;
@@ -183,10 +228,13 @@ class PlanSettingsScreen extends StatelessWidget {
           udisValor = 0.0;
         }
         
-        return recuperacion * udisValor;
+        final resultado = recuperacion * udisValor;
+        print('🔍 _calculateTotalRetirarCorto: resultado = $recuperacion * $udisValor = $resultado');
+        return resultado;
       }
     }
     
+    print('🔍 _calculateTotalRetirarCorto: Usando fallback = ${udisPlan * 0.8}');
     return (udisPlan * 0.8); // Fallback
   }
 
