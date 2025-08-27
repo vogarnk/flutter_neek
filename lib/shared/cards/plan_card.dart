@@ -46,9 +46,10 @@ class PlanCard extends StatelessWidget {
     final montoFinal = NumberFormat('#,###', 'en_US').format(recuperacionFinalUdis);
   // Estado visual
   final isCotizado = status == 'cotizado';
-  final estadoTexto = isCotizado ? 'Por Activar' : 'Autorizado';
-  final estadoColor = isCotizado ? const Color(0xFFFFF3C7) : const Color(0xFFD1FAE5);
-  final iconColor = isCotizado ? const Color(0xFFB45309) : const Color(0xFF047857);
+  final isAutorizadoPorPagar = status == 'autorizado_por_pagar_1';
+  final estadoTexto = isCotizado ? 'Por Activar' : (isAutorizadoPorPagar ? 'Póliza autorizada' : 'Autorizado');
+  final estadoColor = isCotizado ? const Color(0xFFFFF3C7) : (isAutorizadoPorPagar ? const Color(0xFFFFF3C7) : const Color(0xFFD1FAE5));
+  final iconColor = isCotizado ? const Color(0xFFB45309) : (isAutorizadoPorPagar ? const Color(0xFFB45309) : const Color(0xFF047857));
   final textColor = iconColor;
 
     return Container(

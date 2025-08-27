@@ -89,9 +89,10 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     final retiroEnAnio = currentYear + widget.duracion;
 
     final isCotizado = widget.status == 'cotizado';
-    final estadoTexto = isCotizado ? 'Por Activar' : 'Autorizado';
-    final estadoColor = isCotizado ? const Color(0xFFFFF3C7) : const Color(0xFFD1FAE5);
-    final textColor = isCotizado ? const Color(0xFFB45309) : const Color(0xFF047857);
+    final isAutorizadoPorPagar = widget.status == 'autorizado_por_pagar_1';
+    final estadoTexto = isCotizado ? 'Por Activar' : (isAutorizadoPorPagar ? 'Pago Pendiente' : 'Autorizado');
+    final estadoColor = isCotizado ? const Color(0xFFFFF3C7) : (isAutorizadoPorPagar ? const Color(0xFFFFF3C7) : const Color(0xFFD1FAE5));
+    final textColor = isCotizado ? const Color(0xFFB45309) : (isAutorizadoPorPagar ? const Color(0xFFB45309) : const Color(0xFF047857));
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -258,9 +259,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         ),
         const SizedBox(height: 16),
         DetailCard(
-          title: 'Total a Retirar en $retiroEnAnio',
-          udis: '${numberFormat.format(widget.totalRetirar)} UDIS',
-          mxn: currencyFormat.format(widget.totalRetirarMxn),
+          title: 'Total a Retirar en ${retiroEnAnio-1}',
+          udis: '${numberFormat.format(widget.recuperacionFinalUdis)} UDIS',
+          mxn: currencyFormat.format(widget.recuperacionFinalMxn),
           icon: Icons.lock,
         ),
         const SizedBox(height: 16),
