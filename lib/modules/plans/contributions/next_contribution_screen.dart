@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/shared/cards/card_neek.dart';
 import 'package:neek/core/payment_instructions_service.dart';
+import 'package:neek/core/movimientos_service.dart';
 
 class NextContributionScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -23,6 +24,8 @@ class NextContributionScreen extends StatefulWidget {
 
 class _NextContributionScreenState extends State<NextContributionScreen> {
   bool isChecked = true;
+  List<dynamic>? movimientos;
+  bool isLoadingMovimientos = false;
   
   // Valores calculados
   String _numeroPoliza = '';
@@ -32,12 +35,20 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
   String _importe = '';
   String _tc = '';
   String _importeTotal = '';
+  int _movimientosPagados = 0;
+  int _totalMovimientos = 0;
+  int _siguientePago = 1;
 
   @override
   void initState() {
     super.initState();
     // Calcular valores inmediatamente
     _calculateValues();
+    
+    // Si el status es "autorizado", cargar movimientos para calcular el siguiente pago
+    if (widget.userPlan['status'] == 'autorizado') {
+      _loadMovimientos();
+    }
   }
 
   void _calculateValues() {
@@ -75,10 +86,17 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
         .where((part) => part != null && part.toString().isNotEmpty)
         .join(' ');
     
-    // Recibo: duración * periodicidad
+    // Recibo: número de pago / total de pagos
     final duracion = widget.userPlan['duracion'] ?? 0;
     final periodicidad = widget.userPlan['periodicidad'] ?? '';
-    _recibo = '1 / ${duracion * _getPeriodicidadMultiplier(periodicidad)}';
+    final totalPagos = duracion * _getPeriodicidadMultiplier(periodicidad);
+    
+    // Si el status es "autorizado", usar el número de pago calculado
+    if (widget.userPlan['status'] == 'autorizado') {
+      _recibo = '$_siguientePago / $totalPagos';
+    } else {
+      _recibo = '1 / $totalPagos';
+    }
     
     // Moneda (siempre UDI)
     _moneda = 'UDI';
@@ -101,10 +119,9 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
         _importe = _formatCurrency(importeNum);
       }
     } else {
-      // Si no hay cotizaciones, usar un valor por defecto o calcular basado en el plan
+      // Si no hay cotizaciones, usar el valor de UDIS del plan directamente
       final udis = widget.userPlan['udis'];
       if (udis != null) {
-        // Calcular aportación anual basada en las UDIS del plan
         double udisNum;
         if (udis is String) {
           udisNum = double.tryParse(udis) ?? 0.0;
@@ -113,9 +130,7 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
         } else {
           udisNum = 0.0;
         }
-        // Aproximar la aportación anual como un porcentaje de las UDIS
-        final aportacionAnual = udisNum * 0.1; // 10% como ejemplo
-        _importe = _formatCurrency(aportacionAnual);
+        _importe = _formatCurrency(udisNum);
       } else {
         _importe = '0.00';
       }
@@ -159,6 +174,118 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
     print('NextContributionScreen: _importe = $_importe');
     print('NextContributionScreen: _tc = $_tc');
     print('NextContributionScreen: _importeTotal = $_importeTotal');
+  }
+
+  Future<void> _loadMovimientos() async {
+    setState(() {
+      isLoadingMovimientos = true;
+    });
+    
+    try {
+      final result = await MovimientosService.obtenerMovimientos(widget.userPlanId);
+      setState(() {
+        movimientos = result;
+        isLoadingMovimientos = false;
+      });
+      
+      // Calcular el siguiente pago y movimientos pagados
+      _calculateNextPayment();
+    } catch (e) {
+      setState(() {
+        isLoadingMovimientos = false;
+      });
+      print('Error al cargar movimientos: $e');
+    }
+  }
+
+  void _calculateNextPayment() {
+    if (movimientos == null || movimientos!.isEmpty) return;
+    
+    // Ordenar movimientos por fecha (más antiguos primero)
+    final sortedMovements = List.from(movimientos!)
+      ..sort((a, b) {
+        final fechaA = DateTime.tryParse(a['periodo'] ?? '') ?? DateTime(1900);
+        final fechaB = DateTime.tryParse(b['periodo'] ?? '') ?? DateTime(1900);
+        return fechaA.compareTo(fechaB);
+      });
+    
+    // Contar movimientos pagados (con factura)
+    final paidMovements = sortedMovements.where((movement) => 
+      movement['factura'] != null && movement['factura'].toString().isNotEmpty
+    ).length;
+    
+    // El siguiente pago es el número de movimientos pagados + 1
+    final nextPaymentNumber = paidMovements + 1;
+    
+    // Buscar el primer movimiento sin factura (más antiguo pendiente)
+    final nextPendingMovement = sortedMovements.firstWhere(
+      (movement) => movement['factura'] == null || movement['factura'].toString().isEmpty,
+      orElse: () => sortedMovements.last, // Si todos están pagados, usar el último
+    );
+    
+    setState(() {
+      _movimientosPagados = paidMovements;
+      _totalMovimientos = sortedMovements.length;
+      _siguientePago = nextPaymentNumber;
+    });
+    
+    // Actualizar el recibo con el número de pago correcto
+    _updateRecibo();
+    
+    // Actualizar el importe basado en el movimiento pendiente
+    if (nextPendingMovement != null) {
+      final udis = nextPendingMovement['udis'];
+      if (udis != null) {
+        double importeNum;
+        if (udis is String) {
+          importeNum = double.tryParse(udis) ?? 0.0;
+        } else if (udis is num) {
+          importeNum = udis.toDouble();
+        } else {
+          importeNum = 0.0;
+        }
+        _importe = _formatCurrency(importeNum);
+        
+        // Recalcular el importe total
+        _recalculateTotal();
+      }
+    }
+    
+    print('Movimientos pagados: $_movimientosPagados de $_totalMovimientos');
+    print('Siguiente pago número: $_siguientePago');
+  }
+
+  void _updateRecibo() {
+    final duracion = widget.userPlan['duracion'] ?? 0;
+    final periodicidad = widget.userPlan['periodicidad'] ?? '';
+    final totalPagos = duracion * _getPeriodicidadMultiplier(periodicidad);
+    
+    setState(() {
+      _recibo = '$_siguientePago / $totalPagos';
+    });
+  }
+
+  void _recalculateTotal() {
+    if (_importe.isNotEmpty && _tc.isNotEmpty && _importe != 'Cargando...' && _tc != 'Cargando...') {
+      try {
+        // Remover comas del importe y convertir a double
+        final importeStr = _importe.replaceAll(',', '');
+        final importeNum = double.tryParse(importeStr) ?? 0.0;
+        
+        // Convertir TC a double
+        double tcNum;
+        if (_tc is String) {
+          tcNum = double.tryParse(_tc) ?? 0.0;
+        } else {
+          tcNum = 0.0;
+        }
+        
+        final total = importeNum * tcNum;
+        _importeTotal = _formatCurrency(total);
+      } catch (e) {
+        _importeTotal = 'Error en cálculo';
+      }
+    }
   }
 
   int _getPeriodicidadMultiplier(String periodicidad) {
@@ -277,6 +404,56 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
                   infoRow('MONEDA', _moneda),
                   infoRow('IMPORTE', _importe),
                   infoRow('TC', _tc),
+                  if (widget.userPlan['status'] == 'autorizado' && isLoadingMovimientos) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Calculando siguiente pago...',
+                          style: TextStyle(
+                            color: AppColors.textGray500,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else if (widget.userPlan['status'] == 'autorizado' && !isLoadingMovimientos && _totalMovimientos > 0) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F9FF),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFF0EA5E9), width: 0.5),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline,
+                            color: Color(0xFF0EA5E9),
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Progreso: $_movimientosPagados de $_totalMovimientos aportaciones pagadas',
+                              style: const TextStyle(
+                                color: Color(0xFF0EA5E9),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
