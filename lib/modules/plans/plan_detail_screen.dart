@@ -329,6 +329,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                     user: widget.user,
                     userPlan: userPlan,
                     cotizaciones: cotizaciones ?? [],
+                    userPlanId: widget.userPlanId,
                   ),
                 ),
               );
@@ -405,6 +406,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                     user: widget.user,
                     userPlan: userPlan,
                     cotizaciones: cotizaciones ?? [],
+                    userPlanId: widget.userPlanId,
                   ),
                 ),
               );

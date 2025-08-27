@@ -228,6 +228,7 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
                 user: widget.user ?? {},
                 userPlan: widget.currentPlan ?? {},
                 cotizaciones: widget.cotizaciones ?? [],
+                userPlanId: widget.currentPlan?['id'] ?? 1,
               ),
             ),
           );

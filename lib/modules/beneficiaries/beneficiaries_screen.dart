@@ -100,6 +100,7 @@ class BeneficiariesScreen extends StatelessWidget {
                           user: user,
                           userPlan: userPlan,
                           cotizaciones: [], // Lista vacía por defecto
+                          userPlanId: userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
                         ),
                       ),
                     );

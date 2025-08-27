@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/shared/cards/card_neek.dart';
+import 'package:neek/core/payment_instructions_service.dart';
 
 class NextContributionScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final Map<String, dynamic> userPlan;
   final List<dynamic> cotizaciones;
+  final int userPlanId;
 
   const NextContributionScreen({
     super.key,
     required this.user,
     required this.userPlan,
     required this.cotizaciones,
+    required this.userPlanId,
   });
 
   @override
@@ -346,8 +349,8 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: isChecked
-                          ? () {
-                              debugPrint('✅ Enviar instrucciones de pago');
+                          ? () async {
+                              await _sendPaymentInstructions();
                             }
                           : null,
                       icon: const Icon(Icons.arrow_forward),
@@ -385,5 +388,66 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
         ],
       ),
     );
+  }
+
+  /// Envía las instrucciones de pago por email
+  Future<void> _sendPaymentInstructions() async {
+    try {
+      // Mostrar indicador de carga
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+
+      // Llamar al servicio
+      final result = await PaymentInstructionsService.instance.sendPaymentInstructionsEmail(
+        userPlanId: widget.userPlanId,
+      );
+
+      // Cerrar indicador de carga
+      Navigator.of(context).pop();
+
+      if (result['success']) {
+        // Mostrar mensaje de éxito
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        
+        // Opcional: cerrar la pantalla y regresar
+        Navigator.of(context).pop();
+      } else {
+        // Mostrar mensaje de error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      // Cerrar indicador de carga si está abierto
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+      
+      // Mostrar mensaje de error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error inesperado: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

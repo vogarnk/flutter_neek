@@ -273,6 +273,7 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                 user: widget.user ?? {},
                 userPlan: widget.currentPlan ?? {},
                 cotizaciones: widget.cotizaciones,
+                userPlanId: widget.currentPlan?['id'] ?? 1,
               ),
             ),
           );
@@ -289,6 +290,7 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                 user: widget.user ?? {},
                 userPlan: widget.currentPlan ?? {},
                 cotizaciones: widget.cotizaciones,
+                userPlanId: widget.currentPlan?['id'] ?? 1,
               ),
             ),
           );
