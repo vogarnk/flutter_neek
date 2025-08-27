@@ -62,7 +62,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
     super.initState();
 
     if (widget.status == 'autorizado_por_pagar_1') {
-      Future.microtask(() => showPlanAuthorizedDialog(context));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showPlanAuthorizedDialog(context);
+      });
     }
 
     // Cargar datos según el estado del plan
@@ -72,10 +74,16 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           cotizaciones = result;
         });
       });
-    } else if (widget.status == 'autorizado' || widget.status == 'autorizado_por_pagar_1') {
+    } else if (widget.status == 'autorizado') {
       MovimientosService.obtenerMovimientos(widget.userPlanId).then((result) {
         setState(() {
           movimientos = result;
+        });
+      });
+    } else if (widget.status == 'autorizado_por_pagar_1') {
+      CotizacionService.obtenerCotizaciones(widget.userPlanId).then((result) {
+        setState(() {
+          cotizaciones = result;
         });
       });
     }
@@ -357,7 +365,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
   }
 
   Widget _buildTableWidget() {
-    if (widget.status == 'cotizado') {
+    if (widget.status == 'cotizado' || widget.status == 'autorizado_por_pagar_1') {
       return cotizaciones == null
           ? const Center(child: CircularProgressIndicator())
           : PlanContributionsTable(
@@ -372,7 +380,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 'beneficiarios': widget.beneficiarios,
               },
             );
-    } else if (widget.status == 'autorizado' || widget.status == 'autorizado_por_pagar_1') {
+    } else if (widget.status == 'autorizado') {
       return movimientos == null
           ? const Center(child: CircularProgressIndicator())
           : PlanMovementsTable(

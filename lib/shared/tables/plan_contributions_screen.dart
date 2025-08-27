@@ -146,8 +146,10 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
                 ? '\$${NumberFormat('#,###.00', 'es_MX').format(aportacionUdis * udis)}'
                 : NumberFormat('#,###', 'es_MX').format(aportacionUdis);
 
-            // Si el plan está cotizado, todas las aportaciones son pendientes (son solo proyecciones)
-            final status = widget.status == 'cotizado' ? 'Pendiente' : (indicesPagados.contains(index) ? 'Completado' : 'Pendiente');
+            // Si el plan está cotizado o autorizado_por_pagar_1, todas las aportaciones son pendientes
+            final status = (widget.status == 'cotizado' || widget.status == 'autorizado_por_pagar_1') 
+                ? 'Pendiente' 
+                : (indicesPagados.contains(index) ? 'Completado' : 'Pendiente');
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
