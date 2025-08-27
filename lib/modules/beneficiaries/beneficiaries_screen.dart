@@ -11,6 +11,7 @@ class BeneficiariesScreen extends StatelessWidget {
   final int? userPlanId;
   final String status;
   final Map<String, dynamic>? currentPlan;
+  final List<dynamic>? cotizaciones;
 
   const BeneficiariesScreen({
     super.key,
@@ -19,6 +20,7 @@ class BeneficiariesScreen extends StatelessWidget {
     this.userPlanId,
     required this.status,
     this.currentPlan,
+    this.cotizaciones,
   });
 
   @override
@@ -101,7 +103,7 @@ class BeneficiariesScreen extends StatelessWidget {
                             'udis': 100000,
                             'beneficiarios': beneficiarios,
                           },
-                          cotizaciones: [], // Lista vacía por defecto
+                          cotizaciones: cotizaciones ?? [], // Usar cotizaciones reales si están disponibles
                           userPlanId: userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
                         ),
                       ),

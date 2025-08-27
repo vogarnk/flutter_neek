@@ -17,6 +17,7 @@ class PlanActionsRow extends StatelessWidget {
   final int? userPlanId;
   final String? polizaUrl;
   final Map<String, dynamic>? currentPlan;
+  final List<dynamic>? cotizaciones;
 
   const PlanActionsRow({
     super.key,
@@ -26,6 +27,7 @@ class PlanActionsRow extends StatelessWidget {
     this.userPlanId,
     this.polizaUrl,
     this.currentPlan,
+    this.cotizaciones,
   });
 
   @override
@@ -91,6 +93,7 @@ class PlanActionsRow extends StatelessWidget {
                             beneficiarios: beneficiarios,
                             userPlanId: userPlanId,
                             currentPlan: currentPlan,
+                            cotizaciones: cotizaciones,
                           ),
                         ),
                       );
@@ -189,6 +192,7 @@ class PlanActionsRow extends StatelessWidget {
                   userPlanId: userPlanId,
                   status: status,
                   currentPlan: currentPlan,
+                  cotizaciones: cotizaciones,
                 ),
               ),
             );

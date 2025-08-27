@@ -332,6 +332,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             'udis': userPlanInfo?['udis'],
             'beneficiarios': widget.beneficiarios,
           },
+          cotizaciones: cotizaciones,
         ),
       ];
     }
@@ -422,6 +423,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             'udis': userPlanInfo?['udis'],
             'beneficiarios': widget.beneficiarios,
           },
+          cotizaciones: cotizaciones,
         ),        
       ];
     }
@@ -514,6 +516,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
             'udis': userPlanInfo?['udis'],
             'beneficiarios': widget.beneficiarios,
           },
+          cotizaciones: cotizaciones,
         ),        
       ];
     }    
