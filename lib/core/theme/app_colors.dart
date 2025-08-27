@@ -13,4 +13,5 @@ class AppColors {
   static const textGray900 = Color(0xFF111827);
 
   static const primary = Color(0xFF2B5FF3);
+  static const primary100 = Color(0xFFE1EFFE);
 }

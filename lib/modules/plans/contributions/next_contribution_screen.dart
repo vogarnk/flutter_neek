@@ -199,6 +199,43 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
                     nombrePlan: widget.userPlan['nombre_plan'] ?? 'Mi plan', 
                     mostrarBoton: false
                   ),
+                  // Badge de estado
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: widget.userPlan['status'] == 'autorizado_por_pagar_1'
+                          ? AppColors.primary100 // Azul claro
+                          : const Color(0xFFD1FAE5), // Verde claro
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          widget.userPlan['status'] == 'autorizado_por_pagar_1'
+                              ? Icons.schedule // Reloj para "Listo para activar"
+                              : Icons.check_circle, // Check para "Activo"
+                          color: widget.userPlan['status'] == 'autorizado_por_pagar_1'
+                              ? Theme.of(context).colorScheme.primary // Color primary del tema
+                              : const Color(0xFF047857), // Verde
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.userPlan['status'] == 'autorizado_por_pagar_1'
+                              ? 'Listo para activar'
+                              : 'Activo',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: widget.userPlan['status'] == 'autorizado_por_pagar_1'
+                                ? Theme.of(context).colorScheme.primary // Color primary del tema
+                                : const Color(0xFF047857), // Verde
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),                  
+                  const SizedBox(height: 16),
                   infoRow('PÓLIZA', _numeroPoliza),
                   infoRow('CONTRATANTE', _nombreCompleto),
                   infoRow('RECIBO', _recibo),
@@ -225,24 +262,76 @@ class _NextContributionScreenState extends State<NextContributionScreen> {
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: isChecked,
-                        onChanged: (value) {
-                          setState(() => isChecked = value!);
-                        },
-                      ),
-                      const Expanded(
-                        child: Text(
-                          'He leído la información que se me ha proporcionado acerca de mi plan de ahorro en este módulo.',
-                          style: TextStyle(fontSize: 13, color: AppColors.textGray900),
+                                  child: Column(
+                      children: [
+                        // Icono de tarjeta de crédito en azul
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE3F2FD),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: const Icon(
+                            Icons.credit_card,
+                            color: Color(0xFF1976D2),
+                            size: 30,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                        const SizedBox(height: 16),
+                        
+                        // Título en negro
+                        const Text(
+                          '¿Listo para hacer tu pago?',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Instrucciones en gris
+                        const Text(
+                          'Te enviaremos un correo con las instrucciones detalladas y los diferentes medios de pago disponibles (tarjeta de crédito o débito a través de pago en línea, depósito directo o vía telefónica).',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textGray500,
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        // Instrucciones de comprobante en gris
+                        const Text(
+                          'Una vez recibido podrás realizar tu pago y posteriormente, enviar tu comprobante a tu agente neek o al correo reportedepagos@neek.mx',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textGray500,
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 24),
+                        
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: isChecked,
+                              onChanged: (value) {
+                                setState(() => isChecked = value!);
+                              },
+                            ),
+                            const Expanded(
+                              child: Text(
+                                'He leído la información que se me ha proporcionado acerca de mi plan de ahorro en este módulo.',
+                                style: TextStyle(fontSize: 13, color: AppColors.textGray900),
+                              ),
+                            ),
+                          ],
+                        ),
                   const SizedBox(height: 12),
                   Text(
                     'Importe Total: \$ $_importeTotal',

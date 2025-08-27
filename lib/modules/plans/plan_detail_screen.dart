@@ -16,6 +16,7 @@ import 'package:neek/core/cotizacion_service.dart';
 import 'package:neek/core/movimientos_service.dart';
 import 'package:neek/core/api_service.dart';
 import 'dart:convert';
+import 'contributions/next_contribution_screen.dart';
 
 class PlanDetailScreen extends StatefulWidget {
   final String nombrePlan;
