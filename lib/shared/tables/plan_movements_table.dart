@@ -54,7 +54,7 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Movimientos Reales',
+                      'Plan de ahorro',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -63,7 +63,7 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Historial de tus aportaciones realizadas',
+                      'Revisa y planea tus aportaciones',
                       style: TextStyle(
                         color: Colors.black54,
                         fontSize: 14,
@@ -81,10 +81,10 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                   Switch(
-                    value: isUdiSelected,
+                    value: !isUdiSelected,
                     onChanged: (val) {
                       setState(() {
-                        isUdiSelected = val;
+                        isUdiSelected = !val;
                       });
                     },
                     activeColor: Colors.white,     // Thumb cuando está ON
@@ -170,7 +170,7 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
                     ),
                     Expanded(
                       child: Text(
-                        isUdiSelected ? '$monto UDIS' : '\$$monto',
+                        isUdiSelected ? '$monto' : '\$$monto',
                         style: Theme.of(context).textTheme.displaySmall?.copyWith(
                               fontSize: 14,
                             ),
