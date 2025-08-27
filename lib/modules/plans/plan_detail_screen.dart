@@ -14,6 +14,8 @@ import 'package:neek/shared/buttons/plan_actions_row.dart';
 import '../../core/theme/app_colors.dart';
 import 'package:neek/core/cotizacion_service.dart';
 import 'package:neek/core/movimientos_service.dart';
+import 'package:neek/core/api_service.dart';
+import 'dart:convert';
 
 class PlanDetailScreen extends StatefulWidget {
   final String nombrePlan;
@@ -58,6 +60,7 @@ class PlanDetailScreen extends StatefulWidget {
 class _PlanDetailScreenState extends State<PlanDetailScreen> {
   List<dynamic>? cotizaciones;
   List<dynamic>? movimientos;
+  Map<String, dynamic>? userPlanInfo;
   
   @override
   void initState() {
@@ -68,6 +71,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
         showPlanAuthorizedDialog(context);
       });
     }
+
+    // Obtener información del plan del usuario
+    _loadUserPlanInfo();
 
     // Cargar datos según el estado del plan
     if (widget.status == 'cotizado') {
@@ -88,6 +94,32 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           cotizaciones = result;
         });
       });
+    }
+  }
+
+  Future<void> _loadUserPlanInfo() async {
+    try {
+      // Obtener información del usuario para obtener los datos del plan
+      final response = await ApiService.instance.get('/user');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final userData = data['data'];
+        final userPlans = userData['user_plans'] as List?;
+        
+        if (userPlans != null) {
+          // Buscar el plan que coincida con el userPlanId
+          final currentPlan = userPlans.firstWhere(
+            (plan) => plan['id'] == widget.userPlanId,
+            orElse: () => {},
+          );
+          
+          setState(() {
+            userPlanInfo = currentPlan;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error al obtener información del plan: $e');
     }
   }
 
@@ -381,6 +413,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
                 'nombre_plan': widget.nombrePlan,
                 'status': widget.status,
                 'duracion': widget.duracion,
+                'numero_poliza': userPlanInfo?['numero_poliza'],
+                'periodicidad': userPlanInfo?['periodicidad'],
+                'udis': userPlanInfo?['udis'],
                 'beneficiarios': widget.beneficiarios,
               },
             );
@@ -390,6 +425,18 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           : PlanMovementsTable(
               movimientos: movimientos!,
               status: widget.status,
+              user: widget.user,
+              currentPlan: {
+                'id': widget.userPlanId,
+                'nombre_plan': widget.nombrePlan,
+                'status': widget.status,
+                'duracion': widget.duracion,
+                'numero_poliza': userPlanInfo?['numero_poliza'],
+                'periodicidad': userPlanInfo?['periodicidad'],
+                'udis': userPlanInfo?['udis'],
+                'beneficiarios': widget.beneficiarios,
+              },
+              cotizaciones: cotizaciones,
             );
     }
     

@@ -268,7 +268,11 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const NextContributionScreen(),
+              builder: (context) => NextContributionScreen(
+                user: widget.user ?? {},
+                userPlan: widget.currentPlan ?? {},
+                cotizaciones: widget.cotizaciones,
+              ),
             ),
           );
         };
@@ -280,7 +284,11 @@ class _PlanContributionsTableState extends State<PlanContributionsTable> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const NextContributionScreen(),
+              builder: (context) => NextContributionScreen(
+                user: widget.user ?? {},
+                userPlan: widget.currentPlan ?? {},
+                cotizaciones: widget.cotizaciones,
+              ),
             ),
           );
         };

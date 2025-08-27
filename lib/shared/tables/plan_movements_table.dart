@@ -5,11 +5,17 @@ import 'package:neek/modules/plans/contributions/next_contribution_screen.dart';
 class PlanMovementsTable extends StatefulWidget {
   final List<dynamic> movimientos;
   final String status;
+  final Map<String, dynamic>? user;
+  final Map<String, dynamic>? currentPlan;
+  final List<dynamic>? cotizaciones;
 
   const PlanMovementsTable({
     super.key,
     required this.movimientos,
     required this.status,
+    this.user,
+    this.currentPlan,
+    this.cotizaciones,
   });
 
   @override
@@ -218,7 +224,11 @@ class _PlanMovementsTableState extends State<PlanMovementsTable> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const NextContributionScreen(),
+              builder: (context) => NextContributionScreen(
+                user: widget.user ?? {},
+                userPlan: widget.currentPlan ?? {},
+                cotizaciones: widget.cotizaciones ?? [],
+              ),
             ),
           );
         },
