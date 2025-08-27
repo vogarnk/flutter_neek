@@ -105,7 +105,11 @@ class PlanActionsRow extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const PlanSettingsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => PlanSettingsScreen(
+                            userPlan: currentPlan,
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -175,7 +179,11 @@ class PlanActionsRow extends StatelessWidget {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const PlanSettingsScreen()),
+              MaterialPageRoute(
+                builder: (_) => PlanSettingsScreen(
+                  userPlan: currentPlan,
+                ),
+              ),
             );
           },
         ),
