@@ -30,6 +30,7 @@ class PlanDetailScreen extends StatefulWidget {
   final List<dynamic> beneficiarios;
   final String status;
   final int userPlanId;
+  final String? polizaUrl;
 
   const PlanDetailScreen({
     super.key,
@@ -46,7 +47,8 @@ class PlanDetailScreen extends StatefulWidget {
     required this.totalRetirar2065,
     required this.totalRetirar2065Mxn,
     required this.status,
-    required this.userPlanId
+    required this.userPlanId,
+    this.polizaUrl,
   });
 
   @override
@@ -249,7 +251,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
 
     if (status == 'autorizado_por_pagar_1') {
       return [
-        const PlanAuthorizedCard(),
+        PlanAuthorizedCard(polizaUrl: widget.polizaUrl),
         const SizedBox(height: 16),
         SumaAseguradaChartCard(
           sumaUdis: widget.sumaAsegurada,
@@ -300,13 +302,14 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           beneficiarios: widget.beneficiarios,
           status: widget.status,
           userPlanId: widget.userPlanId,
+          polizaUrl: widget.polizaUrl,
         ),        
       ];
     }
 
     if (status == 'autorizado') {
       return [
-        const PlanAuthorizedCard(),
+        PlanAuthorizedCard(polizaUrl: widget.polizaUrl),
         const SizedBox(height: 16),
         SumaAseguradaChartCard(
           sumaUdis: widget.sumaAsegurada,
@@ -357,6 +360,7 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
           beneficiarios: widget.beneficiarios,
           status: widget.status,
           userPlanId: widget.userPlanId,
+          polizaUrl: widget.polizaUrl,
         ),        
       ];
     }    

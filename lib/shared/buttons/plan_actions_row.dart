@@ -8,12 +8,14 @@ import '../../modules/legal/legal_screen.dart';
 import '../../modules/plans/contributions_screen.dart';
 import '../../modules/plans/movements_screen.dart';
 import '../../modules/plans/stats/stats_screen.dart';
+import '../../pdfx_viewer_screen.dart';
 
 class PlanActionsRow extends StatelessWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
   final String status;
   final int? userPlanId;
+  final String? polizaUrl;
 
   const PlanActionsRow({
     super.key,
@@ -21,6 +23,7 @@ class PlanActionsRow extends StatelessWidget {
     required this.beneficiarios,
     required this.status,
     this.userPlanId,
+    this.polizaUrl,
   });
 
   @override
@@ -41,7 +44,25 @@ class PlanActionsRow extends StatelessWidget {
                     icon: Icons.policy,
                     label: 'Póliza',
                     onTap: () {
-                      Navigator.pushNamed(context, '/mi-poliza');
+                      if (polizaUrl != null && polizaUrl!.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PdfxViewerScreen(
+                              title: 'Mi Póliza',
+                              pdfUrl: polizaUrl!,
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Mostrar mensaje de que la póliza no está disponible
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('La póliza no está disponible en este momento'),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
                     },
                   ),
                   PlanActionButton(
@@ -142,22 +163,28 @@ class PlanActionsRow extends StatelessWidget {
           ),
         ] else if (status == 'autorizado_por_pagar_1') ...[
           PlanActionButton(
-            icon: Icons.lock,
-            label: 'Póliza',
+            icon: Icons.policy,
+            label: 'Ver mi póliza',
             onTap: () {
-              showDialog(
-                context: context,
-                builder: (_) => AlertDialog(
-                  title: const Text('Plan inactivo'),
-                  content: const Text('Este plan aún no ha sido activado.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Entendido'),
+              if (polizaUrl != null && polizaUrl!.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PdfxViewerScreen(
+                      title: 'Mi Póliza',
+                      pdfUrl: polizaUrl!,
                     ),
-                  ],
-                ),
-              );
+                  ),
+                );
+              } else {
+                // Mostrar mensaje de que la póliza no está disponible
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('La póliza no está disponible en este momento'),
+                    backgroundColor: Colors.blue,
+                  ),
+                );
+              }
             },
           ),
         ],

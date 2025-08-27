@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import '../../../pdfx_viewer_screen.dart';
 
 class PlanAuthorizedCard extends StatelessWidget {
-  const PlanAuthorizedCard({super.key});
+  final String? polizaUrl;
+  
+  const PlanAuthorizedCard({
+    super.key,
+    this.polizaUrl,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +46,25 @@ class PlanAuthorizedCard extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              // Acción al ver la póliza
+              if (polizaUrl != null && polizaUrl!.isNotEmpty) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PdfxViewerScreen(
+                      title: 'Mi Póliza',
+                      pdfUrl: polizaUrl!,
+                    ),
+                  ),
+                );
+              } else {
+                // Mostrar mensaje de que la póliza no está disponible
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('La póliza no está disponible en este momento'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF16A34A),

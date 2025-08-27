@@ -250,6 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final duracion = (plan['duracion'] ?? 0).toInt();
                     final status = plan['status'] ?? 'Sin status';
                     final userPlanId = plan['id'] ?? 'Sin id';
+                    final polizaUrl = plan['poliza'];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: PlanCard(
@@ -267,6 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         beneficiarios: beneficiarios, // ✅ agregado
                         status: status,
                         userPlanId: userPlanId,
+                        polizaUrl: polizaUrl,
                       ),
                     );
                   },
