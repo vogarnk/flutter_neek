@@ -153,7 +153,7 @@ class PlanSettingsScreen extends StatelessWidget {
   // Función para calcular total retirar corto: recuperacion_udis del año objetivo (duración + año actual)
   double _calculateTotalRetirarCorto() {
     final udisPlan = userPlan?['udis'] ?? 0.0;
-    if (cotizaciones == null || cotizaciones!.isEmpty || udisActual == null) {
+    if (cotizaciones == null || cotizaciones!.isEmpty) {
       return (udisPlan * 0.8); // Fallback
     }
     
@@ -203,12 +203,12 @@ class PlanSettingsScreen extends StatelessWidget {
     
     if (cotizacionObjetivo != null) {
       final recuperacionUdis = cotizacionObjetivo['recuperacion_udis'];
-      final udisIndex = cotizacionObjetivo['udis'];
+      final udisProyectado = cotizacionObjetivo['udis'];
       
       print('🔍 _calculateTotalRetirarCorto: recuperacionUdis = $recuperacionUdis');
-      print('🔍 _calculateTotalRetirarCorto: udisIndex = $udisIndex');
+      print('🔍 _calculateTotalRetirarCorto: udisProyectado = $udisProyectado');
       
-      if (recuperacionUdis != null && udisIndex != null) {
+      if (recuperacionUdis != null && udisProyectado != null) {
         double recuperacion;
         double udisValor;
         
@@ -220,16 +220,18 @@ class PlanSettingsScreen extends StatelessWidget {
           recuperacion = 0.0;
         }
         
-        if (udisIndex is String) {
-          udisValor = double.tryParse(udisIndex) ?? 0.0;
-        } else if (udisIndex is num) {
-          udisValor = udisIndex.toDouble();
+        if (udisProyectado is String) {
+          udisValor = double.tryParse(udisProyectado) ?? 0.0;
+        } else if (udisProyectado is num) {
+          udisValor = udisProyectado.toDouble();
         } else {
           udisValor = 0.0;
         }
         
+        // Multiplicar recuperacion_udis por el valor de UDIS proyectado para ese año
         final resultado = recuperacion * udisValor;
         print('🔍 _calculateTotalRetirarCorto: resultado = $recuperacion * $udisValor = $resultado');
+        print('🔍 _calculateTotalRetirarCorto: NOTA: Usando UDIS proyectado del año $anioObjetivo, NO el valor actual');
         return resultado;
       }
     }
