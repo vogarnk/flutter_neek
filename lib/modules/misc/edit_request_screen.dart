@@ -32,22 +32,33 @@ class EditRequestScreen extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,                  
                   fontSize: 18,
-                  color: Theme.of(context).textTheme.displaySmall?.color,
+                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 '¿Qué te gustaría cambiar?',
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.displaySmall?.color,
+                  color: Colors.black87,
                 )
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
+                style: TextStyle(
+                  color: Colors.grey.shade800,
+                ),
+                dropdownColor: Theme.of(context).colorScheme.surface,
                 items: const [
                   DropdownMenuItem(value: 'correo', child: Text('Correo')),
                   DropdownMenuItem(value: 'nombre', child: Text('Nombre')),
                   DropdownMenuItem(value: 'telefono', child: Text('Teléfono')),
+                  DropdownMenuItem(value: 'direccion', child: Text('Dirección')),
+                  DropdownMenuItem(value: 'fecha_nacimiento', child: Text('Fecha de nacimiento')),
+                  DropdownMenuItem(value: 'rfc', child: Text('RFC')),
+                  DropdownMenuItem(value: 'curp', child: Text('CURP')),
+                  DropdownMenuItem(value: 'estado_civil', child: Text('Estado civil')),
+                  DropdownMenuItem(value: 'beneficiarios', child: Text('Beneficiarios')),
+                  DropdownMenuItem(value: 'otro', child: Text('Otro')),
                 ],
                 onChanged: (value) {
                   // lógica para manejar selección
@@ -55,13 +66,29 @@ class EditRequestScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      width: 1.5,
+                    ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
-                hint: const Text(
-                  'Correo',
+                hint: Text(
+                  'Selecciona un dato',
                   style: TextStyle(
-                    color: Colors.black54, // 👈 Así te aseguras de que no sea blanco
+                    color: Colors.grey.shade600,
                     fontSize: 16,
                   ),
                 ),// 👈 Esto muestra el placeholder
@@ -70,17 +97,38 @@ class EditRequestScreen extends StatelessWidget {
               Text(
                 'Describe aquí que te gustaria cambiar',
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.displaySmall?.color,
+                  color: Colors.black87,
                 )
               ),
               const SizedBox(height: 8),
               TextFormField(
+                style: TextStyle(
+                  color: Colors.grey.shade800,
+                ),
                 maxLines: 4,
                 decoration: InputDecoration(
                   hintText: 'Escribe aquí...',
-                  hintStyle: Theme.of(context).textTheme.bodySmall, // 👈 Aquí se usa bodySmall
+                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey.shade600,
+                      ), // 👈 Aquí se usa bodySmall
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -100,7 +148,10 @@ class EditRequestScreen extends StatelessWidget {
               const SizedBox(height: 12),
               RichText(
                 text: TextSpan(
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 12),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: 12,
+                        color: Colors.black87,
+                      ),
                   children: [
                     const TextSpan(
                       text: 'Tu información está protegida, para más información puedes leer nuestro ',
