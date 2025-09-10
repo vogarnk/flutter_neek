@@ -30,8 +30,8 @@ class ChatMessage {
       id: json['id'] ?? '',
       text: json['text'] ?? json['message'] ?? '',
       isUser: json['is_user'] ?? false,
-      timestamp: DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()),
-      filePath: json['file_path'],
+      timestamp: DateTime.parse(json['created_at'] ?? json['timestamp'] ?? DateTime.now().toIso8601String()),
+      filePath: json['file_url'], // La API usa 'file_url' en lugar de 'file_path'
       fileName: json['file_name'],
       fileType: json['file_type'],
       conversationId: json['conversation_id'],
@@ -46,8 +46,8 @@ class ChatMessage {
       'id': id,
       'text': text,
       'is_user': isUser,
-      'timestamp': timestamp.toIso8601String(),
-      'file_path': filePath,
+      'created_at': timestamp.toIso8601String(),
+      'file_url': filePath, // Usar 'file_url' para consistencia con la API
       'file_name': fileName,
       'file_type': fileType,
       'conversation_id': conversationId,

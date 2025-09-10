@@ -13,6 +13,8 @@ class ApiService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // Define aquí tu URL base; se elige automáticamente según plataforma
+  String get baseUrl => _baseUrl;
+  
   String get _baseUrl {
     if (Platform.isAndroid) {
       return 'https://app.neek.mx/api';

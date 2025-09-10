@@ -3,163 +3,311 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:neek/core/api_service.dart';
 import 'package:neek/models/chat_message_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ChatService {
-  static const String _chatEndpoint = '/chat';
+  static const String _chatEndpoint = '/app-chat';
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  // Enviar mensaje de texto
-  static Future<ChatResponse> sendTextMessage({
-    required String message,
-    required String sessionId,
-    String? conversationId,
-  }) async {
+  // Obtener user_id del usuario autenticado
+  static Future<String?> _getUserId() async {
     try {
-      final response = await ApiService.instance.post(
-        '$_chatEndpoint/message',
-        body: {
-          'message': message,
-          'session_id': sessionId,
-          'conversation_id': conversationId,
-          'type': 'text',
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) {
+        print('❌ [ChatService] No hay token almacenado');
+        return null;
+      }
+
+      print('🔍 [ChatService] Token encontrado, intentando decodificar...');
+
+      // Intentar decodificar token JWT
+      try {
+        final parts = token.split('.');
+        if (parts.length == 3) {
+          String payload = parts[1];
+          while (payload.length % 4 != 0) {
+            payload += '=';
+          }
+
+          final decodedBytes = base64Url.decode(payload);
+          final decodedString = utf8.decode(decodedBytes);
+          final payloadData = jsonDecode(decodedString);
+          
+          print('📋 [ChatService] Payload del token: $payloadData');
+          
+          final userId = payloadData['sub'] ?? 
+                        payloadData['user_id'] ?? 
+                        payloadData['id'] ?? 
+                        payloadData['user']['id'] ??
+                        payloadData['data']['id'] ??
+                        payloadData['data']['user_id'];
+          
+          if (userId != null) {
+            print('✅ [ChatService] User ID encontrado en token: $userId');
+            return userId.toString();
+          }
+        }
+      } catch (e) {
+        print('⚠️ [ChatService] Error decodificando JWT: $e');
+      }
+
+      // Intentar extraer user_id usando el mismo método que BeneficiarioService
+      final tokenUserId = _extractUserIdFromToken(token);
+      if (tokenUserId != null) {
+        print('✅ [ChatService] User ID extraído del token: $tokenUserId');
+        return tokenUserId.toString();
+      }
+
+      // Fallback: obtener user_id de la API
+      print('🔄 [ChatService] Intentando obtener user_id de la API...');
+      return await _getUserIdFromApi();
+      
+    } catch (e) {
+      print('💥 [ChatService] Error al obtener user_id: $e');
+      return null;
+    }
+  }
+
+  // Método auxiliar para extraer user_id del token (similar a BeneficiarioService)
+  static String? _extractUserIdFromToken(String token) {
+    try {
+      print('🔍 [ChatService] Intentando extraer user_id del token JWT');
+      
+      // Los tokens JWT tienen formato: header.payload.signature
+      final parts = token.split('.');
+      if (parts.length != 3) {
+        print('❌ [ChatService] Token no tiene formato JWT válido');
+        return null;
+      }
+
+      // Decodificar el payload (segunda parte)
+      final payload = parts[1];
+      
+      // Agregar padding si es necesario para base64
+      String paddedPayload = payload;
+      while (paddedPayload.length % 4 != 0) {
+        paddedPayload += '=';
+      }
+      
+      // Decodificar base64
+      final decodedBytes = base64Url.decode(paddedPayload);
+      final decodedString = utf8.decode(decodedBytes);
+      
+      print('📋 [ChatService] Payload del token: $decodedString');
+      
+      final payloadData = jsonDecode(decodedString);
+      final userId = payloadData['sub'] ?? 
+                    payloadData['user_id'] ?? 
+                    payloadData['id'] ?? 
+                    payloadData['data']['id'] ??
+                    payloadData['data']['user_id'];
+      
+      print('📋 [ChatService] User ID del token: $userId');
+      return userId?.toString();
+      
+    } catch (e) {
+      print('💥 [ChatService] Error al decodificar token JWT: $e');
+      return null;
+    }
+  }
+
+  // Método de fallback para obtener user_id de la API (usando el mismo patrón que BeneficiarioService)
+  static Future<String?> _getUserIdFromApi() async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) {
+        print('❌ [ChatService] No hay token para obtener user_id de API');
+        return null;
+      }
+
+      print('🔍 [ChatService] Intentando obtener user_id de /api/user');
+
+      // Usar el mismo patrón que BeneficiarioService
+      final response = await http.get(
+        Uri.parse('${ApiService.instance.baseUrl}/user'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
         },
       );
 
+      print('📥 [ChatService] Respuesta de /api/user: ${response.statusCode}');
+      print('📥 [ChatService] Cuerpo de respuesta: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return ChatResponse.fromJson(data);
-      } else {
-        throw Exception('Error al enviar mensaje: ${response.statusCode}');
+        print('📋 [ChatService] Datos del usuario: $data');
+        
+        // Buscar user_id en diferentes ubicaciones (igual que BeneficiarioService)
+        final userId = data['data']['id'] ?? 
+                      data['data']['user_id'] ?? 
+                      data['id'] ?? 
+                      data['user_id'] ??
+                      data['user']['id'];
+        
+        if (userId != null) {
+          print('✅ [ChatService] User ID obtenido de API: $userId');
+          return userId.toString();
+        }
       }
+      
+      print('❌ [ChatService] No se pudo obtener user_id de la API');
+      return null;
     } catch (e) {
-      throw Exception('Error de conexión: $e');
+      print('💥 [ChatService] Error al obtener user_id de API: $e');
+      return null;
     }
   }
 
-  // Enviar archivo (imagen o PDF)
-  static Future<ChatResponse> sendFileMessage({
-    required File file,
-    required String sessionId,
-    String? conversationId,
-    String? message,
-  }) async {
+  // Inicializar chat (crear nueva conversación o retornar existente)
+  static Future<ChatInitializeResponse> initializeChat({String? sessionId}) async {
     try {
-      final fields = <String, String>{
-        'session_id': sessionId,
-        'conversation_id': conversationId ?? '',
-        'message': message ?? '',
-        'type': 'file',
-      };
+      final userId = await _getUserId();
+      if (userId == null) {
+        throw Exception('No se pudo obtener el ID del usuario');
+      }
 
-      final files = [
-        http.MultipartFile(
-          'file',
-          file.readAsBytes().asStream(),
-          file.lengthSync(),
-          filename: file.path.split('/').last,
-        ),
-      ];
+      final body = <String, dynamic>{'user_id': userId};
+      if (sessionId != null) {
+        body['session_id'] = sessionId;
+      }
 
-      final response = await ApiService.instance.postMultipart(
-        path: '$_chatEndpoint/file',
-        fields: fields,
-        files: files,
+      final response = await ApiService.instance.post(
+        '$_chatEndpoint/initialize',
+        body: body,
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return ChatResponse.fromJson(data);
+        return ChatInitializeResponse.fromJson(data);
       } else {
-        throw Exception('Error al enviar archivo: ${response.statusCode}');
+        throw Exception('Error al inicializar chat: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error de conexión: $e');
     }
   }
 
-  // Obtener historial de conversación
-  static Future<List<ChatMessage>> getConversationHistory({
-    required String conversationId,
-    int? limit,
-    int? offset,
-  }) async {
+  // Obtener mensajes de una conversación
+  static Future<List<ChatMessage>> getMessages(String conversationId) async {
     try {
-      String path = '$_chatEndpoint/history?conversation_id=$conversationId';
-      if (limit != null) path += '&limit=$limit';
-      if (offset != null) path += '&offset=$offset';
-
-      final response = await ApiService.instance.get(path);
+      final response = await ApiService.instance.get(
+        '$_chatEndpoint/conversations/$conversationId/messages',
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final List<dynamic> messages = data['messages'] ?? [];
         return messages.map((msg) => ChatMessage.fromJson(msg)).toList();
       } else {
-        throw Exception('Error al obtener historial: ${response.statusCode}');
+        throw Exception('Error al obtener mensajes: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error de conexión: $e');
     }
   }
 
-  // Crear nueva conversación
-  static Future<String> createConversation({
-    required String sessionId,
-    String? initialMessage,
+  // Enviar mensaje de texto
+  static Future<ChatMessage> sendMessage({
+    required String conversationId,
+    required String text,
+    File? file,
   }) async {
     try {
-      final response = await ApiService.instance.post(
-        '$_chatEndpoint/conversation',
-        body: {
-          'session_id': sessionId,
-          'initial_message': initialMessage,
-        },
-      );
+      if (file == null) {
+        // Enviar mensaje de texto
+        final response = await ApiService.instance.post(
+          '$_chatEndpoint/send-message',
+          body: {
+            'conversation_id': conversationId,
+            'text': text,
+          },
+        );
 
-      if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        return data['conversation_id'] ?? '';
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          return ChatMessage.fromJson(data['message']);
+        } else {
+          throw Exception('Error al enviar mensaje: ${response.statusCode}');
+        }
       } else {
-        throw Exception('Error al crear conversación: ${response.statusCode}');
+        // Enviar mensaje con archivo
+        final request = http.MultipartRequest(
+          'POST',
+          Uri.parse('${ApiService.instance.baseUrl}$_chatEndpoint/send-message'),
+        );
+
+        // Agregar headers de autenticación
+        final token = await _storage.read(key: 'auth_token');
+        if (token != null) {
+          request.headers['Authorization'] = 'Bearer $token';
+        }
+
+        request.fields['conversation_id'] = conversationId;
+        request.fields['text'] = text;
+        request.files.add(await http.MultipartFile.fromPath('file', file.path));
+
+        final response = await request.send();
+        final responseData = await response.stream.bytesToString();
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(responseData);
+          return ChatMessage.fromJson(data['message']);
+        } else {
+          throw Exception('Error al enviar archivo: ${response.statusCode}');
+        }
       }
     } catch (e) {
       throw Exception('Error de conexión: $e');
     }
   }
 
-  // Marcar mensaje como leído
-  static Future<bool> markMessageAsRead({
-    required String messageId,
-    required String conversationId,
-  }) async {
+  // Marcar conversación como leída
+  static Future<bool> markAsRead(String conversationId) async {
     try {
       final response = await ApiService.instance.put(
-        '$_chatEndpoint/message/read',
-        body: {
-          'message_id': messageId,
-          'conversation_id': conversationId,
-        },
+        '$_chatEndpoint/conversations/$conversationId/mark-read',
       );
 
       return response.statusCode == 200;
     } catch (e) {
+      print('Error al marcar como leído: $e');
       return false;
     }
   }
 
-  // Obtener estado de la conversación
-  static Future<ConversationStatus> getConversationStatus({
-    required String conversationId,
-  }) async {
+  // Cerrar conversación
+  static Future<bool> closeConversation(String conversationId) async {
     try {
+      final response = await ApiService.instance.put(
+        '$_chatEndpoint/conversations/$conversationId/close',
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error al cerrar conversación: $e');
+      return false;
+    }
+  }
+
+  // Obtener conversaciones del usuario
+  static Future<List<ChatConversation>> getUserConversations() async {
+    try {
+      final userId = await _getUserId();
+      if (userId == null) {
+        throw Exception('No se pudo obtener el ID del usuario');
+      }
+
       final response = await ApiService.instance.get(
-        '$_chatEndpoint/conversation/$conversationId/status',
+        '$_chatEndpoint/users/$userId/conversations',
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return ConversationStatus.fromJson(data);
+        final List<dynamic> conversations = data['conversations'] ?? [];
+        return conversations.map((conv) => ChatConversation.fromJson(conv)).toList();
       } else {
-        throw Exception('Error al obtener estado: ${response.statusCode}');
+        throw Exception('Error al obtener conversaciones: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Error de conexión: $e');
@@ -167,66 +315,65 @@ class ChatService {
   }
 }
 
-class ChatResponse {
-  final String messageId;
+// Respuesta de inicialización del chat
+class ChatInitializeResponse {
   final String conversationId;
-  final String response;
-  final bool isBot;
-  final DateTime timestamp;
-  final String? agentId;
-  final String? agentName;
+  final String sessionId;
+  final ChatMessage? welcomeMessage;
+  final List<ChatMessage>? existingMessages;
+  final bool isNewConversation;
 
-  ChatResponse({
-    required this.messageId,
+  ChatInitializeResponse({
     required this.conversationId,
-    required this.response,
-    required this.isBot,
-    required this.timestamp,
-    this.agentId,
-    this.agentName,
+    required this.sessionId,
+    this.welcomeMessage,
+    this.existingMessages,
+    required this.isNewConversation,
   });
 
-  factory ChatResponse.fromJson(Map<String, dynamic> json) {
-    return ChatResponse(
-      messageId: json['message_id'] ?? '',
+  factory ChatInitializeResponse.fromJson(Map<String, dynamic> json) {
+    return ChatInitializeResponse(
       conversationId: json['conversation_id'] ?? '',
-      response: json['response'] ?? '',
-      isBot: json['is_bot'] ?? true,
-      timestamp: DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()),
-      agentId: json['agent_id'],
-      agentName: json['agent_name'],
+      sessionId: json['session_id'] ?? '',
+      welcomeMessage: json['welcome_message'] != null 
+          ? ChatMessage.fromJson(json['welcome_message'])
+          : null,
+      existingMessages: json['messages'] != null
+          ? (json['messages'] as List).map((msg) => ChatMessage.fromJson(msg)).toList()
+          : null,
+      isNewConversation: json['welcome_message'] != null,
     );
   }
 }
 
-class ConversationStatus {
-  final String conversationId;
-  final bool isActive;
-  final bool isBotResponding;
-  final String? currentAgentId;
-  final String? currentAgentName;
-  final DateTime lastActivity;
-  final int unreadMessages;
+// Modelo de conversación
+class ChatConversation {
+  final String id;
+  final String status;
+  final int unreadCount;
+  final ChatMessage? lastMessage;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  ConversationStatus({
-    required this.conversationId,
-    required this.isActive,
-    required this.isBotResponding,
-    this.currentAgentId,
-    this.currentAgentName,
-    required this.lastActivity,
-    required this.unreadMessages,
+  ChatConversation({
+    required this.id,
+    required this.status,
+    required this.unreadCount,
+    this.lastMessage,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
-  factory ConversationStatus.fromJson(Map<String, dynamic> json) {
-    return ConversationStatus(
-      conversationId: json['conversation_id'] ?? '',
-      isActive: json['is_active'] ?? false,
-      isBotResponding: json['is_bot_responding'] ?? true,
-      currentAgentId: json['current_agent_id'],
-      currentAgentName: json['current_agent_name'],
-      lastActivity: DateTime.parse(json['last_activity'] ?? DateTime.now().toIso8601String()),
-      unreadMessages: json['unread_messages'] ?? 0,
+  factory ChatConversation.fromJson(Map<String, dynamic> json) {
+    return ChatConversation(
+      id: json['id'] ?? '',
+      status: json['status'] ?? 'active',
+      unreadCount: json['unread_count'] ?? 0,
+      lastMessage: json['last_message'] != null
+          ? ChatMessage.fromJson(json['last_message'])
+          : null,
+      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
     );
   }
 }

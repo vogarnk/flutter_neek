@@ -1,13 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:neek/core/theme/app_colors.dart';
-import 'package:neek/core/theme/app_theme.dart';
 import 'package:neek/core/chat_service.dart';
 import 'package:neek/models/chat_message_model.dart';
-import 'package:neek/core/device_token_service.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String? conversationId;
+  
+  const ChatScreen({super.key, this.conversationId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -19,8 +20,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
   String? _conversationId;
-  String? _sessionId;
   bool _isLoading = true;
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -30,25 +31,49 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _initializeChat() async {
     try {
-      // Generar un ID de sesión simple para esta implementación
-      _sessionId = 'session_${DateTime.now().millisecondsSinceEpoch}';
+      if (widget.conversationId != null) {
+        // Cargar conversación existente específica
+        _conversationId = widget.conversationId;
+        final messages = await ChatService.getMessages(_conversationId!);
+        
+        setState(() {
+          _messages.clear();
+          _messages.addAll(messages);
+          _isLoading = false;
+        });
+        
+        // Marcar mensajes como leídos
+        ChatService.markAsRead(_conversationId!);
+      } else {
+        // Inicializar chat usando la nueva API (crear nueva o obtener existente)
+        final response = await ChatService.initializeChat();
+        
+        _conversationId = response.conversationId;
+        
+        // Limpiar mensajes anteriores
+        _messages.clear();
+        
+        if (response.isNewConversation && response.welcomeMessage != null) {
+          // Nueva conversación con mensaje de bienvenida
+          _messages.add(response.welcomeMessage!);
+        } else if (response.existingMessages != null) {
+          // Conversación existente con mensajes previos
+          _messages.addAll(response.existingMessages!);
+        }
+
+        setState(() {
+          _isLoading = false;
+        });
+        
+        // Marcar mensajes como leídos
+        if (_conversationId != null) {
+          ChatService.markAsRead(_conversationId!);
+        }
+      }
       
-      // Por ahora, usar un ID de conversación simple
-      _conversationId = 'conv_${DateTime.now().millisecondsSinceEpoch}';
-
-      // Mensaje de bienvenida del bot
-      _messages.add(ChatMessage(
-        id: 'welcome_${DateTime.now().millisecondsSinceEpoch}',
-        text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?',
-        isUser: false,
-        timestamp: DateTime.now(),
-        conversationId: _conversationId,
-      ));
-
-      setState(() {
-        _isLoading = false;
-      });
+      _scrollToBottom();
     } catch (e) {
+      print('Error al inicializar chat: $e');
       setState(() {
         _isLoading = false;
       });
@@ -63,6 +88,37 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  // Método para refrescar mensajes (obtener nuevos mensajes del servidor)
+  Future<void> _refreshMessages() async {
+    if (_conversationId == null || _isRefreshing) return;
+
+    setState(() {
+      _isRefreshing = true;
+    });
+
+    try {
+      final newMessages = await ChatService.getMessages(_conversationId!);
+      
+      // Actualizar solo si hay mensajes nuevos
+      if (newMessages.length != _messages.length) {
+        setState(() {
+          _messages.clear();
+          _messages.addAll(newMessages);
+        });
+        
+        // Marcar como leídos los nuevos mensajes
+        ChatService.markAsRead(_conversationId!);
+        _scrollToBottom();
+      }
+    } catch (e) {
+      print('Error al refrescar mensajes: $e');
+    } finally {
+      setState(() {
+        _isRefreshing = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -70,41 +126,47 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+  void _sendMessage() async {
+    if (_messageController.text.trim().isEmpty || _conversationId == null) return;
 
-    final message = ChatMessage(
-      id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-      text: _messageController.text.trim(),
-      isUser: true,
-      timestamp: DateTime.now(),
-      conversationId: _conversationId,
-    );
-
-    setState(() {
-      _messages.add(message);
-      _isTyping = true;
-    });
-
+    final messageText = _messageController.text.trim();
     _messageController.clear();
-    _scrollToBottom();
 
-    // Simular respuesta del bot
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      setState(() {
+        _isTyping = true;
+      });
+
+      // Enviar mensaje usando la nueva API
+      final sentMessage = await ChatService.sendMessage(
+        conversationId: _conversationId!,
+        text: messageText,
+      );
+
+      setState(() {
+        _messages.add(sentMessage);
+        _isTyping = false;
+      });
+
+      _scrollToBottom();
+
+      // La respuesta del bot llegará automáticamente vía webhook
+      // No necesitamos simular una respuesta
+    } catch (e) {
+      print('Error al enviar mensaje: $e');
+      setState(() {
+        _isTyping = false;
+      });
+      
       if (mounted) {
-        setState(() {
-          _isTyping = false;
-          _messages.add(ChatMessage(
-            id: 'bot_${DateTime.now().millisecondsSinceEpoch}',
-            text: 'Gracias por tu mensaje. Un agente humano se pondrá en contacto contigo pronto.',
-            isUser: false,
-            timestamp: DateTime.now(),
-            conversationId: _conversationId,
-          ));
-        });
-        _scrollToBottom();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al enviar mensaje: $e'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
       }
-    });
+    }
   }
 
   void _scrollToBottom() {
@@ -120,37 +182,56 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _pickFile() async {
+    if (_conversationId == null) return;
+    
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
         allowMultiple: false,
       );
 
       if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        final message = ChatMessage(
-          id: 'file_${DateTime.now().millisecondsSinceEpoch}',
-          text: 'Archivo enviado: ${file.name}',
-          isUser: true,
-          timestamp: DateTime.now(),
-          conversationId: _conversationId,
-          fileName: file.name,
-          fileType: file.extension,
+        final platformFile = result.files.first;
+        
+        if (platformFile.path == null) {
+          throw Exception('No se pudo acceder al archivo');
+        }
+
+        final file = File(platformFile.path!);
+        
+        setState(() {
+          _isTyping = true;
+        });
+
+        // Enviar archivo usando la nueva API
+        final sentMessage = await ChatService.sendMessage(
+          conversationId: _conversationId!,
+          text: 'Archivo enviado: ${platformFile.name}',
+          file: file,
         );
 
         setState(() {
-          _messages.add(message);
+          _messages.add(sentMessage);
+          _isTyping = false;
         });
+        
         _scrollToBottom();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al seleccionar archivo: $e'),
-          backgroundColor: AppColors.primary,
-        ),
-      );
+      print('Error al enviar archivo: $e');
+      setState(() {
+        _isTyping = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al enviar archivo: $e'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
     }
   }
 
@@ -197,6 +278,22 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            onPressed: _isRefreshing ? null : _refreshMessages,
+            icon: _isRefreshing 
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.textWhite),
+                    ),
+                  )
+                : const Icon(Icons.refresh),
+            tooltip: 'Actualizar mensajes',
+          ),
+        ],
       ),
       body: Column(
         children: [
