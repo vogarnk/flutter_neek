@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
-import '../modules/register/register_form.dart';
+import '../modules/savings/savings_type_selection_screen.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -64,7 +64,7 @@ class RegisterScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PlanSummaryScreen(),
+                        builder: (context) => const SavingsTypeSelectionScreen(),
                       ),
                     );
                   },
