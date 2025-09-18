@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/core/quote_service.dart' as quote;
@@ -25,6 +26,9 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
   List<quote.PlanOption>? plans;
   bool showInputs = true;
   late PageController _pageController;
+  
+  // Variables para mantener los valores actuales de los parámetros
+  Map<String, dynamic>? currentParameters;
 
   @override
   void initState() {
@@ -256,45 +260,157 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          Icon(
-            _getSimulationIcon(selectedType!),
-            color: AppColors.primary,
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  _getSimulationTypeTitle(selectedType!),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textGray900,
-                  ),
+          Row(
+            children: [
+              Icon(
+                _getSimulationIcon(selectedType!),
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _getSimulationTypeTitle(selectedType!),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textGray900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Toca un parámetro para editarlo',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textGray500,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Parámetros configurados',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textGray500,
-                  ),
+              ),
+              IconButton(
+                onPressed: () => setState(() => showInputs = !showInputs),
+                icon: Icon(
+                  showInputs ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: AppColors.textGray500,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: () => setState(() => showInputs = !showInputs),
-            icon: Icon(
-              showInputs ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-              color: AppColors.textGray500,
-            ),
-          ),
+          const SizedBox(height: 12),
+          _buildParameterChips(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildParameterChips() {
+    if (simulationResults == null) return const SizedBox.shrink();
+    
+    final parameters = simulationResults!['parameters'] as Map<String, dynamic>;
+    final simulationType = simulationResults!['simulation_type'] as String;
+    
+    List<Widget> chips = [];
+    
+    switch (simulationType) {
+      case 'monthly-savings':
+        chips = [
+          _buildParameterChip('Edad', '${parameters['age']} años', () => _editParameter('age')),
+          _buildParameterChip('Plazo', '${parameters['plan_duration']} años', () => _editParameter('plan_duration')),
+          _buildParameterChip('Ahorro Mensual', '\$${NumberFormat('#,###', 'es_MX').format(parameters['monthly_savings'])}', () => _editParameter('monthly_savings')),
+        ];
+        break;
+      case 'target-amount':
+        chips = [
+          _buildParameterChip('Edad', '${parameters['age']} años', () => _editParameter('age')),
+          _buildParameterChip('Monto Objetivo', '\$${NumberFormat('#,###', 'es_MX').format(parameters['target_amount'])}', () => _editParameter('target_amount')),
+          _buildParameterChip('Edad Objetivo', '${parameters['target_age']} años', () => _editParameter('target_age')),
+        ];
+        break;
+      case 'education':
+        chips = [
+          _buildParameterChip('Edad', '${parameters['age']} años', () => _editParameter('age')),
+          _buildParameterChip('Ahorro Mensual', '\$${NumberFormat('#,###', 'es_MX').format(parameters['monthly_savings'])}', () => _editParameter('monthly_savings')),
+          _buildParameterChip('Años a Universidad', '${parameters['years_to_university']} años', () => _editParameter('years_to_university')),
+        ];
+        break;
+      case 'insurance-amount':
+        chips = [
+          _buildParameterChip('Edad', '${parameters['age']} años', () => _editParameter('age')),
+          _buildParameterChip('Monto Seguro', '\$${NumberFormat('#,###', 'es_MX').format(parameters['insurance_amount'])}', () => _editParameter('insurance_amount')),
+          _buildParameterChip('Beneficiarios', '${parameters['beneficiaries']} personas', () => _editParameter('beneficiaries')),
+        ];
+        break;
+    }
+    
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: chips,
+    );
+  }
+
+  Widget _buildParameterChip(String label, String value, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$label: ',
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: AppColors.primary,
+              ),
+            ),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textGray900,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(
+              Icons.edit,
+              size: 14,
+              color: AppColors.primary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _editParameter(String parameterName) {
+    // Expandir inputs y limpiar la selección de planes
+    setState(() {
+      showInputs = true;
+      plans = null; // Limpiar planes para permitir nueva simulación
+      generatedToken = null;
+      simulationResults = null;
+    });
+    
+    // Mostrar mensaje informativo
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Edita el parámetro "$parameterName" y presiona "Simular" para ver nuevos resultados'),
+        duration: const Duration(seconds: 3),
+        backgroundColor: AppColors.primary,
       ),
     );
   }
@@ -445,6 +561,11 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           simulationResults = simulationData;
           plans = results.plans.isNotEmpty ? results.plans : _createMockPlans(age, planDuration, monthlySavings);
           showInputs = false; // Contraer inputs después de la simulación
+          currentParameters = {
+            'age': age,
+            'plan_duration': planDuration,
+            'monthly_savings': monthlySavings,
+          };
           isLoading = false;
         });
         
@@ -525,6 +646,11 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           simulationResults = simulationData;
           plans = results.plans.isNotEmpty ? results.plans : _createMockPlans(age, targetAge - age, targetAmount / ((targetAge - age) * 12));
           showInputs = false; // Contraer inputs después de la simulación
+          currentParameters = {
+            'age': age,
+            'target_amount': targetAmount,
+            'target_age': targetAge,
+          };
           isLoading = false;
         });
         
@@ -605,6 +731,11 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           simulationResults = simulationData;
           plans = results.plans.isNotEmpty ? results.plans : _createMockPlans(age, yearsToUniversity, monthlySavings);
           showInputs = false; // Contraer inputs después de la simulación
+          currentParameters = {
+            'age': age,
+            'monthly_savings': monthlySavings,
+            'years_to_university': yearsToUniversity,
+          };
           isLoading = false;
         });
         
@@ -685,6 +816,11 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           simulationResults = simulationData;
           plans = results.plans.isNotEmpty ? results.plans : _createMockPlans(age, 10, insuranceAmount * 0.01);
           showInputs = false; // Contraer inputs después de la simulación
+          currentParameters = {
+            'age': age,
+            'insurance_amount': insuranceAmount,
+            'beneficiaries': beneficiaries,
+          };
           isLoading = false;
         });
         

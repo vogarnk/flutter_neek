@@ -245,9 +245,11 @@ class QuoteResults {
     for (var result in resultsData) {
       final List<dynamic> quotes = result['quotes'] ?? [];
       final String csvFile = result['csv_file'] ?? '';
+      debugPrint('CSV file found: $csvFile');
       for (var quote in quotes) {
         // Agregar el archivo CSV al quote
         quote['csv_file'] = csvFile;
+        debugPrint('Quote ID: ${quote['id']}, CSV: $csvFile');
         plans.add(PlanOption.fromJson(quote));
       }
     }

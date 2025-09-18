@@ -154,7 +154,9 @@ class SimulationPlanCard extends StatelessWidget {
             
             // Debug: Archivo CSV
             if (plan.csvFile != null && plan.csvFile!.isNotEmpty)
-              _buildCsvDebugInfo(plan.csvFile!),
+              _buildCsvDebugInfo(plan.csvFile!)
+            else
+              _buildCsvDebugInfo('CSV no disponible - ID: ${plan.id}'),
           ],
         ),
       ),
