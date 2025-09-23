@@ -404,15 +404,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
       generatedToken = null;
       simulationResults = null;
     });
-    
-    // Mostrar mensaje informativo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Edita el parámetro "$parameterName" y presiona "Simular" para ver nuevos resultados'),
-        duration: const Duration(seconds: 3),
-        backgroundColor: AppColors.primary,
-      ),
-    );
   }
 
   Widget _buildPlansList() {

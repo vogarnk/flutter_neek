@@ -157,6 +157,6 @@ class SavingsConstants {
   
   static const List<int> beneficiariesOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   
-  static const double minTargetAmount = 1000.0;
+  static const double minTargetAmount = 400000.0;
   static const double minInsuranceAmount = 10000.0;
 }

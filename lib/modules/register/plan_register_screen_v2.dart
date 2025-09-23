@@ -26,36 +26,6 @@ class _PlanRegisterScreenV2State extends State<PlanRegisterScreenV2> {
   void initState() {
     super.initState();
     // Si hay datos de simulación, mostrarlos en la UI
-    if (widget.userData.containsKey('simulation_type')) {
-      _showSimulationInfo();
-    }
-  }
-
-  void _showSimulationInfo() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Información de Simulación'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Tipo: ${widget.userData['simulation_type']}'),
-              Text('Token: ${widget.userData['simulation_token']}'),
-              const SizedBox(height: 8),
-              const Text('Los datos de tu simulación se incluirán en el registro.'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido'),
-            ),
-          ],
-        ),
-      );
-    });
   }
 
   void _continue() async {
@@ -142,52 +112,6 @@ class _PlanRegisterScreenV2State extends State<PlanRegisterScreenV2> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Mostrar información de simulación si existe
-                    if (widget.userData.containsKey('simulation_type')) ...[
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.analytics,
-                              color: AppColors.primary,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Simulación incluida',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Tipo: ${widget.userData['simulation_type']}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.textGray500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
                     const Text(
                       '¡Estamos listos para empezar!',
                       style: TextStyle(
