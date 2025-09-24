@@ -72,7 +72,7 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Monto Objetivo',
+                      'Monto a Retirar',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,

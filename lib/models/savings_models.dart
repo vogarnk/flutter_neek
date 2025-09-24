@@ -4,14 +4,14 @@ class SavingsType {
   final String id;
   final String title;
   final String description;
-  final IconData icon;
+  final String iconPath;
   final Color color;
 
   SavingsType({
     required this.id,
     required this.title,
     required this.description,
-    required this.icon,
+    required this.iconPath,
     required this.color,
   });
 
@@ -20,29 +20,29 @@ class SavingsType {
       id: 'monthly-savings',
       title: 'Ahorro Mensual',
       description: 'Ahorra una cantidad fija en base a tu meta',
-      icon: Icons.savings,
+      iconPath: 'assets/icon/tipo_ahorro/safe.svg',
       color: const Color(0xFF2563EB),
     ),
     SavingsType(
       id: 'target-amount',
       title: 'Monto a Retirar',
       description: 'Ahorra en base a tu objetivo y a cuanto quieres retirar ',
-      icon: Icons.flag,
-      color: const Color(0xFF059669),
+      iconPath: 'assets/icon/tipo_ahorro/retirar.svg',
+      color: const Color(0xFF2563EB),
     ),
     SavingsType(
       id: 'education',
       title: 'Educación',
       description: 'Ahorra para la educación universitaria de tus hijos',
-      icon: Icons.school,
-      color: const Color(0xFFDC2626),
+      iconPath: 'assets/icon/tipo_ahorro/education.svg',
+      color: const Color(0xFF2563EB),
     ),
     SavingsType(
       id: 'insurance-amount',
       title: 'Suma Asegurada',
       description: 'Ahorra visionando tu futuro, vive tranquilo y protegido',
-      icon: Icons.security,
-      color: const Color(0xFF7C3AED),
+      iconPath: 'assets/icon/tipo_ahorro/suma_asegurada.svg',
+      color: const Color(0xFF2563EB),
     ),
   ];
 }

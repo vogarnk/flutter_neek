@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:neek/core/theme/app_colors.dart';
@@ -146,16 +147,20 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                   color: type.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Icon(
-                  type.icon,
-                  size: 32,
-                  color: type.color,
+                child: SvgPicture.asset(
+                  type.iconPath,
+                  width: 12,
+                  height: 12,
+                  colorFilter: ColorFilter.mode(
+                    type.color,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
