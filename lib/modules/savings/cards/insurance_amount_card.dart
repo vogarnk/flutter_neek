@@ -6,7 +6,6 @@ class InsuranceAmountCard extends StatefulWidget {
   final Function({
     required int age,
     required double insuranceAmount,
-    required int beneficiaries,
   }) onSimulate;
   final VoidCallback onBack;
 
@@ -23,7 +22,6 @@ class InsuranceAmountCard extends StatefulWidget {
 class _InsuranceAmountCardState extends State<InsuranceAmountCard> {
   int _age = 25;
   double _insuranceAmount = 100000;
-  int _beneficiaries = 1;
   final TextEditingController _amountController = TextEditingController();
 
   @override
@@ -102,14 +100,6 @@ class _InsuranceAmountCardState extends State<InsuranceAmountCard> {
 
           // Campo de suma asegurada
           _buildAmountField(),
-          const SizedBox(height: 24),
-
-          // Campo de beneficiarios
-          _buildField(
-            label: 'Número de Beneficiarios',
-            value: '$_beneficiaries',
-            onTap: () => _showBeneficiariesSelector(),
-          ),
           const SizedBox(height: 32),
 
           // Botón de simular
@@ -268,18 +258,6 @@ class _InsuranceAmountCardState extends State<InsuranceAmountCard> {
     );
   }
 
-  void _showBeneficiariesSelector() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => _buildSelector(
-        title: 'Selecciona el número de beneficiarios',
-        items: SavingsConstants.beneficiariesOptions,
-        currentValue: _beneficiaries,
-        onSelected: (value) => setState(() => _beneficiaries = value),
-        formatter: (value) => '$value beneficiario${value > 1 ? 's' : ''}',
-      ),
-    );
-  }
 
   Widget _buildSelector<T>({
     required String title,
@@ -353,7 +331,6 @@ class _InsuranceAmountCardState extends State<InsuranceAmountCard> {
     widget.onSimulate(
       age: _age,
       insuranceAmount: _insuranceAmount,
-      beneficiaries: _beneficiaries,
     );
   }
 }

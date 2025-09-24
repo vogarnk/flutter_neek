@@ -749,7 +749,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
   Future<void> _simulateInsuranceAmount({
     required int age,
     required double insuranceAmount,
-    required int beneficiaries,
   }) async {
     setState(() => isLoading = true);
     
@@ -759,13 +758,11 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
       debugPrint('Parámetros enviados:');
       debugPrint('- age: $age');
       debugPrint('- insuranceAmount: $insuranceAmount');
-      debugPrint('- beneficiaries: $beneficiaries');
       
       // Llamada real a la API
       final response = await quote.QuoteService().simulateInsuranceAmount(
         age: age,
         insuranceAmount: insuranceAmount,
-        beneficiaries: beneficiaries,
       );
       
       // Debug: mostrar respuesta de la API
@@ -796,7 +793,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           'parameters': {
             'age': age,
             'insurance_amount': insuranceAmount,
-            'beneficiaries': beneficiaries,
           },
           'plans': results.plans.map((plan) => plan.toJson()).toList(),
           'token': response.token,
@@ -811,7 +807,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           currentParameters = {
             'age': age,
             'insurance_amount': insuranceAmount,
-            'beneficiaries': beneficiaries,
           };
           isLoading = false;
         });

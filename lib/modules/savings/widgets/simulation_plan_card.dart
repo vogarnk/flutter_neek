@@ -76,7 +76,7 @@ class SimulationPlanCard extends StatelessWidget {
                       'Ahorro + Protección ⭐️',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? AppColors.primary : const Color(0xFF2563EB),
+                        color: isSelected ? AppColors.primary : AppColors.textWhite,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -152,7 +152,27 @@ class SimulationPlanCard extends StatelessWidget {
               ),
               const Divider(height: 1, color: Color(0xFFE5E7EB)),
             ],
-            
+            // Duración del plan - para todos los planes que tengan archivo CSV
+            if (plan.csvFile != null && plan.csvFile!.isNotEmpty) ...[
+              _infoBadgeRow(
+                title: 'Duración del Plan',
+                icon: Icons.schedule,
+                badgeText: '${_extractPlanDurationFromCsv(plan.csvFile!)} años',
+                note: 'Tiempo de ahorro del plan',
+                isDarkBackground: true,
+              ),
+            ],            
+            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+
+            // Coberturas
+            _infoBadgeRow(
+              title: 'Coberturas',
+              icon: Icons.shield_outlined,
+              badgeText: _getCoverageLabel(plan.coverageType),
+              note: 'Tipo de protección incluida',
+            ),
+            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+               
             // Beneficiarios
             _infoBadgeRow(
               title: 'Beneficiarios',
@@ -161,27 +181,7 @@ class SimulationPlanCard extends StatelessWidget {
               note: 'Persona designada para recibir el beneficio',
               isDarkBackground: true,
             ),
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
             
-            // Coberturas
-            _infoBadgeRow(
-              title: 'Coberturas',
-              icon: Icons.shield_outlined,
-              badgeText: _getCoverageLabel(plan.coverageType),
-              note: 'Tipo de protección incluida',
-            ),
-            
-            // Duración del plan - solo para monto objetivo
-            if (isTargetAmountSimulation && plan.csvFile != null && plan.csvFile!.isNotEmpty) ...[
-              const Divider(height: 1, color: Color(0xFFE5E7EB)),
-              _infoBadgeRow(
-                title: 'Duración del Plan',
-                icon: Icons.schedule,
-                badgeText: '${_extractPlanDurationFromCsv(plan.csvFile!)} años',
-                note: 'Tiempo de ahorro del plan',
-                isDarkBackground: true,
-              ),
-            ],
             
             // Debug: Archivo CSV
             if (plan.csvFile != null && plan.csvFile!.isNotEmpty)

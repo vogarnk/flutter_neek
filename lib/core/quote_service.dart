@@ -118,7 +118,6 @@ class QuoteService {
   Future<QuoteResponse> simulateInsuranceAmount({
     required int age,
     required double insuranceAmount,
-    int beneficiaries = 1,
   }) async {
     try {
       final response = await http.post(
@@ -130,7 +129,6 @@ class QuoteService {
         body: json.encode({
           'age': age,
           'insurance_amount': insuranceAmount,
-          'beneficiaries': beneficiaries,
         }),
       );
 
