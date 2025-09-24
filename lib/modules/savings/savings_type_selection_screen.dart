@@ -92,7 +92,7 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '¿Cómo quieres ahorrar?',
+              '¿Como te gustaría calcular tu plan?',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,

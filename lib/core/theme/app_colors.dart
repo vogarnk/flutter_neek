@@ -15,4 +15,14 @@ class AppColors {
   static const primary = Color(0xFF2B5FF3);
   static const primary100 = Color(0xFFE1EFFE);
   static const primary600 = Color(0xFF1C64F2);
+  
+  // Colores para tipos de cobertura
+  static const coverageNone = Color(0xFFE1EFFE);
+  static const coverageExtra = Color(0xFF1E429F);
+  static const coverageD3 = Color(0xFF111928);
+  
+  // Colores de texto para tipos de cobertura
+  static const coverageTextNone = Color(0xFF1A56DB);
+  static const coverageTextExtra = Color(0xFFD1DFF3);
+  static const coverageTextD3 = Colors.white;
 }

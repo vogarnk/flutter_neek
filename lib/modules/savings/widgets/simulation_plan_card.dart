@@ -65,7 +65,7 @@ class SimulationPlanCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected 
                   ? AppColors.primary.withOpacity(0.1)
-                  : const Color(0xFFEFF5FF),
+                  : _getCoverageBackgroundColor(plan.coverageType),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Center(
@@ -76,7 +76,7 @@ class SimulationPlanCard extends StatelessWidget {
                       'Ahorro + Protección ⭐️',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? AppColors.primary : AppColors.textWhite,
+                        color: isSelected ? AppColors.primary : _getCoverageTextColor(plan.coverageType),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -270,15 +270,47 @@ class SimulationPlanCard extends StatelessWidget {
     switch (coverageType.toLowerCase()) {
       case 'sin cobertura':
       case 'none':
-        return const Color(0xFFE1EFFE);
+        return AppColors.coverageNone;
       case 'cobertura extra':
       case 'extra':
-        return const Color(0xFF1E429F);
+        return AppColors.coverageExtra;
       case 'cobertura d3':
       case 'd3':
-        return const Color(0xFF111928);
+        return AppColors.coverageD3;
       default:
         return const Color(0xFF2563EB);
+    }
+  }
+
+  Color _getCoverageBackgroundColor(String coverageType) {
+    switch (coverageType.toLowerCase()) {
+      case 'sin cobertura':
+      case 'none':
+        return AppColors.coverageNone;
+      case 'cobertura extra':
+      case 'extra':
+        return AppColors.coverageExtra;
+      case 'cobertura d3':
+      case 'd3':
+        return AppColors.coverageD3;
+      default:
+        return const Color(0xFFEFF5FF);
+    }
+  }
+
+  Color _getCoverageTextColor(String coverageType) {
+    switch (coverageType.toLowerCase()) {
+      case 'sin cobertura':
+      case 'none':
+        return AppColors.coverageTextNone;
+      case 'cobertura extra':
+      case 'extra':
+        return AppColors.coverageTextExtra;
+      case 'cobertura d3':
+      case 'd3':
+        return AppColors.coverageTextD3;
+      default:
+        return AppColors.textWhite;
     }
   }
 
