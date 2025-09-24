@@ -445,6 +445,7 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
                     plan: plan,
                     isSelected: false,
                     onTap: () => _selectPlan(plan),
+                    simulationType: simulationResults!['simulation_type'],
                   ),
                 ),
               );

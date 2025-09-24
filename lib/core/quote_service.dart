@@ -283,6 +283,10 @@ class PlanOption {
   final String totalRetirar2050Udis;
   final String totalRetirarPlanUdis;
   final String? csvFile;
+  final int? targetYear;
+  final double? udiValueAtTarget;
+  final double? valueAtTargetAge;
+  final int? valorRescateUdisAtTarget;
 
   PlanOption({
     required this.id,
@@ -305,6 +309,10 @@ class PlanOption {
     required this.totalRetirar2050Udis,
     required this.totalRetirarPlanUdis,
     this.csvFile,
+    this.targetYear,
+    this.udiValueAtTarget,
+    this.valueAtTargetAge,
+    this.valorRescateUdisAtTarget,
   });
 
   factory PlanOption.fromJson(Map<String, dynamic> json) {
@@ -329,6 +337,10 @@ class PlanOption {
       totalRetirar2050Udis: json['total_retirar_2050_udis'] ?? '0',
       totalRetirarPlanUdis: json['total_retirar_plan_udis'] ?? '0',
       csvFile: json['csv_file'],
+      targetYear: json['target_year'],
+      udiValueAtTarget: json['udi_value_at_target']?.toDouble(),
+      valueAtTargetAge: json['value_at_target_age']?.toDouble(),
+      valorRescateUdisAtTarget: json['valor_rescate_udis_at_target']?.toInt(),
     );
   }
 
@@ -353,6 +365,10 @@ class PlanOption {
       'udi_value_at_plan_year': udiValueAtPlanYear,
       'total_retirar_2050_udis': totalRetirar2050Udis,
       'total_retirar_plan_udis': totalRetirarPlanUdis,
+      'target_year': targetYear,
+      'udi_value_at_target': udiValueAtTarget,
+      'value_at_target_age': valueAtTargetAge,
+      'valor_rescate_udis_at_target': valorRescateUdisAtTarget,
     };
   }
 }
