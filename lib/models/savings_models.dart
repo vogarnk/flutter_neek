@@ -4,14 +4,14 @@ class SavingsType {
   final String id;
   final String title;
   final String description;
-  final IconData icon;
+  final String iconPath;
   final Color color;
 
   SavingsType({
     required this.id,
     required this.title,
     required this.description,
-    required this.icon,
+    required this.iconPath,
     required this.color,
   });
 
@@ -19,30 +19,30 @@ class SavingsType {
     SavingsType(
       id: 'monthly-savings',
       title: 'Ahorro Mensual',
-      description: 'Ahorra una cantidad fija cada mes',
-      icon: Icons.savings,
+      description: 'Ahorra una cantidad fija en base a tu meta',
+      iconPath: 'assets/icon/tipo_ahorro/safe.svg',
       color: const Color(0xFF2563EB),
     ),
     SavingsType(
       id: 'target-amount',
-      title: 'Monto Objetivo',
-      description: 'Define cuánto quieres retirar',
-      icon: Icons.flag,
-      color: const Color(0xFF059669),
+      title: 'Monto a Retirar',
+      description: 'Ahorra en base a tu objetivo y a cuanto quieres retirar ',
+      iconPath: 'assets/icon/tipo_ahorro/retirar.svg',
+      color: const Color(0xFF2563EB),
     ),
     SavingsType(
       id: 'education',
       title: 'Educación',
-      description: 'Ahorra para la educación universitaria',
-      icon: Icons.school,
-      color: const Color(0xFFDC2626),
+      description: 'Ahorra para la educación universitaria de tus hijos',
+      iconPath: 'assets/icon/tipo_ahorro/education.svg',
+      color: const Color(0xFF2563EB),
     ),
     SavingsType(
       id: 'insurance-amount',
       title: 'Suma Asegurada',
-      description: 'Protege a tus beneficiarios',
-      icon: Icons.security,
-      color: const Color(0xFF7C3AED),
+      description: 'Ahorra visionando tu futuro, vive tranquilo y protegido',
+      iconPath: 'assets/icon/tipo_ahorro/suma_asegurada.svg',
+      color: const Color(0xFF2563EB),
     ),
   ];
 }
@@ -157,6 +157,6 @@ class SavingsConstants {
   
   static const List<int> beneficiariesOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   
-  static const double minTargetAmount = 1000.0;
+  static const double minTargetAmount = 400000.0;
   static const double minInsuranceAmount = 10000.0;
 }

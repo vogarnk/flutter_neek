@@ -48,6 +48,7 @@ flutter:
   assets:
     - assets/logo.svg
     - assets/icon/flags/mx.svg
+    - assets/icon/tipo_ahorro/
     - assets/images/first_logo.svg
     - assets/images/second_logo.svg 
     - assets/images/logo_neek.png 

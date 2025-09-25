@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:neek/core/theme/app_colors.dart';
@@ -92,7 +93,7 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '¿Cómo quieres ahorrar?',
+              '¿Como te gustaría calcular tu plan?',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -146,16 +147,20 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                   color: type.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Icon(
-                  type.icon,
-                  size: 32,
-                  color: type.color,
+                child: SvgPicture.asset(
+                  type.iconPath,
+                  width: 12,
+                  height: 12,
+                  colorFilter: ColorFilter.mode(
+                    type.color,
+                    BlendMode.srcIn,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -404,15 +409,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
       generatedToken = null;
       simulationResults = null;
     });
-    
-    // Mostrar mensaje informativo
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Edita el parámetro "$parameterName" y presiona "Simular" para ver nuevos resultados'),
-        duration: const Duration(seconds: 3),
-        backgroundColor: AppColors.primary,
-      ),
-    );
   }
 
   Widget _buildPlansList() {
@@ -454,6 +450,7 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
                     plan: plan,
                     isSelected: false,
                     onTap: () => _selectPlan(plan),
+                    simulationType: simulationResults!['simulation_type'],
                   ),
                 ),
               );
@@ -757,7 +754,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
   Future<void> _simulateInsuranceAmount({
     required int age,
     required double insuranceAmount,
-    required int beneficiaries,
   }) async {
     setState(() => isLoading = true);
     
@@ -767,13 +763,11 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
       debugPrint('Parámetros enviados:');
       debugPrint('- age: $age');
       debugPrint('- insuranceAmount: $insuranceAmount');
-      debugPrint('- beneficiaries: $beneficiaries');
       
       // Llamada real a la API
       final response = await quote.QuoteService().simulateInsuranceAmount(
         age: age,
         insuranceAmount: insuranceAmount,
-        beneficiaries: beneficiaries,
       );
       
       // Debug: mostrar respuesta de la API
@@ -804,7 +798,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           'parameters': {
             'age': age,
             'insurance_amount': insuranceAmount,
-            'beneficiaries': beneficiaries,
           },
           'plans': results.plans.map((plan) => plan.toJson()).toList(),
           'token': response.token,
@@ -819,7 +812,6 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
           currentParameters = {
             'age': age,
             'insurance_amount': insuranceAmount,
-            'beneficiaries': beneficiaries,
           };
           isLoading = false;
         });

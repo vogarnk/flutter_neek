@@ -7,16 +7,20 @@ class SimulationPlanCard extends StatelessWidget {
   final PlanOption plan;
   final bool isSelected;
   final VoidCallback onTap;
+  final String? simulationType;
 
   const SimulationPlanCard({
     super.key,
     required this.plan,
     required this.isSelected,
     required this.onTap,
+    this.simulationType,
   });
 
   @override
   Widget build(BuildContext context) {
+    //Muestra los datos obtenidos de la respuesta de la simulación
+    print(plan.toJson());
     final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: 'MXN');
     final numberFormat = NumberFormat('#,###', 'es_MX');
     
@@ -28,6 +32,9 @@ class SimulationPlanCard extends StatelessWidget {
     // Calcular prima anual en UDIS
     final primaAnualUdis = double.tryParse(plan.primaAnualUdis) ?? 0.0;
     
+    // Verificar si es simulación de monto objetivo
+    final isTargetAmountSimulation = simulationType == 'target-amount';
+    print(simulationType);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -58,7 +65,7 @@ class SimulationPlanCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected 
                   ? AppColors.primary.withOpacity(0.1)
-                  : const Color(0xFFEFF5FF),
+                  : _getCoverageBackgroundColor(plan.coverageType),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Center(
@@ -69,7 +76,7 @@ class SimulationPlanCard extends StatelessWidget {
                       'Ahorro + Protección ⭐️',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: isSelected ? AppColors.primary : const Color(0xFF2563EB),
+                        color: isSelected ? AppColors.primary : _getCoverageTextColor(plan.coverageType),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -115,25 +122,57 @@ class SimulationPlanCard extends StatelessWidget {
             ),
             const Divider(height: 1, color: Color(0xFFE5E7EB)),
             
-            // Total a retirar en año corto
-            _udiRow(
-              title: 'Total a retirar en $anioCorto',
-              amountUdis: '${numberFormat.format(double.tryParse(plan.totalRetirarPlanUdis)?.toInt() ?? 0)} UDIS',
-              amountMxn: currencyFormat.format(plan.totalRetirarPlanMxn),
-              note: 'Proyección de UDI al día del hoy',
-              isDarkBackground: true,
+            // Totales a retirar - condicional según tipo de simulación
+            if (isTargetAmountSimulation) ...[
+              // Para monto objetivo: solo mostrar un total a retirar
+              _udiRow(
+                title: 'Total a retirar en ${plan.targetYear}',
+                amountUdis: '${numberFormat.format(double.tryParse(plan.valorRescateUdisAtTarget?.toString() ?? '0')?.toInt() ?? 0)} UDIS',
+                amountMxn: currencyFormat.format(plan.valueAtTargetAge ?? 0.0),
+                note: 'Proyección de UDI al año mostrado',
+                isDarkBackground: true,
+              ),
+              const Divider(height: 1, color: Color(0xFFE5E7EB)),
+            ] else ...[
+              // Para otros tipos: mostrar ambos totales
+              _udiRow(
+                title: 'Total a retirar en $anioCorto',
+                amountUdis: '${numberFormat.format(double.tryParse(plan.totalRetirarPlanUdis)?.toInt() ?? 0)} UDIS',
+                amountMxn: currencyFormat.format(plan.totalRetirarPlanMxn),
+                note: 'Proyección de UDI al día del hoy',
+                isDarkBackground: true,
+              ),
+              const Divider(height: 1, color: Color(0xFFE5E7EB)),
+              
+              _udiRow(
+                title: 'Total a retirar en $anioLargo',
+                amountUdis: '${numberFormat.format(double.tryParse(plan.totalRetirar2050Udis)?.toInt() ?? 0)} UDIS',
+                amountMxn: currencyFormat.format(plan.totalRetirar2050Mxn),
+                note: 'Proyección de UDI al día del hoy',
+              ),
+              const Divider(height: 1, color: Color(0xFFE5E7EB)),
+            ],
+            // Duración del plan - para todos los planes que tengan archivo CSV
+            if (plan.csvFile != null && plan.csvFile!.isNotEmpty) ...[
+              _infoBadgeRow(
+                title: 'Duración del Plan',
+                icon: Icons.schedule,
+                badgeText: '${_extractPlanDurationFromCsv(plan.csvFile!)} años',
+                note: 'Tiempo de ahorro del plan',
+                isDarkBackground: true,
+              ),
+            ],            
+            const Divider(height: 1, color: Color(0xFFE5E7EB)),
+
+            // Coberturas
+            _infoBadgeRow(
+              title: 'Coberturas',
+              icon: Icons.shield_outlined,
+              badgeText: _getCoverageLabel(plan.coverageType),
+              note: 'Tipo de protección incluida',
             ),
             const Divider(height: 1, color: Color(0xFFE5E7EB)),
-            
-            // Total a retirar en 2050
-            _udiRow(
-              title: 'Total a retirar en $anioLargo',
-              amountUdis: '${numberFormat.format(double.tryParse(plan.totalRetirar2050Udis)?.toInt() ?? 0)} UDIS',
-              amountMxn: currencyFormat.format(plan.totalRetirar2050Mxn),
-              note: 'Proyección de UDI al día del hoy',
-            ),
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
-            
+               
             // Beneficiarios
             _infoBadgeRow(
               title: 'Beneficiarios',
@@ -142,15 +181,7 @@ class SimulationPlanCard extends StatelessWidget {
               note: 'Persona designada para recibir el beneficio',
               isDarkBackground: true,
             ),
-            const Divider(height: 1, color: Color(0xFFE5E7EB)),
             
-            // Coberturas
-            _infoBadgeRow(
-              title: 'Coberturas',
-              icon: Icons.shield_outlined,
-              badgeText: _getCoverageLabel(plan.coverageType),
-              note: 'Tipo de protección incluida',
-            ),
             
             // Debug: Archivo CSV
             if (plan.csvFile != null && plan.csvFile!.isNotEmpty)
@@ -224,19 +255,62 @@ class SimulationPlanCard extends StatelessWidget {
     }
   }
 
+  int _extractPlanDurationFromCsv(String csvFile) {
+    // Formato: {{rango_edad}}_{{ahorro_mensual}}_{{tipo_cobertura}}_{{duracion_años}}
+    // Ejemplo: "27-29_2500.00_none_5.csv"
+    final parts = csvFile.split('_');
+    if (parts.length >= 4) {
+      final durationPart = parts[3].replaceAll('.csv', '');
+      return int.tryParse(durationPart) ?? plan.planDuration;
+    }
+    return plan.planDuration;
+  }
+
   Color _getCoverageColor(String coverageType) {
     switch (coverageType.toLowerCase()) {
       case 'sin cobertura':
       case 'none':
-        return const Color(0xFFE1EFFE);
+        return AppColors.coverageNone;
       case 'cobertura extra':
       case 'extra':
-        return const Color(0xFF1E429F);
+        return AppColors.coverageExtra;
       case 'cobertura d3':
       case 'd3':
-        return const Color(0xFF111928);
+        return AppColors.coverageD3;
       default:
         return const Color(0xFF2563EB);
+    }
+  }
+
+  Color _getCoverageBackgroundColor(String coverageType) {
+    switch (coverageType.toLowerCase()) {
+      case 'sin cobertura':
+      case 'none':
+        return AppColors.coverageNone;
+      case 'cobertura extra':
+      case 'extra':
+        return AppColors.coverageExtra;
+      case 'cobertura d3':
+      case 'd3':
+        return AppColors.coverageD3;
+      default:
+        return const Color(0xFFEFF5FF);
+    }
+  }
+
+  Color _getCoverageTextColor(String coverageType) {
+    switch (coverageType.toLowerCase()) {
+      case 'sin cobertura':
+      case 'none':
+        return AppColors.coverageTextNone;
+      case 'cobertura extra':
+      case 'extra':
+        return AppColors.coverageTextExtra;
+      case 'cobertura d3':
+      case 'd3':
+        return AppColors.coverageTextD3;
+      default:
+        return AppColors.textWhite;
     }
   }
 

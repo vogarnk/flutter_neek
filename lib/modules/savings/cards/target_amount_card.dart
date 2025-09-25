@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/models/savings_models.dart';
 
@@ -29,7 +31,7 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
   @override
   void initState() {
     super.initState();
-    _amountController.text = _targetAmount.toStringAsFixed(0);
+    _amountController.text = _formatAmount(_targetAmount);
   }
 
   @override
@@ -70,7 +72,7 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Monto Objetivo',
+                      'Monto a Retirar',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -204,6 +206,10 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
         TextFormField(
           controller: _amountController,
           keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            _AmountInputFormatter(),
+          ],
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -237,7 +243,8 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
             ),
           ),
           onChanged: (value) {
-            final amount = double.tryParse(value);
+            final cleanValue = value.replaceAll(',', '');
+            final amount = double.tryParse(cleanValue);
             if (amount != null) {
               setState(() => _targetAmount = amount);
             }
@@ -245,7 +252,7 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Mínimo: \$${SavingsConstants.minTargetAmount.toStringAsFixed(0)}',
+          'Mínimo: \$${_formatAmount(SavingsConstants.minTargetAmount)}',
           style: const TextStyle(
             fontSize: 12,
             color: AppColors.textGray500,
@@ -344,7 +351,7 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
     if (_targetAmount < SavingsConstants.minTargetAmount) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('El monto mínimo es \$${SavingsConstants.minTargetAmount.toStringAsFixed(0)}'),
+          content: Text('El monto mínimo es \$${_formatAmount(SavingsConstants.minTargetAmount)}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -365,6 +372,49 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
       age: _age,
       targetAmount: _targetAmount,
       targetAge: _targetAge,
+    );
+  }
+
+  String _formatAmount(double amount) {
+    final formatter = NumberFormat('#,###', 'es_MX');
+    return formatter.format(amount.toInt());
+  }
+}
+
+class _AmountInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Remover caracteres no numéricos excepto comas
+    String newText = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    
+    if (newText.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    // Convertir a número y formatear
+    final number = int.parse(newText);
+    final formatter = NumberFormat('#,###', 'es_MX');
+    final formatted = formatter.format(number);
+
+    // Calcular la nueva posición del cursor
+    int cursorPosition = formatted.length;
+    if (oldValue.selection.baseOffset < oldValue.text.length) {
+      // Si el usuario está editando en el medio del texto
+      final oldLength = oldValue.text.length;
+      final newLength = formatted.length;
+      final lengthDiff = newLength - oldLength;
+      cursorPosition = (oldValue.selection.baseOffset + lengthDiff).clamp(0, formatted.length);
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: cursorPosition),
     );
   }
 }
