@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/api_service.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 import '../splash_screen.dart';
 import '../core/theme/app_colors.dart';
 import '../modules/register/change_password_screen.dart';
@@ -196,7 +197,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       runSpacing: 8,
                       children: [
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ForgotPasswordScreen(
+                                  preFilledEmail: _emailCtrl.text.isNotEmpty ? _emailCtrl.text : null,
+                                ),
+                              ),
+                            );
+                          },
                           child: const Text(
                             '¿Olvidaste tu contraseña?',
                             style: TextStyle(color: AppColors.primary),
