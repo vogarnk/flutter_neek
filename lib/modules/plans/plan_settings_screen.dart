@@ -27,6 +27,7 @@ class PlanSettingsScreen extends StatelessWidget {
     final numeroPoliza = userPlan?['numero_poliza'] ?? '';
     final udis = userPlan?['udis'] ?? 0.0;
     final status = userPlan?['status'] ?? '';
+    final userPlanId = userPlan?['id']; // 👈 Extraer el ID del plan
     
     // Log de valores extraídos
     print('🔍 PlanSettingsScreen: nombrePlan = $nombrePlan');
@@ -35,6 +36,7 @@ class PlanSettingsScreen extends StatelessWidget {
     print('🔍 PlanSettingsScreen: numeroPoliza = $numeroPoliza');
     print('🔍 PlanSettingsScreen: udis = $udis');
     print('🔍 PlanSettingsScreen: status = $status');
+    print('🔍 PlanSettingsScreen: userPlanId = $userPlanId'); // 👈 Log del ID
     print('🔍 PlanSettingsScreen: beneficiarios = ${userPlan?['beneficiarios']}');
     print('🔍 PlanSettingsScreen: cotizaciones = $cotizaciones');
     print('🔍 PlanSettingsScreen: cotizaciones length = ${cotizaciones?.length}');
@@ -63,7 +65,11 @@ class PlanSettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CardNeek(nombrePlan: nombrePlan, mostrarBoton: true),
+            CardNeek(
+              nombrePlan: nombrePlan, 
+              userPlanId: userPlanId,
+              mostrarBoton: true,
+            ),
             const SizedBox(height: 24),
             const SizedBox(height: 16),
             PlanSummaryCard(
