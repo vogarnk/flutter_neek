@@ -24,26 +24,63 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
   Future<void> _loadSessions() async {
     try {
+      print('🔍 [SecurityScreen] Cargando sesiones...');
       final data = await SecurityApiService.instance.getSessions();
+      print('✅ [SecurityScreen] Sesiones cargadas: ${data.length}');
       setState(() {
         _sessions = data;
         _loading = false;
       });
     } catch (e) {
+      print('❌ [SecurityScreen] Error al cargar sesiones: $e');
       setState(() => _loading = false);
+      
+      String errorMessage = 'Error al cargar sesiones';
+      if (e.toString().contains('Token de autenticación')) {
+        errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+      } else if (e.toString().contains('No se encontró el token')) {
+        errorMessage = 'No se encontró el token de autenticación.';
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al cargar sesiones')),
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
       );
     }
   }
 
   Future<void> _closeSession(String sessionId) async {
-    final success = await SecurityApiService.instance.closeSession(sessionId);
-    if (success) {
-      _loadSessions(); // recarga la lista actualizada
-    } else {
+    try {
+      print('🔍 [SecurityScreen] Cerrando sesión: $sessionId');
+      final success = await SecurityApiService.instance.closeSession(sessionId);
+      if (success) {
+        print('✅ [SecurityScreen] Sesión cerrada exitosamente');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sesión cerrada exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadSessions(); // recarga la lista actualizada
+      } else {
+        print('❌ [SecurityScreen] No se pudo cerrar la sesión');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo cerrar la sesión'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ [SecurityScreen] Error al cerrar sesión: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo cerrar la sesión')),
+        SnackBar(
+          content: Text('Error al cerrar sesión: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -96,6 +133,35 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   const SizedBox(height: 16),
                   if (_loading)
                     const Center(child: CircularProgressIndicator())
+                  else if (_sessions.isEmpty)
+                    Column(
+                      children: [
+                        const Icon(
+                          Icons.devices_other,
+                          size: 48,
+                          color: AppColors.textGray400,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No hay sesiones activas',
+                          style: TextStyle(
+                            color: AppColors.textGray500,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: _loadSessions,
+                          icon: const Icon(Icons.refresh, size: 18),
+                          label: const Text('Recargar'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          ),
+                        ),
+                      ],
+                    )
                   else
                     Column(
                       children: _sessions.map(_buildDeviceTile).toList(),
@@ -301,26 +367,39 @@ class _SecurityScreenState extends State<SecurityScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        leading: const Icon(
-          Icons.computer_outlined,
+        leading: Icon(
+          _getDeviceIcon(session.deviceType),
           size: 28,
           color: AppColors.textGray900,
         ),
         title: Text(
-          session.ipAddress,
+          _getDeviceTitle(session.deviceType),
           style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.textGray900,
           ),
         ),
-        subtitle: Text(
-          session.userAgent,
-          style: const TextStyle(color: AppColors.textGray500),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              session.userAgent,
+              style: const TextStyle(color: AppColors.textGray500),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              session.timeAgo,
+              style: const TextStyle(
+                color: AppColors.textGray400,
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
-        trailing: session.isCurrent
+        trailing: session.isExpired
             ? const Text(
-                'Actual',
-                style: TextStyle(color: AppColors.primary),
+                'Expirada',
+                style: TextStyle(color: Colors.red),
               )
             : TextButton(
                 onPressed: () => _closeSession(session.id),
@@ -328,5 +407,31 @@ class _SecurityScreenState extends State<SecurityScreen> {
               ),
       ),
     );
+  }
+
+  IconData _getDeviceIcon(String deviceType) {
+    switch (deviceType.toLowerCase()) {
+      case 'mobile_app':
+        return Icons.phone_android;
+      case 'web':
+        return Icons.computer;
+      case 'desktop':
+        return Icons.desktop_windows;
+      default:
+        return Icons.device_unknown;
+    }
+  }
+
+  String _getDeviceTitle(String deviceType) {
+    switch (deviceType.toLowerCase()) {
+      case 'mobile_app':
+        return 'Aplicación móvil';
+      case 'web':
+        return 'Navegador web';
+      case 'desktop':
+        return 'Escritorio';
+      default:
+        return 'Dispositivo desconocido';
+    }
   }
 }
