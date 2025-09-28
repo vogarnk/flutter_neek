@@ -8,11 +8,15 @@ class InsuranceAmountCard extends StatefulWidget {
     required double insuranceAmount,
   }) onSimulate;
   final VoidCallback onBack;
+  final int? initialAge;
+  final double? initialInsuranceAmount;
 
   const InsuranceAmountCard({
     super.key,
     required this.onSimulate,
     required this.onBack,
+    this.initialAge,
+    this.initialInsuranceAmount,
   });
 
   @override
@@ -27,6 +31,10 @@ class _InsuranceAmountCardState extends State<InsuranceAmountCard> {
   @override
   void initState() {
     super.initState();
+    // Usar valores iniciales si están disponibles
+    if (widget.initialAge != null) _age = widget.initialAge!;
+    if (widget.initialInsuranceAmount != null) _insuranceAmount = widget.initialInsuranceAmount!;
+    
     _amountController.text = _insuranceAmount.toStringAsFixed(0);
   }
 

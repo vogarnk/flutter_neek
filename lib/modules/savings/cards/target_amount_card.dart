@@ -11,11 +11,17 @@ class TargetAmountCard extends StatefulWidget {
     required int targetAge,
   }) onSimulate;
   final VoidCallback onBack;
+  final int? initialAge;
+  final double? initialTargetAmount;
+  final int? initialTargetAge;
 
   const TargetAmountCard({
     super.key,
     required this.onSimulate,
     required this.onBack,
+    this.initialAge,
+    this.initialTargetAmount,
+    this.initialTargetAge,
   });
 
   @override
@@ -31,6 +37,11 @@ class _TargetAmountCardState extends State<TargetAmountCard> {
   @override
   void initState() {
     super.initState();
+    // Usar valores iniciales si están disponibles
+    if (widget.initialAge != null) _age = widget.initialAge!;
+    if (widget.initialTargetAmount != null) _targetAmount = widget.initialTargetAmount!;
+    if (widget.initialTargetAge != null) _targetAge = widget.initialTargetAge!;
+    
     _amountController.text = _formatAmount(_targetAmount);
   }
 

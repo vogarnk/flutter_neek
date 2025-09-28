@@ -9,11 +9,17 @@ class MonthlySavingsCard extends StatefulWidget {
     required double monthlySavings,
   }) onSimulate;
   final VoidCallback onBack;
+  final int? initialAge;
+  final int? initialPlanDuration;
+  final double? initialMonthlySavings;
 
   const MonthlySavingsCard({
     super.key,
     required this.onSimulate,
     required this.onBack,
+    this.initialAge,
+    this.initialPlanDuration,
+    this.initialMonthlySavings,
   });
 
   @override
@@ -24,6 +30,15 @@ class _MonthlySavingsCardState extends State<MonthlySavingsCard> {
   int _age = 25;
   int _planDuration = 10;
   double _monthlySavings = 2500;
+
+  @override
+  void initState() {
+    super.initState();
+    // Usar valores iniciales si están disponibles
+    if (widget.initialAge != null) _age = widget.initialAge!;
+    if (widget.initialPlanDuration != null) _planDuration = widget.initialPlanDuration!;
+    if (widget.initialMonthlySavings != null) _monthlySavings = widget.initialMonthlySavings!;
+  }
 
   @override
   Widget build(BuildContext context) {
