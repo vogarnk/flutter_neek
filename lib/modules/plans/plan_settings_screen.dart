@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/cards/card_neek.dart';
 import 'plan_summary_card.dart';
+import '../savings/savings_type_selection_screen.dart';
 
 class PlanSettingsScreen extends StatelessWidget {
   final Map<String, dynamic>? userPlan;
@@ -83,7 +84,94 @@ class PlanSettingsScreen extends StatelessWidget {
               anioLargo: anioLargo,
               beneficiarios: userPlan?['beneficiarios']?.length ?? 0, // Número real de beneficiarios
             ),
+            const SizedBox(height: 24),
+            // Botón para modificar simulación
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1F2937),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF374151)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Personalizar Plan',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Modifica los parámetros de tu simulación para explorar diferentes opciones de ahorro.',
+                    style: TextStyle(
+                      color: Color(0xFF9CA3AF),
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _navigateToModifySimulation(context),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text('Modificar Simulación'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3B82F6),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToModifySimulation(BuildContext context) {
+    // Extraer parámetros del plan actual para pasarlos a la simulación
+    Map<String, dynamic>? previousParameters;
+    String? simulationType;
+    
+    if (userPlan != null) {
+      // Intentar determinar el tipo de simulación basado en los datos del plan
+      // Por ahora, vamos a usar parámetros genéricos que funcionen con todos los tipos
+      final edad = edadUsuario ?? 25;
+      final duracion = userPlan?['duracion'] ?? 10;
+      
+      // Para este ejemplo, vamos a asumir que es un plan de ahorro mensual
+      // En una implementación real, deberías tener un campo que indique el tipo de simulación original
+      simulationType = 'monthly-savings';
+      
+      previousParameters = {
+        'age': edad,
+        'plan_duration': duracion,
+        'monthly_savings': _calculateAhorroAnual() / 12, // Convertir anual a mensual
+      };
+      
+      // Si tienes información adicional del plan, puedes intentar otros tipos:
+      // - Para target-amount: necesitas 'target_amount' y 'target_age'
+      // - Para education: necesitas 'monthly_savings' y 'years_to_university'
+      // - Para insurance-amount: necesitas 'insurance_amount'
+    }
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SavingsTypeSelectionScreen(
+          previousParameters: previousParameters,
+          previousSimulationType: simulationType,
         ),
       ),
     );

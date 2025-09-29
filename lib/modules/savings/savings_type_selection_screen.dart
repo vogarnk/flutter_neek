@@ -13,7 +13,14 @@ import 'package:neek/modules/savings/widgets/simulation_plan_card.dart';
 import 'package:neek/modules/register/plan_register_screen_v2.dart';
 
 class SavingsTypeSelectionScreen extends StatefulWidget {
-  const SavingsTypeSelectionScreen({super.key});
+  final Map<String, dynamic>? previousParameters;
+  final String? previousSimulationType;
+  
+  const SavingsTypeSelectionScreen({
+    super.key,
+    this.previousParameters,
+    this.previousSimulationType,
+  });
 
   @override
   State<SavingsTypeSelectionScreen> createState() => _SavingsTypeSelectionScreenState();
@@ -35,6 +42,12 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
   void initState() {
     super.initState();
     _pageController = PageController();
+    
+    // Si hay parámetros previos, inicializar con ellos
+    if (widget.previousParameters != null) {
+      currentParameters = widget.previousParameters;
+      selectedType = widget.previousSimulationType;
+    }
   }
 
   @override
@@ -196,21 +209,32 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
         return MonthlySavingsCard(
           onSimulate: _simulateMonthlySavings,
           onBack: () => setState(() => selectedType = null),
+          initialAge: currentParameters?['age'],
+          initialPlanDuration: currentParameters?['plan_duration'],
+          initialMonthlySavings: currentParameters?['monthly_savings'],
         );
       case 'target-amount':
         return TargetAmountCard(
           onSimulate: _simulateTargetAmount,
           onBack: () => setState(() => selectedType = null),
+          initialAge: currentParameters?['age'],
+          initialTargetAmount: currentParameters?['target_amount'],
+          initialTargetAge: currentParameters?['target_age'],
         );
       case 'education':
         return EducationCard(
           onSimulate: _simulateEducation,
           onBack: () => setState(() => selectedType = null),
+          initialAge: currentParameters?['age'],
+          initialMonthlySavings: currentParameters?['monthly_savings'],
+          initialYearsToUniversity: currentParameters?['years_to_university'],
         );
       case 'insurance-amount':
         return InsuranceAmountCard(
           onSimulate: _simulateInsuranceAmount,
           onBack: () => setState(() => selectedType = null),
+          initialAge: currentParameters?['age'],
+          initialInsuranceAmount: currentParameters?['insurance_amount'],
         );
       default:
         return Container();
