@@ -27,14 +27,26 @@ class NotificationApiService {
     final uri = Uri.parse('$_baseUrl/notifications/toggle');
     final headers = await _buildHeaders();
 
+    final requestBody = {
+      'key': key,
+      'value': value,
+    };
+
+    print('🔹 Enviando notificación toggle: $requestBody');
+
     final response = await _client.post(
       uri,
       headers: headers,
-      body: jsonEncode({
-        'key': key,
-        'value': value,
-      }),
+      body: jsonEncode(requestBody),
     );
+
+    print('🔹 Respuesta del servidor: ${response.statusCode}');
+    print('🔹 Cuerpo de respuesta: ${response.body}');
+
+    if (response.statusCode != 200) {
+      print('❌ Error al actualizar notificación: ${response.body}');
+    }
+
     return response.statusCode == 200;
   }
 

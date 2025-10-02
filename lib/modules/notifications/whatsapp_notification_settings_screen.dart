@@ -79,6 +79,14 @@ class _WhatsappNotificationSettingsScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     NotificationSwitchTile(
+                      title: 'Marketing WhatsApp',
+                      subtitle:
+                          'Recibe notificaciones sobre marketing en tu cuenta',
+                      fieldKey: 'whatsapp_marketing',
+                      initialValue: _settings.whatsappMarketing,
+                    ),
+                    const Divider(),                    
+                    NotificationSwitchTile(
                       title: 'Notificaciones de Emergencia',
                       subtitle:
                           'Recibe notificaciones sobre eventos inesperados en tu cuenta',
