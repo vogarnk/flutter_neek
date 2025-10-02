@@ -1,18 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/modules/beneficiaries/create_beneficiary_screen.dart';
+import 'package:neek/core/beneficiario_service.dart';
 
-class BeneficiariesCard extends StatelessWidget {
+class BeneficiariesCard extends StatefulWidget {
   final List<dynamic> beneficiarios;
   final bool mostrarBoton;
   final int? userPlanId;
+  final VoidCallback? onBeneficiariosUpdated;
 
   const BeneficiariesCard({
     super.key,
     required this.beneficiarios,
     this.mostrarBoton = true,
     this.userPlanId,
+    this.onBeneficiariosUpdated,
   });
+
+  @override
+  State<BeneficiariesCard> createState() => _BeneficiariesCardState();
+}
+
+class _BeneficiariesCardState extends State<BeneficiariesCard> {
+  List<dynamic> _beneficiarios = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _beneficiarios = widget.beneficiarios;
+  }
+
+  @override
+  void didUpdateWidget(BeneficiariesCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.beneficiarios != widget.beneficiarios) {
+      _beneficiarios = widget.beneficiarios;
+    }
+  }
+
+  Future<void> _recargarBeneficiarios() async {
+    if (_isLoading) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final beneficiariosActualizados = await BeneficiarioService.getBeneficiarios(
+        userPlanId: widget.userPlanId,
+      );
+      
+      setState(() {
+        _beneficiarios = beneficiariosActualizados;
+      });
+
+      // Notificar al widget padre que los beneficiarios se actualizaron
+      if (widget.onBeneficiariosUpdated != null) {
+        widget.onBeneficiariosUpdated!();
+      }
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al actualizar beneficiarios: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +161,7 @@ class BeneficiariesCard extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Estado vacío
-          if (beneficiarios.isEmpty)
+          if (_beneficiarios.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Column(
@@ -111,7 +176,7 @@ class BeneficiariesCard extends StatelessWidget {
               ),
             )
           else
-          ...beneficiarios.map((b) {
+          ..._beneficiarios.map((b) {
             return Column(
               children: [
                 _beneficiarioRow(
@@ -129,29 +194,19 @@ class BeneficiariesCard extends StatelessWidget {
           const SizedBox(height: 8),
 
           // Footer
-          mostrarBoton
+          widget.mostrarBoton
               ? SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () async {
+                    onPressed: _isLoading ? null : () async {
                       final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => CreateBeneficiaryScreen(userPlanId: userPlanId)),
+                        MaterialPageRoute(builder: (_) => CreateBeneficiaryScreen(userPlanId: widget.userPlanId)),
                       );
                       
-                      // Si se agregó un beneficiario exitosamente, actualizar la lista
+                      // Si se agregó un beneficiario exitosamente, recargar la lista
                       if (result != null) {
-                        // Notificar al padre que se agregó un beneficiario
-                        if (context.mounted) {
-                          // Aquí podrías usar un callback o un provider para actualizar la lista
-                          // Por ahora, solo mostramos un mensaje
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Beneficiario agregado exitosamente'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        }
+                        await _recargarBeneficiarios();
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -161,7 +216,16 @@ class BeneficiariesCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text('Añadir beneficiarios'),
+                    child: _isLoading 
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text('Añadir beneficiarios'),
                   ),
                 )
         : GestureDetector(

@@ -3,7 +3,7 @@ import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/shared/cards/card_neek.dart';
 import 'package:neek/shared/cards/beneficiaries_card.dart';
 
-class ConfirmedBeneficiariesScreen extends StatelessWidget {
+class ConfirmedBeneficiariesScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
   final int? userPlanId;
@@ -18,6 +18,25 @@ class ConfirmedBeneficiariesScreen extends StatelessWidget {
     this.currentPlan,
     this.cotizaciones,
   });
+
+  @override
+  State<ConfirmedBeneficiariesScreen> createState() => _ConfirmedBeneficiariesScreenState();
+}
+
+class _ConfirmedBeneficiariesScreenState extends State<ConfirmedBeneficiariesScreen> {
+  late List<dynamic> _beneficiarios;
+
+  @override
+  void initState() {
+    super.initState();
+    _beneficiarios = widget.beneficiarios;
+  }
+
+  void _onBeneficiariosUpdated() {
+    setState(() {
+      // La lista se actualizará automáticamente desde el BeneficiariesCard
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +58,7 @@ class ConfirmedBeneficiariesScreen extends StatelessWidget {
               mostrarBoton: false,
             ),
             const SizedBox(height: 24),
-            if (beneficiarios.isEmpty)
+            if (_beneficiarios.isEmpty)
               const Center(
                 child: Text(
                   'No hay beneficiarios confirmados.',
@@ -48,53 +67,13 @@ class ConfirmedBeneficiariesScreen extends StatelessWidget {
               )
             else
               BeneficiariesCard(
-                beneficiarios: beneficiarios,
+                beneficiarios: _beneficiarios,
                 mostrarBoton: false, // o false en ConfirmedBeneficiariesScreen
-                userPlanId: user['user_plan_id'] ?? user['plan_id'],
+                userPlanId: widget.user['user_plan_id'] ?? widget.user['plan_id'],
+                onBeneficiariosUpdated: _onBeneficiariosUpdated,
               ),              
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBeneficiaryCard(dynamic b) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            b['nombre'] ?? 'Sin nombre',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textGray900,
-            ),
-          ),
-          const SizedBox(height: 4),
-          if (b['parentesco'] != null)
-            Text(
-              'Parentesco: ${b['parentesco']}',
-              style: const TextStyle(color: AppColors.textGray900),
-            ),
-          if (b['fecha_nacimiento'] != null)
-            Text(
-              'Fecha de nacimiento: ${b['fecha_nacimiento']}',
-              style: TextStyle(color: AppColors.textGray900),
-            ),
-        ],
       ),
     );
   }

@@ -5,7 +5,7 @@ import '../../shared/cards/card_neek.dart';
 import 'package:neek/shared/cards/beneficiaries_card.dart';
 import '../plans/contributions/next_contribution_screen.dart';
 
-class BeneficiariesScreen extends StatelessWidget {
+class BeneficiariesScreen extends StatefulWidget {
   final Map<String, dynamic> user;
   final List<dynamic> beneficiarios;
   final int? userPlanId;
@@ -22,6 +22,25 @@ class BeneficiariesScreen extends StatelessWidget {
     this.currentPlan,
     this.cotizaciones,
   });
+
+  @override
+  State<BeneficiariesScreen> createState() => _BeneficiariesScreenState();
+}
+
+class _BeneficiariesScreenState extends State<BeneficiariesScreen> {
+  late List<dynamic> _beneficiarios;
+
+  @override
+  void initState() {
+    super.initState();
+    _beneficiarios = widget.beneficiarios;
+  }
+
+  void _onBeneficiariosUpdated() {
+    setState(() {
+      // La lista se actualizará automáticamente desde el BeneficiariesCard
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +91,12 @@ class BeneficiariesScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  if (beneficiarios.isEmpty) {
+                  if (_beneficiarios.isEmpty) {
                     _mostrarAlerta(context, 'Debes añadir al menos un beneficiario.');
                     return;
                   }
 
-                  final int sumaPorcentajes = beneficiarios.fold<int>(
+                  final int sumaPorcentajes = _beneficiarios.fold<int>(
                     0,
                     (total, b) => total + (int.tryParse(b['porcentaje'].toString()) ?? 0),
                   );
@@ -87,24 +106,24 @@ class BeneficiariesScreen extends StatelessWidget {
                     return;
                   }
 
-                  if (status == 'autorizado_por_pagar_1') {
+                  if (widget.status == 'autorizado_por_pagar_1') {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => NextContributionScreen(
-                          user: user,
-                          userPlan: currentPlan ?? {
-                            'id': userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
+                          user: widget.user,
+                          userPlan: widget.currentPlan ?? {
+                            'id': widget.userPlanId ?? widget.user['user_plan_id'] ?? widget.user['plan_id'],
                             'nombre_plan': 'Mi Plan',
-                            'status': status,
+                            'status': widget.status,
                             'duracion': 5,
                             'numero_poliza': 'N/A',
                             'periodicidad': 'anual',
                             'udis': 100000,
-                            'beneficiarios': beneficiarios,
+                            'beneficiarios': _beneficiarios,
                           },
-                          cotizaciones: cotizaciones ?? [], // Usar cotizaciones reales si están disponibles
-                          userPlanId: userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
+                          cotizaciones: widget.cotizaciones ?? [], // Usar cotizaciones reales si están disponibles
+                          userPlanId: widget.userPlanId ?? widget.user['user_plan_id'] ?? widget.user['plan_id'],
                         ),
                       ),
                     );
@@ -127,11 +146,11 @@ class BeneficiariesScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      status == 'autorizado_por_pagar_1' 
+                      widget.status == 'autorizado_por_pagar_1' 
                           ? 'Comenzar y pagar primera aportación'
                           : 'Activar mi plan'
                     ),
-                    if (status == 'autorizado_por_pagar_1') ...[
+                    if (widget.status == 'autorizado_por_pagar_1') ...[
                       const SizedBox(width: 8),
                       const Icon(Icons.arrow_forward, size: 20),
                     ],
@@ -143,9 +162,10 @@ class BeneficiariesScreen extends StatelessWidget {
 
             // Tabla de beneficiarios
             BeneficiariesCard(
-              beneficiarios: beneficiarios,
-              mostrarBoton: status != 'autorizado_por_pagar_1', // No mostrar botón si está autorizado por pagar
-              userPlanId: userPlanId ?? user['user_plan_id'] ?? user['plan_id'],
+              beneficiarios: _beneficiarios,
+              mostrarBoton: widget.status != 'autorizado_por_pagar_1', // No mostrar botón si está autorizado por pagar
+              userPlanId: widget.userPlanId ?? widget.user['user_plan_id'] ?? widget.user['plan_id'],
+              onBeneficiariosUpdated: _onBeneficiariosUpdated,
             ),            
           ],
         ),
@@ -153,73 +173,6 @@ class BeneficiariesScreen extends StatelessWidget {
     );
   }
 
-  Widget _beneficiarioRow({
-    required String nombre,
-    required String tipo,
-    required String acceso,
-    required int porcentaje,
-  }) {
-    final bool esBasico = acceso == 'Básico';
-    final Color bgColor = esBasico ? const Color(0xFFE8F0FF) : const Color(0xFFE0FFF5);
-    final Color textColor = esBasico ? const Color(0xFF6366F1) : const Color(0xFF06B6D4);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 20,
-            backgroundColor: Color(0xFFE5E7EB), // gris claro de fondo
-            child: Icon(
-              Icons.person,
-              color: Color(0xFF9CA3AF), // gris medio para el ícono
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(nombre, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                const SizedBox(height: 2),
-                Text(tipo, style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280))),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Center(
-                child: Text(
-                  acceso,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '$porcentaje%',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Color(0xFF111928),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
 
   void _mostrarAlerta(BuildContext context, String mensaje) {
