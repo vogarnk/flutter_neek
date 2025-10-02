@@ -201,12 +201,15 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                 DropdownButtonFormField<String>(
                   value: _selectedDataType,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black87,
                   ),
-                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  dropdownColor: Colors.white,
                   items: _dataTypes.map((item) => DropdownMenuItem(
                     value: item['value'],
-                    child: Text(item['label']!),
+                    child: Text(
+                      item['label']!,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
                   )).toList(),
                   onChanged: (value) {
                     setState(() {
@@ -260,12 +263,15 @@ class _EditRequestScreenState extends State<EditRequestScreen> {
                 DropdownButtonFormField<String>(
                   value: _selectedTipoSolicitud,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black87,
                   ),
-                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  dropdownColor: Colors.white,
                   items: _tipoSolicitud.map((item) => DropdownMenuItem(
                     value: item['value'],
-                    child: Text(item['label']!),
+                    child: Text(
+                      item['label']!,
+                      style: const TextStyle(color: Colors.black87),
+                    ),
                   )).toList(),
                   onChanged: (value) {
                     setState(() {
