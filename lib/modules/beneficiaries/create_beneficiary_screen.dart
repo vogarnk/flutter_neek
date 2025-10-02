@@ -202,9 +202,8 @@ class _CreateBeneficiaryScreenState extends State<CreateBeneficiaryScreen> {
                 ],
               ),
               if (_selectedDate != null) ...[
-                _sectionTitle('Tutor del Beneficiario'),
-                Text('Debug: Edad = ${_calculateAge(_selectedDate!)} años'), // 👈 Debug temporal
                 if (_isMinor(_selectedDate!)) ...[
+                  _sectionTitle('Tutor del Beneficiario'),                  
                   CheckboxListTile(
                     contentPadding: EdgeInsets.zero,
                     value: tutorRequerido,
@@ -909,16 +908,6 @@ Widget _radioOption(String label, String groupValue, Function(String?) onChanged
         isLoading = false;
       });
 
-      // Mostrar mensaje de éxito y regresar
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Beneficiario guardado exitosamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context, beneficiario);
-      }
 
     } catch (e) {
       setState(() {
