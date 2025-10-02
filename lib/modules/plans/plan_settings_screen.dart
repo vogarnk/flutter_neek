@@ -84,55 +84,6 @@ class PlanSettingsScreen extends StatelessWidget {
               anioLargo: anioLargo,
               beneficiarios: userPlan?['beneficiarios']?.length ?? 0, // Número real de beneficiarios
             ),
-            const SizedBox(height: 24),
-            // Botón para modificar simulación
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1F2937),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF374151)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Personalizar Plan',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Modifica los parámetros de tu simulación para explorar diferentes opciones de ahorro.',
-                    style: TextStyle(
-                      color: Color(0xFF9CA3AF),
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _navigateToModifySimulation(context),
-                      icon: const Icon(Icons.edit, size: 18),
-                      label: const Text('Modificar Simulación'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3B82F6),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),

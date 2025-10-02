@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/shared/tables/udi_plan_summary.dart';
+import 'package:neek/core/api_service.dart';
+import 'package:neek/core/beneficiario_service.dart';
+import 'package:neek/modules/verification/verificacion_screen.dart';
+import 'package:neek/modules/beneficiaries/beneficiaries_screen.dart';
+import 'package:neek/modules/plans/questionnaire_stepper_screen.dart';
+import 'dart:convert';
 
 class PlanSummaryScreen extends StatelessWidget {
   final int plazo;
@@ -51,7 +57,7 @@ class PlanSummaryScreen extends StatelessWidget {
   }
 }
 
-class PlanSummaryCard extends StatelessWidget {
+class PlanSummaryCard extends StatefulWidget {
   final int plazo;
   final double ahorroAnual;
   final double primaAnual;
@@ -76,6 +82,13 @@ class PlanSummaryCard extends StatelessWidget {
   });
 
   @override
+  State<PlanSummaryCard> createState() => _PlanSummaryCardState();
+}
+
+class _PlanSummaryCardState extends State<PlanSummaryCard> {
+  bool _isLoading = false;
+
+  @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'es_MX', symbol: 'MXN');
 
@@ -92,20 +105,20 @@ class PlanSummaryCard extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold , color: AppColors.background)),
 
           const SizedBox(height: 20),
-          _formField('Plazo del ahorro', '$plazo años'),
+          _formField('Plazo del ahorro', '${widget.plazo} años'),
           const SizedBox(height: 12),
-          _formField('Ahorro anual', currencyFormat.format(ahorroAnual)),
+          _formField('Ahorro anual', currencyFormat.format(widget.ahorroAnual)),
 
           const SizedBox(height: 20),
 
           UdiPlanSummaryCard(
-            primaAnual: primaAnual,
-            sumaAsegurada: sumaAsegurada,
-            totalRetirarCorto: totalRetirarCorto,
-            totalRetirarLargo: totalRetirarLargo,
-            anioCorto: anioCorto,
-            anioLargo: anioLargo,
-            beneficiarios: beneficiarios,
+            primaAnual: widget.primaAnual,
+            sumaAsegurada: widget.sumaAsegurada,
+            totalRetirarCorto: widget.totalRetirarCorto,
+            totalRetirarLargo: widget.totalRetirarLargo,
+            anioCorto: widget.anioCorto,
+            anioLargo: widget.anioLargo,
+            beneficiarios: widget.beneficiarios,
             udisActual: 8.54, // Valor por defecto, idealmente debería venir como parámetro
           ),
 
@@ -119,31 +132,20 @@ class PlanSummaryCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {}, // TODO: Acción Ajustar
-                  icon: const Icon(Icons.tune),
-                  label: const Text('Ajustar'),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    side: const BorderSide(
-                      color: AppColors.textGray200, // 👈 gray50 (muy claro)
-                      width: 1.2,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 12),
-              Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {}, // TODO: Acción Activar
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text(
-                    'Activar',
+                  onPressed: _isLoading ? null : _handleActivateButton,
+                  icon: _isLoading 
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Icon(Icons.arrow_forward),
+                  label: Text(
+                    _isLoading ? 'Verificando...' : 'Activar',
                     overflow: TextOverflow.ellipsis, // 👈 evita desbordamiento
                     softWrap: false,
                   ),
@@ -162,6 +164,132 @@ class PlanSummaryCard extends StatelessWidget {
             ],
           )
         ],
+      ),
+    );
+  }
+
+  Future<void> _handleActivateButton() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Obtener datos del usuario
+      final userData = await _getUserData();
+      if (userData == null) {
+        _showError('No se pudieron obtener los datos del usuario');
+        return;
+      }
+
+      // Verificar si el usuario está verificado
+      final isUserVerified = userData['perfil_completo'] == 1;
+      
+      if (!isUserVerified) {
+        // Usuario no verificado, ir a verificación
+        _navigateToVerification(userData);
+        return;
+      }
+
+      // Usuario verificado, verificar beneficiarios
+      final beneficiarios = await _getBeneficiarios();
+      final areBeneficiariesComplete = _areBeneficiariesComplete(beneficiarios);
+
+      if (!areBeneficiariesComplete) {
+        // Beneficiarios no completos, ir a agregar beneficiarios
+        _navigateToBeneficiaries(userData, beneficiarios);
+        return;
+      }
+
+      // Usuario verificado y beneficiarios completos, ir al cuestionario
+      _navigateToQuestionnaire();
+      
+    } catch (e) {
+      _showError('Error al verificar el estado: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>?> _getUserData() async {
+    try {
+      final response = await ApiService.instance.get('/user');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data'];
+      }
+      return null;
+    } catch (e) {
+      print('Error obteniendo datos del usuario: $e');
+      return null;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _getBeneficiarios() async {
+    try {
+      final userPlanId = await BeneficiarioService.obtenerUserPlanId();
+      if (userPlanId == null) {
+        return [];
+      }
+      return await BeneficiarioService.getBeneficiarios(userPlanId: userPlanId);
+    } catch (e) {
+      print('Error obteniendo beneficiarios: $e');
+      return [];
+    }
+  }
+
+  bool _areBeneficiariesComplete(List<Map<String, dynamic>> beneficiarios) {
+    if (beneficiarios.isEmpty) {
+      return false;
+    }
+
+    // Verificar que la suma de porcentajes sea exactamente 100%
+    final totalPercentage = beneficiarios.fold<int>(
+      0,
+      (sum, beneficiario) => sum + (int.tryParse(beneficiario['porcentaje']?.toString() ?? '0') ?? 0),
+    );
+
+    return totalPercentage == 100;
+  }
+
+  void _navigateToVerification(Map<String, dynamic> userData) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VerificacionScreen(user: userData),
+      ),
+    );
+  }
+
+  void _navigateToBeneficiaries(Map<String, dynamic> userData, List<Map<String, dynamic>> beneficiarios) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BeneficiariesScreen(
+          user: userData,
+          beneficiarios: beneficiarios,
+          status: 'cotizado',
+        ),
+      ),
+    );
+  }
+
+  void _navigateToQuestionnaire() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const QuestionnaireStepperScreen(),
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
       ),
     );
   }
