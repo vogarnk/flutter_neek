@@ -363,7 +363,7 @@ class AccountDetailScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // 🟣 Card del Agente (fuera del contenedor anterior)
-            const AgentCard(),
+            //const AgentCard(),
           ],
         ),
       ),
