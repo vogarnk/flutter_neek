@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/questionnaire_service.dart';
+import '../../core/beneficiario_service.dart';
 
 class QuestionnaireStepperScreen extends StatefulWidget {
   const QuestionnaireStepperScreen({super.key});
@@ -20,6 +21,7 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
   List<int> _steps = [];
   final Map<int, dynamic> _answersByQuestionId = {};
   final Map<int, TextEditingController> _textControllers = {};
+  bool _hasSavedAnswers = false;
 
   @override
   void initState() {
@@ -46,6 +48,10 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
       const excludedSteps = {11};
       final items = allItems.where((q) => !excludedSteps.contains(q.step)).toList();
       final steps = items.map((e) => e.step).toSet().toList()..sort();
+
+      // Cargar respuestas guardadas si existen
+      await _loadSavedAnswers();
+
       setState(() {
         _questions = items;
         _steps = steps;
@@ -59,19 +65,150 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
     }
   }
 
-  void _nextStep() {
+  Future<void> _loadSavedAnswers() async {
+    try {
+      final hasSaved = await QuestionnaireService.instance.hasLocalQuestionnaire();
+      setState(() {
+        _hasSavedAnswers = hasSaved;
+      });
+
+      if (hasSaved) {
+        final savedData = await QuestionnaireService.instance.loadQuestionnaireLocally();
+        if (savedData != null) {
+          final savedAnswers = savedData['answers'] as Map<int, dynamic>?;
+          if (savedAnswers != null && savedAnswers.isNotEmpty) {
+            setState(() {
+              _answersByQuestionId.addAll(savedAnswers);
+            });
+            print('🔍 QuestionnaireStepperScreen: Respuestas guardadas cargadas (${savedAnswers.length} respuestas)');
+          }
+        }
+      }
+    } catch (e) {
+      print('🔍 QuestionnaireStepperScreen: Error al cargar respuestas guardadas: $e');
+    }
+  }
+
+  Future<void> _saveAndExit() async {
+    if (_answersByQuestionId.isEmpty) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      // Obtener el userPlanId
+      final userPlanId = await BeneficiarioService.obtenerUserPlanId();
+
+      if (userPlanId == null) {
+        setState(() {
+          _error = 'No se pudo obtener el ID del plan de usuario';
+          _loading = false;
+        });
+        return;
+      }
+
+      // Guardar respuestas localmente
+      await QuestionnaireService.instance.saveQuestionnaireLocally(
+        userPlanId: userPlanId,
+        answersByQuestionId: _answersByQuestionId,
+        questions: _questions,
+      );
+
+      setState(() {
+        _loading = false;
+        _hasSavedAnswers = true;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Progreso guardado. Puedes continuar más tarde.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      Navigator.of(context).maybePop();
+    } catch (e) {
+      setState(() {
+        _loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar: ${e.toString()}')),
+      );
+    }
+  }
+
+  void _nextStep() async {
     if (!_validateCurrentStep()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Responde las preguntas requeridas para continuar.')),
       );
       return;
     }
+
     if (currentStep < _steps.length - 1) {
       setState(() => currentStep++);
       _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
-      // Último paso; aquí podrías enviar respuestas si aplica
-      Navigator.of(context).maybePop();
+      // Último paso; enviar respuestas
+      await _submitQuestionnaire();
+    }
+  }
+
+  Future<void> _submitQuestionnaire() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      // Obtener el userPlanId
+      final userPlanId = await BeneficiarioService.obtenerUserPlanId();
+
+      if (userPlanId == null) {
+        setState(() {
+          _error = 'No se pudo obtener el ID del plan de usuario';
+          _loading = false;
+        });
+        return;
+      }
+
+      // Enviar respuestas con las preguntas para mapear legacy_index
+      final result = await QuestionnaireService.instance.sendQuestionnaireAnswers(
+        userPlanId: userPlanId,
+        answersByQuestionId: _answersByQuestionId,
+        questions: _questions, // Pasar las preguntas para mapear legacy_index
+      );
+
+      setState(() {
+        _loading = false;
+      });
+
+      if (result['success'] == true) {
+        // Limpiar respuestas guardadas después de enviar exitosamente
+        await QuestionnaireService.instance.clearLocalQuestionnaire();
+
+        setState(() {
+          _hasSavedAnswers = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cuestionario completado exitosamente')),
+        );
+        Navigator.of(context).maybePop();
+      } else {
+        setState(() {
+          _error = result['message'] ?? 'Error al enviar las respuestas';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _loading = false;
+        _error = 'Error al procesar el cuestionario: ${e.toString()}';
+      });
     }
   }
 
@@ -173,13 +310,36 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Cuestionario Médico',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: Colors.black,
-                  ),
+                Row(
+                  children: [
+                    const Text(
+                      'Cuestionario Médico',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                    ),
+                    if (_hasSavedAnswers) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: AppColors.primary, width: 1),
+                        ),
+                        child: Text(
+                          'Progreso guardado',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 12),
                 ...items.where(_isQuestionVisible).map(_buildQuestion).toList(),
@@ -202,7 +362,7 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
                     Expanded(
                       flex: currentStep > 0 ? 1 : 2,
                       child: ElevatedButton(
-                        onPressed: _nextStep,
+                        onPressed: _loading ? null : _nextStep,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -210,7 +370,13 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: Text(currentStep < _steps.length - 1 ? 'Continuar' : 'Finalizar'),
+                        child: _loading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : Text(currentStep < _steps.length - 1 ? 'Continuar' : 'Finalizar Cuestionario'),
                       ),
                     ),
                   ],
@@ -220,9 +386,7 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
           ),
           const SizedBox(height: 12),
           TextButton(
-            onPressed: () {
-              // TODO: Guardar local y salir
-            },
+            onPressed: _answersByQuestionId.isNotEmpty ? _saveAndExit : null,
             child: const Text('Guardar y Continuar más tarde'),
           )
         ],
@@ -257,21 +421,23 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
         },
       );
     }
-    if (q.tipo == 'number' || q.tipo == 'float' || q.tipo == 'decimal') {
-      final controller = _textControllers.putIfAbsent(q.id, () {
-        final initial = (_answersByQuestionId[q.id] ?? '').toString();
-        final c = TextEditingController(text: initial);
-        c.addListener(() {
-          _answersByQuestionId[q.id] = c.text;
+      if (q.tipo == 'number' || q.tipo == 'float' || q.tipo == 'decimal') {
+        final controller = _textControllers.putIfAbsent(q.id, () {
+          final currentValue = _answersByQuestionId[q.id];
+          final initialText = (currentValue is String ? currentValue : currentValue?.toString()) ?? '';
+          final c = TextEditingController(text: initialText);
+          c.addListener(() {
+            _answersByQuestionId[q.id] = c.text;
+          });
+          return c;
         });
-        return c;
-      });
       return _numberField(q.texto, 'Ingresa un número', controller);
     }
     if (q.tipo == 'date') {
       final controller = _textControllers.putIfAbsent(q.id, () {
-        final initial = (_answersByQuestionId[q.id] ?? '').toString();
-        return TextEditingController(text: initial);
+        final currentValue = _answersByQuestionId[q.id];
+        final initialText = (currentValue is String ? currentValue : currentValue?.toString()) ?? '';
+        return TextEditingController(text: initialText);
       });
       return _dateField(
         q.texto,
@@ -302,7 +468,9 @@ class _QuestionnaireStepperScreenState extends State<QuestionnaireStepperScreen>
     }
     // text por defecto
     final controller = _textControllers.putIfAbsent(q.id, () {
-      final c = TextEditingController(text: _answersByQuestionId[q.id] ?? '');
+      final currentValue = _answersByQuestionId[q.id];
+      final initialText = (currentValue is String ? currentValue : currentValue?.toString()) ?? '';
+      final c = TextEditingController(text: initialText);
       c.addListener(() {
         _answersByQuestionId[q.id] = c.text;
       });

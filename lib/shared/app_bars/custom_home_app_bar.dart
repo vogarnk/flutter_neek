@@ -35,18 +35,6 @@ class CustomHomeAppBar extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _AnimatedIconButton(
-              icon: Icons.notifications_none,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const NotificationsScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 8),
-            _AnimatedIconButton(
               icon: Icons.person_outline,
               onPressed: () {
                 Navigator.push(

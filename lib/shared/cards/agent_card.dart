@@ -48,7 +48,6 @@ class AgentCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Colors.grey),
             ],
           ),
 
