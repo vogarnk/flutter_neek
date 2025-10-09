@@ -52,7 +52,9 @@ class BeneficiarioService {
         
         // Si no se encuentra directamente, buscar en user_plans
         if (userPlanId == null && data['data']['user_plans'] != null) {
-          final userPlans = data['data']['user_plans'] as List;
+          // user_plans ahora es un Map, necesitamos convertirlo a lista
+          final Map<String, dynamic> userPlansMap = data['data']['user_plans'];
+          final userPlans = userPlansMap.values.toList();
           print('📋 [BeneficiarioService] User plans encontrados: ${userPlans.length}');
           
           if (userPlans.isNotEmpty) {

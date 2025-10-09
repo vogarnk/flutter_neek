@@ -130,7 +130,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _goToHome(Map<String, dynamic> userData) {
-    final List<dynamic> userPlans = userData['user_plans'] ?? [];
+    // user_plans ahora es un Map, necesitamos convertirlo a lista
+    final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
+    final List<dynamic> userPlans = userPlansMap.values.toList();
     final List<String> planNames = userPlans
         .map<String>((plan) => plan['nombre_plan'].toString())
         .toList();
