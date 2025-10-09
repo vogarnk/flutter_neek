@@ -105,7 +105,9 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen>
         final decoded = jsonDecode(response.body);
         final userData = decoded['data'];
         
-        final List<dynamic> userPlans = userData['user_plans'] ?? [];
+        // user_plans ahora es un Map, necesitamos convertirlo a lista
+        final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
+        final List<dynamic> userPlans = userPlansMap.values.toList();
         final List<String> planNames = userPlans
             .map<String>((plan) => plan['nombre_plan'].toString())
             .toList();

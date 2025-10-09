@@ -156,7 +156,9 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final userData = data['data'];
-        final userPlans = userData['user_plans'] as List?;
+        // user_plans ahora es un Map, necesitamos convertirlo a lista
+        final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
+        final userPlans = userPlansMap.values.toList();
         
         // Calcular edad del usuario
         final dateBirth = widget.user['dateBirth'];
