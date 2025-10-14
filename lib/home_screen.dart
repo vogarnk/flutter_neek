@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:neek/shared/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
 import 'package:neek/shared/cards/ahorro_card.dart';
 import 'package:neek/shared/cards/plan_card.dart';
 import 'package:neek/shared/cards/udi_card.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:neek/shared/app_bars/custom_home_app_bar.dart'; // 👈 Importa el widget
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -41,7 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showPlansModalIfNeeded() {
-    final plans = List<Map<String, dynamic>>.from(widget.user['user_plans'] ?? []);
+    // user_plans ahora es un Map, necesitamos convertirlo a lista
+    final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
+    final plans = List<Map<String, dynamic>>.from(userPlansMap.values);
     if (plans.isEmpty && !_hasShownModal) {
       setState(() {
         _hasShownModal = true;
@@ -170,7 +172,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final plans = List<Map<String, dynamic>>.from(widget.user['user_plans'] ?? [])
+    // user_plans ahora es un Map, necesitamos convertirlo a lista
+    final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
+    final plans = List<Map<String, dynamic>>.from(userPlansMap.values)
       ..sort((a, b) {
         final statusA = (a['status'] ?? '').toString().toLowerCase();
         final statusB = (b['status'] ?? '').toString().toLowerCase();
@@ -223,7 +227,13 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
 
               // TARJETA DE AHORRO
-              AhorroCard(plans: List<Map<String, dynamic>>.from(widget.user['user_plans'] ?? [])),
+              Builder(
+                builder: (context) {
+                  final Map<String, dynamic> ahorroPlansMap = widget.user['user_plans'] ?? {};
+                  final List<Map<String, dynamic>> ahorroPlans = List<Map<String, dynamic>>.from(ahorroPlansMap.values);
+                  return AhorroCard(plans: ahorroPlans);
+                },
+              ),
 
               const SizedBox(height: 20),
 
