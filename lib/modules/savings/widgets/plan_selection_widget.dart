@@ -81,18 +81,45 @@ class _PlanSelectionWidgetState extends State<PlanSelectionWidget> {
         
         const SizedBox(height: 16),
         
-        // Indicador de páginas
-        Center(
-          child: SmoothPageIndicator(
-            controller: _pageController,
-            count: widget.plans.length,
-            effect: const ExpandingDotsEffect(
-              dotHeight: 8,
-              dotWidth: 8,
-              spacing: 6,
-              activeDotColor: AppColors.primary,
-              dotColor: AppColors.textGray500,
+        // Indicador de páginas moderno
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1,
             ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.swipe_left_alt,
+                color: Colors.white,
+                size: 16,
+              ),
+              const SizedBox(width: 8),
+              SmoothPageIndicator(
+                controller: _pageController,
+                count: widget.plans.length,
+                effect: const ExpandingDotsEffect(
+                  dotHeight: 6,
+                  dotWidth: 6,
+                  spacing: 8,
+                  expansionFactor: 3,
+                  activeDotColor: Colors.white,
+                  dotColor: Colors.white54,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.swipe_right_alt,
+                color: Colors.white,
+                size: 16,
+              ),
+            ],
           ),
         ),
         
