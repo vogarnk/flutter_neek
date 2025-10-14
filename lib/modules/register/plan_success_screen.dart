@@ -28,15 +28,130 @@ class _PlanSuccessScreenState extends State<PlanSuccessScreen> {
     _enviarDatos();
   }
 
+  Map<String, dynamic> _prepareRegistrationData() {
+    final userData = widget.userData;
+    
+    print('📋 Preparando datos de registro...');
+    print('📋 UserData keys: ${userData.keys.toList()}');
+    print('📋 Selected plan: ${userData['selected_plan']}');
+    
+    // Preparar datos según el formato esperado por Laravel
+    final registrationData = {
+      // Datos de contacto
+      'email': userData['email'],
+      'celular': userData['celular'],
+      
+      // Código de verificación
+      'code_1': userData['code_1'],
+      'code_2': userData['code_2'],
+      'code_3': userData['code_3'],
+      'code_4': userData['code_4'],
+      
+      // Datos personales
+      'primer_nombre': userData['primer_nombre'],
+      'segundo_nombre': userData['segundo_nombre'],
+      'apellido_paterno': userData['apellido_paterno'],
+      'apellido_materno': userData['apellido_materno'],
+      'genero': userData['genero'],
+      'estado_salud': userData['estado_salud'],
+      'fumador': userData['fumador'],
+      
+      // Fecha de nacimiento
+      'dia': userData['dia'],
+      'mes': userData['mes'],
+      'year': userData['year'],
+      
+      // Preferencias
+      'recibir_mensajes': userData['recibir_mensajes'] ?? 0,
+      'deseaLlamadas': userData['deseaLlamadas'] ?? false,
+      if (userData['preferred_call_time'] != null) 'preferred_call_time': userData['preferred_call_time'],
+      
+      // Referencia
+      'referenciaOrigen': userData['referenciaOrigen'],
+      if (userData['referral_slug'] != null) 'referral_slug': userData['referral_slug'],
+      
+      // Plan seleccionado - CRÍTICO: Enviar el nombre del archivo CSV
+      if (userData['selected_plan'] != null) 'plan_seleccionado': _getPlanSelectionString(userData['selected_plan']),
+      
+      // Datos de simulación
+      if (userData['simulation_type'] != null) 'simulation_type': userData['simulation_type'],
+      if (userData['simulation_token'] != null) 'simulation_token': userData['simulation_token'],
+      if (userData['simulation_parameters'] != null) 'simulation_parameters': userData['simulation_parameters'],
+    };
+    
+    // Logging para debug
+    final planSeleccionado = registrationData['plan_seleccionado'];
+    print('🎯 Plan seleccionado que se enviará: $planSeleccionado');
+    print('📤 Datos completos que se enviarán: ${registrationData.keys.toList()}');
+    
+    return registrationData;
+  }
+
+  String _getPlanSelectionString(dynamic selectedPlan) {
+    if (selectedPlan == null) return '';
+    
+    print('🔍 Analizando plan seleccionado: $selectedPlan');
+    
+    // Si es un Map (JSON), extraer el csv_file directamente
+    if (selectedPlan is Map<String, dynamic>) {
+      final plan = selectedPlan;
+      print('🔍 Plan Map keys: ${plan.keys.toList()}');
+      
+      // Buscar el campo csv_file (que ahora debería estar presente)
+      final csvFile = plan['csv_file'] ?? '';
+      print('📄 CSV File encontrado: $csvFile');
+      
+      if (csvFile.isNotEmpty) {
+        return csvFile;
+      }
+      
+      // Si no se encuentra csv_file, intentar construir el nombre basado en los datos del plan
+      final age = plan['age'] ?? '';
+      final monthlySavings = plan['prima_mensual_mxn'] ?? '';
+      final coverageType = plan['coverage_type'] ?? '';
+      final planDuration = plan['plan_duration'] ?? '';
+      
+      print('🔍 Datos extraídos: age=$age, monthlySavings=$monthlySavings, coverageType=$coverageType, planDuration=$planDuration');
+      
+      if (age.isNotEmpty && monthlySavings.isNotEmpty && coverageType.isNotEmpty && planDuration.isNotEmpty) {
+        // Construir el nombre del archivo CSV en el formato esperado
+        final csvFileName = '${age}_${monthlySavings}_${coverageType}_${planDuration}.csv';
+        print('🔧 CSV File construido: $csvFileName');
+        return csvFileName;
+      }
+    }
+    
+    // Si es un objeto PlanOption (fallback), extraer el csvFile
+    if (selectedPlan.toString().contains('PlanOption')) {
+      try {
+        final planMap = selectedPlan as dynamic;
+        if (planMap.csvFile != null && planMap.csvFile.toString().isNotEmpty) {
+          print('📄 CSV File encontrado en PlanOption: ${planMap.csvFile}');
+          return planMap.csvFile.toString();
+        }
+      } catch (e) {
+        print('❌ Error al extraer csvFile del plan: $e');
+      }
+    }
+    
+    print('⚠️ No se pudo extraer el nombre del archivo CSV del plan');
+    return '';
+  }
+
   Future<void> _enviarDatos() async {
     try {
-      final body = {...widget.userData};
-      print('📤 Enviando datos a Neek:');
+      // Preparar los datos para el nuevo endpoint
+      final body = _prepareRegistrationData();
+      print('📤 Enviando datos a Neek (nuevo endpoint):');
       print(jsonEncode(body));
 
       final response = await http.post(
-        Uri.parse('https://app.neek.mx/api/register'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('https://app.neek.mx/api/register/complete'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
         body: jsonEncode(body),
       );
 
@@ -47,7 +162,7 @@ class _PlanSuccessScreenState extends State<PlanSuccessScreen> {
         // Verificar si la respuesta incluye token y requiere cambio de contraseña
         final data = responseBody;
         
-        if (data['token'] != null) {
+        if (data['success'] == true && data['token'] != null) {
           // Guardar el token inmediatamente
           await _secureStorage.write(key: 'auth_token', value: data['token']);
           
