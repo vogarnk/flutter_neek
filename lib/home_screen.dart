@@ -41,9 +41,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showPlansModalIfNeeded() {
-    // user_plans ahora es un Map, necesitamos convertirlo a lista
-    final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
-    final plans = List<Map<String, dynamic>>.from(userPlansMap.values);
+    print('🏠 _showPlansModalIfNeeded - user_plans tipo: ${widget.user['user_plans'].runtimeType}');
+    
+    // Manejar user_plans como Map o List
+    List<dynamic> userPlansRaw = [];
+    
+    if (widget.user['user_plans'] is Map) {
+      print('🏠 _showPlansModalIfNeeded - user_plans es Map, convirtiendo a lista');
+      final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
+      userPlansRaw = userPlansMap.values.toList();
+    } else if (widget.user['user_plans'] is List) {
+      print('🏠 _showPlansModalIfNeeded - user_plans es List, usando directamente');
+      userPlansRaw = widget.user['user_plans'] ?? [];
+    } else {
+      print('🏠 _showPlansModalIfNeeded - user_plans es de tipo inesperado: ${widget.user['user_plans'].runtimeType}');
+      userPlansRaw = [];
+    }
+    
+    final plans = List<Map<String, dynamic>>.from(userPlansRaw);
     if (plans.isEmpty && !_hasShownModal) {
       setState(() {
         _hasShownModal = true;
@@ -172,9 +187,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // user_plans ahora es un Map, necesitamos convertirlo a lista
-    final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
-    final plans = List<Map<String, dynamic>>.from(userPlansMap.values)
+    print('🏠 HomeScreen - user_plans tipo: ${widget.user['user_plans'].runtimeType}');
+    print('🏠 HomeScreen - user_plans contenido: ${widget.user['user_plans']}');
+    
+    // user_plans puede ser un Map o una List, necesitamos manejarlo correctamente
+    List<dynamic> userPlansRaw = [];
+    
+    if (widget.user['user_plans'] is Map) {
+      print('🏠 HomeScreen - user_plans es Map, convirtiendo a lista');
+      final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
+      userPlansRaw = userPlansMap.values.toList();
+    } else if (widget.user['user_plans'] is List) {
+      print('🏠 HomeScreen - user_plans es List, usando directamente');
+      userPlansRaw = widget.user['user_plans'] ?? [];
+    } else {
+      print('🏠 HomeScreen - user_plans es de tipo inesperado: ${widget.user['user_plans'].runtimeType}');
+      userPlansRaw = [];
+    }
+    
+    final plans = List<Map<String, dynamic>>.from(userPlansRaw)
       ..sort((a, b) {
         final statusA = (a['status'] ?? '').toString().toLowerCase();
         final statusB = (b['status'] ?? '').toString().toLowerCase();
@@ -229,8 +260,24 @@ class _HomeScreenState extends State<HomeScreen> {
               // TARJETA DE AHORRO
               Builder(
                 builder: (context) {
-                  final Map<String, dynamic> ahorroPlansMap = widget.user['user_plans'] ?? {};
-                  final List<Map<String, dynamic>> ahorroPlans = List<Map<String, dynamic>>.from(ahorroPlansMap.values);
+                  print('🏠 AhorroCard - user_plans tipo: ${widget.user['user_plans'].runtimeType}');
+                  
+                  // Manejar user_plans como Map o List
+                  List<dynamic> ahorroPlansRaw = [];
+                  
+                  if (widget.user['user_plans'] is Map) {
+                    print('🏠 AhorroCard - user_plans es Map, convirtiendo a lista');
+                    final Map<String, dynamic> ahorroPlansMap = widget.user['user_plans'] ?? {};
+                    ahorroPlansRaw = ahorroPlansMap.values.toList();
+                  } else if (widget.user['user_plans'] is List) {
+                    print('🏠 AhorroCard - user_plans es List, usando directamente');
+                    ahorroPlansRaw = widget.user['user_plans'] ?? [];
+                  } else {
+                    print('🏠 AhorroCard - user_plans es de tipo inesperado: ${widget.user['user_plans'].runtimeType}');
+                    ahorroPlansRaw = [];
+                  }
+                  
+                  final List<Map<String, dynamic>> ahorroPlans = List<Map<String, dynamic>>.from(ahorroPlansRaw);
                   return AhorroCard(plans: ahorroPlans);
                 },
               ),

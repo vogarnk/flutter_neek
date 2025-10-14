@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../shared/cards/agent_card.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
 import '../misc/edit_request_screen.dart'; // ⬅️ Asegúrate de que la ruta sea correcta
 
 class AccountDetailScreen extends StatelessWidget {
@@ -96,105 +95,6 @@ class AccountDetailScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 4),
-                  GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        builder: (context) {
-                          return Dialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Header con título y botón cerrar
-                                  Row(
-                                    children: [
-                                      const Expanded(
-                                        child: Text(
-                                          'Cambiar imagen de perfil',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () => Navigator.pop(context),
-                                        child: const Icon(Icons.close),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 24),
-                                  // Imagen placeholder sobre fondo con cuadrícula
-                                  Container(
-                                    width: double.infinity,
-                                    height: 200,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      color: const Color(0xFFE5E7EB),
-                                      image: const DecorationImage(
-                                        image: AssetImage('assets/images/grid_background.png'), // cuadrícula
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    child: const Center(
-                                      child: CircleAvatar(
-                                        radius: 50,
-                                        backgroundColor: Color(0xFF9CA3AF),
-                                        child: Icon(Icons.person, size: 60, color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    'Ajusta la imagen dentro de la retícula. Una imagen tuya ayudará a tu agente a reconocerte y permitirá saber cuando has accedido a tu cuenta.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Color(0xFF6B7280),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  // Botón guardar
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pop(context); // Aquí puedes colocar la lógica para subir imagen
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF2B5FF3),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(30),
-                                        ),
-                                        padding: const EdgeInsets.symmetric(vertical: 14),
-                                      ),
-                                      child: const Text(
-                                        'Guardar',
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: const Text(
-                      'Cambiar imagen',
-                      style: TextStyle(
-                        color: Color(0xFF2B5FF3),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 20),
                   _userRow(label: 'Usuario', value: '${user['name'] ?? ''} ${user['lName'] ?? ''}'.toLowerCase().replaceAll(' ', '')),
                   //si el usuario tiene perfil_completo con el valor 1, mostrar el icono de verificado

@@ -117,4 +117,35 @@ class SecurityApiService {
       return false;
     }
   }
+
+  // Desactivar cuenta del usuario
+  Future<Map<String, dynamic>> deactivateAccount() async {
+    try {
+      final uri = Uri.parse('$_baseUrl/deactivate-account');
+      final headers = await _buildHeaders();
+
+      print('🔍 [SecurityApiService] Desactivando cuenta...');
+      
+      final response = await _client.post(uri, headers: headers);
+      
+      print('📡 [SecurityApiService] Status: ${response.statusCode}');
+      print('📡 [SecurityApiService] Response: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        return {
+          'success': jsonData['success'] == true,
+          'message': jsonData['message'] ?? 'Cuenta desactivada correctamente',
+        };
+      } else if (response.statusCode == 401) {
+        throw Exception('Token de autenticación inválido o expirado');
+      } else {
+        final errorData = jsonDecode(response.body);
+        throw Exception('Error del servidor: ${errorData['message'] ?? 'Error desconocido'}');
+      }
+    } catch (e) {
+      print('❌ [SecurityApiService] Error al desactivar cuenta: $e');
+      rethrow;
+    }
+  }
 }

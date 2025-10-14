@@ -130,19 +130,55 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _goToHome(Map<String, dynamic> userData) {
-    // user_plans ahora es un Map, necesitamos convertirlo a lista
-    final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
-    final List<dynamic> userPlans = userPlansMap.values.toList();
-    final List<String> planNames = userPlans
-        .map<String>((plan) => plan['nombre_plan'].toString())
-        .toList();
+    try {
+      print('🏠 Datos del usuario recibidos: ${userData.keys.toList()}');
+      print('🏠 user_plans tipo: ${userData['user_plans'].runtimeType}');
+      print('🏠 user_plans contenido: ${userData['user_plans']}');
+      
+      // user_plans puede ser un Map o una List, necesitamos manejarlo correctamente
+      List<dynamic> userPlans = [];
+      
+      if (userData['user_plans'] is Map) {
+        print('🏠 user_plans es Map, convirtiendo a lista');
+        // Si es un Map, convertir a lista
+        final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
+        userPlans = userPlansMap.values.toList();
+      } else if (userData['user_plans'] is List) {
+        print('🏠 user_plans es List, usando directamente');
+        // Si ya es una List, usarla directamente
+        userPlans = userData['user_plans'] ?? [];
+      } else {
+        print('🏠 user_plans es de tipo inesperado: ${userData['user_plans'].runtimeType}');
+        userPlans = [];
+      }
+      
+      print('🏠 userPlans procesado: ${userPlans.length} elementos');
+      
+      final List<String> planNames = userPlans
+          .map<String>((plan) {
+            try {
+              return plan['nombre_plan']?.toString() ?? 'Plan sin nombre';
+            } catch (e) {
+              print('🏠 Error procesando plan: $e');
+              return 'Plan sin nombre';
+            }
+          })
+          .toList();
+      
+      print('🏠 planNames generado: $planNames');
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => HomeScreen(user: userData, planNames: planNames),
-      ),
-    );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => HomeScreen(user: userData, planNames: planNames),
+        ),
+      );
+    } catch (e, stackTrace) {
+      print('❌ Error en _goToHome: $e');
+      print('❌ Stack trace: $stackTrace');
+      print('🔐 Yendo al login por error en _goToHome');
+      _goToLogin();
+    }
   }
 
   void _goToBiometricAuth() {

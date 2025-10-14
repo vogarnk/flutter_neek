@@ -105,9 +105,20 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen>
         final decoded = jsonDecode(response.body);
         final userData = decoded['data'];
         
-        // user_plans ahora es un Map, necesitamos convertirlo a lista
-        final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
-        final List<dynamic> userPlans = userPlansMap.values.toList();
+        // Manejar user_plans como Map o List
+        List<dynamic> userPlans = [];
+        
+        if (userData['user_plans'] is Map) {
+          print('🔐 BiometricAuth - user_plans es Map, convirtiendo a lista');
+          final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
+          userPlans = userPlansMap.values.toList();
+        } else if (userData['user_plans'] is List) {
+          print('🔐 BiometricAuth - user_plans es List, usando directamente');
+          userPlans = userData['user_plans'] ?? [];
+        } else {
+          print('🔐 BiometricAuth - user_plans es de tipo inesperado: ${userData['user_plans'].runtimeType}');
+          userPlans = [];
+        }
         final List<String> planNames = userPlans
             .map<String>((plan) => plan['nombre_plan'].toString())
             .toList();
