@@ -163,10 +163,38 @@ class SimulationPlanCard extends StatelessWidget {
             
             
             // Debug: Archivo CSV
-            if (plan.csvFile != null && plan.csvFile!.isNotEmpty)
-              _buildCsvDebugInfo(plan.csvFile!)
-            else
-              _buildCsvDebugInfo('CSV no disponible - ID: ${plan.id}'),
+            //if (plan.csvFile != null && plan.csvFile!.isNotEmpty)
+            //  _buildCsvDebugInfo(plan.csvFile!)
+            //else
+            //  _buildCsvDebugInfo('CSV no disponible - ID: ${plan.id}'),
+            
+            // Botón de seleccionar
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton(
+                onPressed: onTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSelected ? AppColors.primary : AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: AppColors.primary,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  isSelected ? 'Seleccionado' : 'Seleccionar este plan',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
