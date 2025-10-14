@@ -69,33 +69,12 @@ class SimulationPlanCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Ahorro + Protección ⭐️',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? AppColors.primary : _getCoverageTextColor(plan.coverageType),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getCoverageColor(plan.coverageType),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        _getCoverageLabel(plan.coverageType),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  'Ahorro + Protección ⭐️',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: isSelected ? AppColors.primary : _getCoverageTextColor(plan.coverageType),
+                  ),
                 ),
               ),
             ),
