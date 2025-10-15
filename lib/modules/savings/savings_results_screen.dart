@@ -152,7 +152,7 @@ class _SavingsResultsScreenState extends State<SavingsResultsScreen> {
       'simulation_type': widget.simulationResults['simulation_type'],
       'simulation_token': widget.token,
       'simulation_parameters': widget.simulationResults['parameters'],
-      'selected_plan': plan,
+      'selected_plan': plan.toJson(), // 👈 CRÍTICO: Convertir a JSON para incluir csv_file
     };
 
     Navigator.push(

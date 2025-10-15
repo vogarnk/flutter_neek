@@ -363,6 +363,7 @@ class PlanOption {
       'udi_value_at_plan_year': udiValueAtPlanYear,
       'total_retirar_2050_udis': totalRetirar2050Udis,
       'total_retirar_plan_udis': totalRetirarPlanUdis,
+      'csv_file': csvFile, // 👈 CRÍTICO: Incluir el archivo CSV
       'target_year': targetYear,
       'udi_value_at_target': udiValueAtTarget,
       'value_at_target_age': valueAtTargetAge,

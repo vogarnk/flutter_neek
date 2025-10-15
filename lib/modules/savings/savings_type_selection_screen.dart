@@ -509,7 +509,7 @@ class _SavingsTypeSelectionScreenState extends State<SavingsTypeSelectionScreen>
       'simulation_type': simulationResults!['simulation_type'],
       'simulation_token': generatedToken!,
       'simulation_parameters': simulationResults!['parameters'],
-      'selected_plan': plan.toJson(),
+      'selected_plan': plan.toJson(), // 👈 Ya estaba correcto, incluye csv_file
     };
 
     Navigator.push(
