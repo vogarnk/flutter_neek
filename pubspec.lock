@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  centrifuge:
+    dependency: "direct main"
+    description:
+      name: centrifuge
+      sha256: "26bc8e368799366db4e44b40de442c719b7af506aa79b3786dea11994265c5ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.0"
   characters:
     dependency: transitive
     description:
@@ -765,6 +773,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   screenshot:
     dependency: "direct main"
     description:
@@ -970,6 +986,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  web_socket_channel:
+    dependency: transitive
+    description:
+      name: web_socket_channel
+      sha256: d88238e5eac9a42bb43ca4e721edba3c08c6354d4a53063afaa568516217621b
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
   win32:
     dependency: transitive
     description:

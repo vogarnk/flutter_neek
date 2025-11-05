@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:neek/core/theme/app_colors.dart';
 import 'package:neek/core/chat_service.dart';
+import 'package:neek/core/centrifugo_service.dart';
 import 'package:neek/models/chat_message_model.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -22,11 +23,16 @@ class _ChatScreenState extends State<ChatScreen> {
   String? _conversationId;
   bool _isLoading = true;
   bool _isRefreshing = false;
+  
+  // Servicio de Centrifugo para WebSocket
+  final CentrifugoService _centrifugoService = CentrifugoService();
+  bool _isWebSocketConnected = false;
 
   @override
   void initState() {
     super.initState();
     _initializeChat();
+    _initializeCentrifugo();
   }
 
   Future<void> _initializeChat() async {
@@ -44,6 +50,11 @@ class _ChatScreenState extends State<ChatScreen> {
         
         // Marcar mensajes como leídos
         ChatService.markAsRead(_conversationId!);
+        
+        // Suscribirse al canal de esta conversación si ya está conectado
+        if (_isWebSocketConnected) {
+          _subscribeToConversationChannel();
+        }
       } else {
         // Inicializar chat usando la nueva API (crear nueva o obtener existente)
         final response = await ChatService.initializeChat();
@@ -69,6 +80,11 @@ class _ChatScreenState extends State<ChatScreen> {
         if (_conversationId != null) {
           ChatService.markAsRead(_conversationId!);
         }
+        
+        // Suscribirse al canal de esta conversación si ya está conectado
+        if (_isWebSocketConnected) {
+          _subscribeToConversationChannel();
+        }
       }
       
       _scrollToBottom();
@@ -85,6 +101,97 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         );
       }
+    }
+  }
+
+  /// Inicializar conexión con Centrifugo para WebSocket
+  Future<void> _initializeCentrifugo() async {
+    try {
+      print('🚀 [ChatScreen] Inicializando Centrifugo...');
+      
+      // Conectar a Centrifugo
+      await _centrifugoService.connect(
+        onConnected: () {
+          print('✅ [ChatScreen] Conectado a Centrifugo');
+          setState(() {
+            _isWebSocketConnected = true;
+          });
+          
+          // Suscribirse al canal de la conversación actual
+          if (_conversationId != null) {
+            _subscribeToConversationChannel();
+          }
+        },
+        onDisconnected: () {
+          print('❌ [ChatScreen] Desconectado de Centrifugo');
+          setState(() {
+            _isWebSocketConnected = false;
+          });
+        },
+      );
+      
+    } catch (e) {
+      print('💥 [ChatScreen] Error al inicializar Centrifugo: $e');
+      // No mostrar error al usuario, el chat funcionará sin tiempo real
+    }
+  }
+
+  /// Suscribirse al canal de la conversación actual
+  Future<void> _subscribeToConversationChannel() async {
+    if (_conversationId == null) return;
+    
+    try {
+      print('🔔 [ChatScreen] Suscribiendo a conversación: $_conversationId');
+      
+      final success = await _centrifugoService.subscribeToConversation(
+        _conversationId!,
+        onMessage: _handleWebSocketMessage,
+      );
+      
+      if (success) {
+        print('✅ [ChatScreen] Suscrito a canal de conversación');
+      } else {
+        print('❌ [ChatScreen] No se pudo suscribir al canal');
+      }
+    } catch (e) {
+      print('💥 [ChatScreen] Error al suscribirse al canal: $e');
+    }
+  }
+
+  /// Manejar mensajes recibidos por WebSocket
+  void _handleWebSocketMessage(Map<String, dynamic> data) {
+    try {
+      print('📨 [ChatScreen] Mensaje WebSocket recibido: $data');
+      
+      // Convertir el mensaje a ChatMessage
+      final message = ChatMessage.fromJson(data);
+      
+      // Verificar que el mensaje no esté duplicado
+      final isDuplicate = _messages.any((m) => m.id == message.id);
+      if (isDuplicate) {
+        print('⚠️ [ChatScreen] Mensaje duplicado, ignorando');
+        return;
+      }
+      
+      // Agregar el mensaje a la lista
+      setState(() {
+        _messages.add(message);
+        // Si el mensaje es del bot, ocultar indicador de escritura
+        if (!message.isUser) {
+          _isTyping = false;
+        }
+      });
+      
+      // Scroll al final
+      _scrollToBottom();
+      
+      // Marcar como leído si la pantalla está visible
+      if (mounted) {
+        ChatService.markAsRead(_conversationId!);
+      }
+      
+    } catch (e) {
+      print('💥 [ChatScreen] Error al procesar mensaje WebSocket: $e');
     }
   }
 
@@ -123,6 +230,12 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _messageController.dispose();
     _scrollController.dispose();
+    // No desconectamos Centrifugo aquí porque es un singleton
+    // y puede estar siendo usado por otras pantallas
+    // Si queremos desuscribirnos solo de este canal:
+    if (_conversationId != null) {
+      _centrifugoService.unsubscribe('app_chat_$_conversationId');
+    }
     super.dispose();
   }
 
@@ -143,15 +256,28 @@ class _ChatScreenState extends State<ChatScreen> {
         text: messageText,
       );
 
-      setState(() {
-        _messages.add(sentMessage);
-        _isTyping = false;
-      });
+      // Solo agregar el mensaje si no está conectado a WebSocket
+      // Si está conectado, el mensaje llegará por WebSocket
+      if (!_isWebSocketConnected) {
+        setState(() {
+          _messages.add(sentMessage);
+          _isTyping = false;
+        });
+        _scrollToBottom();
+      } else {
+        // Si está conectado por WebSocket, el mensaje del usuario llegará por ahí
+        // pero podemos agregarlo de inmediato para mejor UX
+        final isDuplicate = _messages.any((m) => m.id == sentMessage.id);
+        if (!isDuplicate) {
+          setState(() {
+            _messages.add(sentMessage);
+          });
+          _scrollToBottom();
+        }
+        // Mantener el indicador de escritura para la respuesta del bot
+      }
 
-      _scrollToBottom();
-
-      // La respuesta del bot llegará automáticamente vía webhook
-      // No necesitamos simular una respuesta
+      // La respuesta del bot llegará automáticamente vía WebSocket
     } catch (e) {
       print('Error al enviar mensaje: $e');
       setState(() {
@@ -279,6 +405,43 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         actions: [
+          // Indicador de conexión WebSocket
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _isWebSocketConnected 
+                      ? Colors.green.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: _isWebSocketConnected ? Colors.green : Colors.grey,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _isWebSocketConnected ? 'En línea' : 'Offline',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: _isWebSocketConnected ? Colors.green : Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           IconButton(
             onPressed: _isRefreshing ? null : _refreshMessages,
             icon: _isRefreshing 
