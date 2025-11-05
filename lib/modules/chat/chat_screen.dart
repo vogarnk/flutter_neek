@@ -232,10 +232,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollController.dispose();
     // No desconectamos Centrifugo aquí porque es un singleton
     // y puede estar siendo usado por otras pantallas
-    // Si queremos desuscribirnos solo de este canal:
-    if (_conversationId != null) {
-      _centrifugoService.unsubscribe('app_chat_$_conversationId');
-    }
+    // Tampoco desuscribimos el canal porque puede que el usuario vuelva pronto
+    // y el cliente de Centrifuge puede mantener la suscripción en su registro interno
+    // Si es necesario limpiar, se hará automáticamente al intentar suscribirse de nuevo
     super.dispose();
   }
 

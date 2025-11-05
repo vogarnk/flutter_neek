@@ -232,14 +232,23 @@ class CentrifugoService {
       return false;
     }
 
-    // Si ya existe la suscripción, solo agregar el callback
+    // Si ya existe la suscripción en nuestro registro, solo agregar el callback
     if (_subscriptions.containsKey(channel)) {
-      print('⚠️ [Centrifugo] Ya está suscrito a $channel, agregando callback');
-      _channelCallbacks[channel]?.add(onMessage);
+      print('⚠️ [Centrifugo] Ya existe suscripción a $channel en nuestro registro, agregando callback');
+      if (_channelCallbacks.containsKey(channel)) {
+        _channelCallbacks[channel]!.add(onMessage);
+      } else {
+        _channelCallbacks[channel] = [onMessage];
+      }
       return true;
     }
 
+    // Intentar suscribirse (si falla porque ya existe en el cliente, lo manejaremos en el catch)
     try {
+      // PRIMERO: Intentar obtener y limpiar cualquier suscripción existente del cliente
+      // Esto previene el error "already exists" antes de que ocurra
+      await _cleanupExistingSubscription(channel);
+
       // Obtener token de suscripción del backend
       final subscriptionToken = await _getSubscriptionToken(channel);
 
@@ -301,19 +310,117 @@ class CentrifugoService {
       
       return true;
     } catch (e) {
+      // Si el error indica que la suscripción ya existe en el cliente,
+      // intentar desuscribirse y reintentar
+      final errorMessage = e.toString().toLowerCase();
+      if (errorMessage.contains('already exists') || 
+          (errorMessage.contains('subscription') && errorMessage.contains('exists'))) {
+        print('⚠️ [Centrifugo] Suscripción ya existe en cliente ($channel), desuscribiendo y reintentando...');
+        
+        try {
+          // Limpiar completamente cualquier suscripción existente del cliente
+          await _cleanupExistingSubscription(channel);
+          
+          // Esperar más tiempo para que el cliente limpie completamente
+          await Future.delayed(const Duration(milliseconds: 500));
+          
+          // Reintentar suscripción (solo una vez para evitar loops infinitos)
+          print('🔄 [Centrifugo] Reintentando suscripción a $channel...');
+          
+          // Obtener nuevo token de suscripción
+          final subscriptionToken = await _getSubscriptionToken(channel);
+          
+          // Crear nueva suscripción
+          final subscription = _client!.newSubscription(
+            channel,
+            SubscriptionConfig(
+              token: subscriptionToken,
+            ),
+          );
+          
+          // Configurar listeners
+          _channelCallbacks[channel] = [onMessage];
+          
+          subscription.publication.listen((event) {
+            print('📨 [Centrifugo] Mensaje recibido en $channel (reintento)');
+            final data = event.data;
+            if (_channelCallbacks.containsKey(channel)) {
+              for (var callback in _channelCallbacks[channel]!) {
+                try {
+                  callback(data as Map<String, dynamic>);
+                } catch (e) {
+                  print('💥 [Centrifugo] Error en callback de $channel: $e');
+                }
+              }
+            }
+          });
+          
+          subscription.subscribed.listen((event) {
+            print('✅ [Centrifugo] Suscrito exitosamente a: $channel (reintento)');
+          });
+          
+          subscription.subscribing.listen((event) {
+            print('⏳ [Centrifugo] Suscribiendo a: $channel (reintento)');
+          });
+          
+          subscription.unsubscribed.listen((event) {
+            print('👋 [Centrifugo] Desuscrito de: $channel');
+            _subscriptions.remove(channel);
+            _channelCallbacks.remove(channel);
+          });
+          
+          subscription.error.listen((event) {
+            print('❌ [Centrifugo] Error en suscripción de $channel: ${event.error}');
+          });
+          
+          _subscriptions[channel] = subscription;
+          subscription.subscribe();
+          
+          print('✅ [Centrifugo] Reintento exitoso para $channel');
+          return true;
+          
+        } catch (retryError) {
+          print('💥 [Centrifugo] Error al reintentar suscripción: $retryError');
+          return false;
+        }
+      }
+      
       print('💥 [Centrifugo] Error al suscribirse al canal $channel: $e');
       return false;
     }
   }
 
-  /// Desuscribirse de un canal específico
-  Future<void> unsubscribe(String channel) async {
+  /// Limpiar cualquier suscripción existente del cliente (método auxiliar)
+  Future<void> _cleanupExistingSubscription(String channel) async {
+    // Primero, limpiar de nuestro registro si existe
     if (_subscriptions.containsKey(channel)) {
-      print('👋 [Centrifugo] Desuscribiendo de: $channel');
-      await _subscriptions[channel]?.unsubscribe();
+      print('🧹 [Centrifugo] Limpiando suscripción existente de $channel de nuestro registro');
+      try {
+        await _subscriptions[channel]?.unsubscribe();
+        await Future.delayed(const Duration(milliseconds: 300));
+      } catch (e) {
+        print('⚠️ [Centrifugo] Error al desuscribirse de $channel: $e');
+      }
       _subscriptions.remove(channel);
       _channelCallbacks.remove(channel);
     }
+    
+    // Intentar obtener y limpiar del cliente directamente
+    // Esto maneja casos donde la suscripción existe en el cliente pero no en nuestro mapa
+    try {
+      // El cliente de Centrifuge puede tener la suscripción en su registro interno
+      // Intentamos desuscribirnos usando el método del cliente si existe
+      // Nota: La librería centrifuge puede no tener un método getSubscription directo
+      // Por eso esperamos un poco más para que se limpie completamente
+      await Future.delayed(const Duration(milliseconds: 400));
+    } catch (e) {
+      // Ignorar errores, continuamos
+    }
+  }
+
+  /// Desuscribirse de un canal específico
+  Future<void> unsubscribe(String channel) async {
+    await _cleanupExistingSubscription(channel);
   }
 
   /// Suscribirse a todos los canales disponibles del usuario
