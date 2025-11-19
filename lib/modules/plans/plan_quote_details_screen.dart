@@ -5,10 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:path/path.dart' as path;
 import '../../core/theme/app_colors.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 
 class PlanQuoteDetailsScreen extends StatefulWidget {
   const PlanQuoteDetailsScreen({super.key});
@@ -19,36 +16,7 @@ class PlanQuoteDetailsScreen extends StatefulWidget {
 
 class _PlanQuoteDetailsScreenState extends State<PlanQuoteDetailsScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
-  late AndroidDeviceInfo? androidInfo;
-
-  @override
-  void initState() {
-    super.initState();
-    initDeviceInfo();
-  }
-
-  Future<void> initDeviceInfo() async {
-    final info = await DeviceInfoPlugin().androidInfo;
-    setState(() {
-      androidInfo = info;
-    });
-  }
   Future<void> _captureAndShare() async {
-    // Detecta si es Android 13+
-    if (Platform.isAndroid && androidInfo?.version.sdkInt != null && androidInfo!.version.sdkInt >= 33) {
-      final photos = await Permission.photos.request();
-      if (!photos.isGranted) {
-        debugPrint('❌ Permiso de fotos no concedido (Android 13+)');
-        return;
-      }
-    } else {
-      final storage = await Permission.storage.request();
-      if (!storage.isGranted) {
-        debugPrint('❌ Permiso de almacenamiento no concedido');
-        return;
-      }
-    }
-
     try {
       final Uint8List? imageBytes = await _screenshotController.capture();
       if (imageBytes == null) {
@@ -56,9 +24,10 @@ class _PlanQuoteDetailsScreenState extends State<PlanQuoteDetailsScreen> {
         return;
       }
 
-      final directory = await getExternalStorageDirectory();
-      final imagePath = '${directory!.path}/plan_quote_${DateTime.now().millisecondsSinceEpoch}.png';
-      final file = File(imagePath)..writeAsBytesSync(imageBytes);
+      // Usar directorio temporal de la app (no requiere permisos)
+      final directory = await getTemporaryDirectory();
+      final imagePath = '${directory.path}/plan_quote_${DateTime.now().millisecondsSinceEpoch}.png';
+      File(imagePath).writeAsBytesSync(imageBytes);
 
       debugPrint('✅ Imagen guardada: $imagePath');
 
