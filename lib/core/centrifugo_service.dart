@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:centrifuge/centrifuge.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -267,17 +268,22 @@ class CentrifugoService {
       subscription.publication.listen((event) {
         print('📨 [Centrifugo] Mensaje recibido en $channel');
         
-        final data = event.data;
-        
-        // Llamar a todos los callbacks registrados para este canal
-        if (_channelCallbacks.containsKey(channel)) {
-          for (var callback in _channelCallbacks[channel]!) {
-            try {
-              callback(data as Map<String, dynamic>);
-            } catch (e) {
-              print('💥 [Centrifugo] Error en callback de $channel: $e');
+        try {
+          // Decodificar los datos (pueden venir como Uint8List o Map)
+          final decodedData = _decodeMessageData(event.data);
+          
+          // Llamar a todos los callbacks registrados para este canal
+          if (_channelCallbacks.containsKey(channel)) {
+            for (var callback in _channelCallbacks[channel]!) {
+              try {
+                callback(decodedData);
+              } catch (e) {
+                print('💥 [Centrifugo] Error en callback de $channel: $e');
+              }
             }
           }
+        } catch (e) {
+          print('💥 [Centrifugo] Error al decodificar mensaje de $channel: $e');
         }
       });
 
@@ -343,15 +349,21 @@ class CentrifugoService {
           
           subscription.publication.listen((event) {
             print('📨 [Centrifugo] Mensaje recibido en $channel (reintento)');
-            final data = event.data;
-            if (_channelCallbacks.containsKey(channel)) {
-              for (var callback in _channelCallbacks[channel]!) {
-                try {
-                  callback(data as Map<String, dynamic>);
-                } catch (e) {
-                  print('💥 [Centrifugo] Error en callback de $channel: $e');
+            try {
+              // Decodificar los datos (pueden venir como Uint8List o Map)
+              final decodedData = _decodeMessageData(event.data);
+              
+              if (_channelCallbacks.containsKey(channel)) {
+                for (var callback in _channelCallbacks[channel]!) {
+                  try {
+                    callback(decodedData);
+                  } catch (e) {
+                    print('💥 [Centrifugo] Error en callback de $channel: $e');
+                  }
                 }
               }
+            } catch (e) {
+              print('💥 [Centrifugo] Error al decodificar mensaje de $channel: $e');
             }
           });
           
@@ -597,6 +609,58 @@ class CentrifugoService {
       print('💥 [Centrifugo] Error al obtener user_id desde API: $e');
       return null;
     }
+  }
+
+  /// Decodificar datos del mensaje (pueden venir como Uint8List o Map)
+  Map<String, dynamic> _decodeMessageData(dynamic data) {
+    // Si ya es un Map, retornarlo directamente
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+    
+    // Si es un Map genérico, convertirlo
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    
+    // Si es Uint8List (bytes), decodificar desde JSON
+    if (data is Uint8List) {
+      try {
+        final jsonString = utf8.decode(data);
+        final decoded = jsonDecode(jsonString) as Map<String, dynamic>;
+        return decoded;
+      } catch (e) {
+        print('💥 [Centrifugo] Error al decodificar Uint8List: $e');
+        rethrow;
+      }
+    }
+    
+    // Si es List<int>, convertir a Uint8List y decodificar
+    if (data is List<int>) {
+      try {
+        final bytes = Uint8List.fromList(data);
+        final jsonString = utf8.decode(bytes);
+        final decoded = jsonDecode(jsonString) as Map<String, dynamic>;
+        return decoded;
+      } catch (e) {
+        print('💥 [Centrifugo] Error al decodificar List<int>: $e');
+        rethrow;
+      }
+    }
+    
+    // Si es String, intentar decodificar como JSON
+    if (data is String) {
+      try {
+        final decoded = jsonDecode(data) as Map<String, dynamic>;
+        return decoded;
+      } catch (e) {
+        print('💥 [Centrifugo] Error al decodificar String: $e');
+        rethrow;
+      }
+    }
+    
+    // Si no se puede decodificar, lanzar error
+    throw Exception('Tipo de dato no soportado: ${data.runtimeType}');
   }
 
   /// Limpiar recursos al cerrar
