@@ -102,15 +102,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         } else {
           // Usuario ya cambió su contraseña, verificar datos del usuario
           print('🏠 Yendo al home');
+          print('📡 Response body completo: ${response.body}');
           final decoded = jsonDecode(response.body);
+          print('📊 Decoded completo: ${jsonEncode(decoded)}');
           final userData = decoded['data'];
+          print('👤 userData extraído: ${jsonEncode(userData)}');
+          print('📦 user_plans antes de pasar a _goToHome: ${jsonEncode(userData['user_plans'])}');
           _goToHome(userData);
         }
       } else {
         // Error al verificar estado del primer login, usar los datos ya obtenidos
         print('🏠 Error en primer login, yendo al home con datos existentes');
+        print('📡 Response body completo: ${response.body}');
         final decoded = jsonDecode(response.body);
+        print('📊 Decoded completo: ${jsonEncode(decoded)}');
         final userData = decoded['data'];
+        print('👤 userData extraído: ${jsonEncode(userData)}');
+        print('📦 user_plans antes de pasar a _goToHome: ${jsonEncode(userData['user_plans'])}');
         _goToHome(userData);
       }
     } catch (e, stackTrace) {
@@ -130,12 +138,37 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   void _goToHome(Map<String, dynamic> userData) {
-    // user_plans ahora es un Map, necesitamos convertirlo a lista
-    final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
-    final List<dynamic> userPlans = userPlansMap.values.toList();
+    print('🏠 _goToHome - userData completo: ${jsonEncode(userData)}');
+    print('🏠 _goToHome - user_plans tipo: ${userData['user_plans'].runtimeType}');
+    print('🏠 _goToHome - user_plans contenido: ${jsonEncode(userData['user_plans'])}');
+    
+    // user_plans puede venir como Map o como List dependiendo del backend
+    final dynamic userPlansData = userData['user_plans'];
+    final List<dynamic> userPlans;
+    
+    if (userPlansData is List) {
+      print('✅ user_plans es una Lista');
+      userPlans = userPlansData;
+    } else if (userPlansData is Map) {
+      print('✅ user_plans es un Map');
+      final Map<String, dynamic> userPlansMap = userPlansData as Map<String, dynamic>;
+      userPlans = userPlansMap.values.toList();
+    } else {
+      print('⚠️ user_plans es null o tipo desconocido, usando lista vacía');
+      userPlans = [];
+    }
+    
+    print('📋 Total de planes encontrados: ${userPlans.length}');
+    
     final List<String> planNames = userPlans
-        .map<String>((plan) => plan['nombre_plan'].toString())
+        .map<String>((plan) {
+          final nombre = plan['nombre_plan']?.toString() ?? '';
+          print('📝 Plan encontrado: $nombre (status: ${plan['status']})');
+          return nombre;
+        })
         .toList();
+    
+    print('📋 Nombres de planes finales: $planNames');
 
     Navigator.pushReplacement(
       context,
