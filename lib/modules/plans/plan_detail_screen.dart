@@ -156,9 +156,26 @@ class _PlanDetailScreenState extends State<PlanDetailScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final userData = data['data'];
-        // user_plans ahora es un Map, necesitamos convertirlo a lista
-        final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
-        final userPlans = userPlansMap.values.toList();
+        
+        print('📊 PlanDetailScreen - user_plans tipo: ${userData['user_plans'].runtimeType}');
+        
+        // user_plans puede venir como Map o como List dependiendo del backend
+        final dynamic userPlansData = userData['user_plans'];
+        final List<dynamic> userPlans;
+        
+        if (userPlansData is List) {
+          print('✅ PlanDetailScreen - user_plans es una Lista');
+          userPlans = userPlansData;
+        } else if (userPlansData is Map) {
+          print('✅ PlanDetailScreen - user_plans es un Map');
+          final Map<String, dynamic> userPlansMap = userPlansData as Map<String, dynamic>;
+          userPlans = userPlansMap.values.toList();
+        } else {
+          print('⚠️ PlanDetailScreen - user_plans es null o tipo desconocido, usando lista vacía');
+          userPlans = [];
+        }
+        
+        print('📋 PlanDetailScreen - Total de planes: ${userPlans.length}');
         
         // Calcular edad del usuario
         final dateBirth = widget.user['dateBirth'];

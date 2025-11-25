@@ -41,14 +41,35 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showPlansModalIfNeeded() {
-    // user_plans ahora es un Map, necesitamos convertirlo a lista
-    final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
-    final plans = List<Map<String, dynamic>>.from(userPlansMap.values);
+    print('🏠 HomeScreen - _showPlansModalIfNeeded llamado');
+    print('🏠 HomeScreen - user_plans tipo: ${widget.user['user_plans'].runtimeType}');
+    
+    // user_plans puede venir como Map o como List dependiendo del backend
+    final dynamic userPlansData = widget.user['user_plans'];
+    final List<dynamic> plans;
+    
+    if (userPlansData is List) {
+      print('✅ HomeScreen - user_plans es una Lista');
+      plans = userPlansData;
+    } else if (userPlansData is Map) {
+      print('✅ HomeScreen - user_plans es un Map');
+      final Map<String, dynamic> userPlansMap = userPlansData as Map<String, dynamic>;
+      plans = userPlansMap.values.toList();
+    } else {
+      print('⚠️ HomeScreen - user_plans es null o tipo desconocido, usando lista vacía');
+      plans = [];
+    }
+    
+    print('📋 HomeScreen - Total de planes: ${plans.length}');
+    
     if (plans.isEmpty && !_hasShownModal) {
+      print('⚠️ HomeScreen - No hay planes, mostrando modal');
       setState(() {
         _hasShownModal = true;
       });
       _showPlansInfoModal();
+    } else {
+      print('✅ HomeScreen - Hay ${plans.length} planes, no se muestra modal');
     }
   }
 
@@ -172,9 +193,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // user_plans ahora es un Map, necesitamos convertirlo a lista
-    final Map<String, dynamic> userPlansMap = widget.user['user_plans'] ?? {};
-    final plans = List<Map<String, dynamic>>.from(userPlansMap.values)
+    print('🏗️ HomeScreen - build() llamado');
+    
+    // user_plans puede venir como Map o como List dependiendo del backend
+    final dynamic userPlansData = widget.user['user_plans'];
+    final List<dynamic> plansList;
+    
+    if (userPlansData is List) {
+      print('✅ HomeScreen build - user_plans es una Lista');
+      plansList = userPlansData;
+    } else if (userPlansData is Map) {
+      print('✅ HomeScreen build - user_plans es un Map');
+      final Map<String, dynamic> userPlansMap = userPlansData as Map<String, dynamic>;
+      plansList = userPlansMap.values.toList();
+    } else {
+      print('⚠️ HomeScreen build - user_plans es null o tipo desconocido, usando lista vacía');
+      plansList = [];
+    }
+    
+    final plans = List<Map<String, dynamic>>.from(plansList)
       ..sort((a, b) {
         final statusA = (a['status'] ?? '').toString().toLowerCase();
         final statusB = (b['status'] ?? '').toString().toLowerCase();
@@ -198,6 +235,8 @@ class _HomeScreenState extends State<HomeScreen> {
         // Ordenar por prioridad (menor número = mayor prioridad)
         return priorityA.compareTo(priorityB);
       });
+    
+    print('📋 HomeScreen build - Total de planes ordenados: ${plans.length}');
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -229,8 +268,27 @@ class _HomeScreenState extends State<HomeScreen> {
               // TARJETA DE AHORRO
               Builder(
                 builder: (context) {
-                  final Map<String, dynamic> ahorroPlansMap = widget.user['user_plans'] ?? {};
-                  final List<Map<String, dynamic>> ahorroPlans = List<Map<String, dynamic>>.from(ahorroPlansMap.values);
+                  print('💰 AhorroCard - Preparando datos de ahorro');
+                  
+                  // user_plans puede venir como Map o como List
+                  final dynamic userPlansData = widget.user['user_plans'];
+                  final List<dynamic> plansList;
+                  
+                  if (userPlansData is List) {
+                    print('✅ AhorroCard - user_plans es una Lista');
+                    plansList = userPlansData;
+                  } else if (userPlansData is Map) {
+                    print('✅ AhorroCard - user_plans es un Map');
+                    final Map<String, dynamic> userPlansMap = userPlansData as Map<String, dynamic>;
+                    plansList = userPlansMap.values.toList();
+                  } else {
+                    print('⚠️ AhorroCard - user_plans es null o tipo desconocido, usando lista vacía');
+                    plansList = [];
+                  }
+                  
+                  final List<Map<String, dynamic>> ahorroPlans = List<Map<String, dynamic>>.from(plansList);
+                  print('💰 AhorroCard - Planes de ahorro: ${ahorroPlans.length}');
+                  
                   return AhorroCard(plans: ahorroPlans);
                 },
               ),

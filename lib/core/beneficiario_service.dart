@@ -52,9 +52,24 @@ class BeneficiarioService {
         
         // Si no se encuentra directamente, buscar en user_plans
         if (userPlanId == null && data['data']['user_plans'] != null) {
-          // user_plans ahora es un Map, necesitamos convertirlo a lista
-          final Map<String, dynamic> userPlansMap = data['data']['user_plans'];
-          final userPlans = userPlansMap.values.toList();
+          print('📋 [BeneficiarioService] user_plans tipo: ${data['data']['user_plans'].runtimeType}');
+          
+          // user_plans puede venir como Map o como List
+          final dynamic userPlansData = data['data']['user_plans'];
+          final List<dynamic> userPlans;
+          
+          if (userPlansData is List) {
+            print('✅ [BeneficiarioService] user_plans es una Lista');
+            userPlans = userPlansData;
+          } else if (userPlansData is Map) {
+            print('✅ [BeneficiarioService] user_plans es un Map');
+            final Map<String, dynamic> userPlansMap = userPlansData as Map<String, dynamic>;
+            userPlans = userPlansMap.values.toList();
+          } else {
+            print('⚠️ [BeneficiarioService] user_plans es null o tipo desconocido, usando lista vacía');
+            userPlans = [];
+          }
+          
           print('📋 [BeneficiarioService] User plans encontrados: ${userPlans.length}');
           
           if (userPlans.isNotEmpty) {

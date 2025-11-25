@@ -105,12 +105,29 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen>
         final decoded = jsonDecode(response.body);
         final userData = decoded['data'];
         
-        // user_plans ahora es un Map, necesitamos convertirlo a lista
-        final Map<String, dynamic> userPlansMap = userData['user_plans'] ?? {};
-        final List<dynamic> userPlans = userPlansMap.values.toList();
+        print('🔐 BiometricAuth - user_plans tipo: ${userData['user_plans'].runtimeType}');
+        
+        // user_plans puede venir como Map o como List
+        final dynamic userPlansData = userData['user_plans'];
+        final List<dynamic> userPlans;
+        
+        if (userPlansData is List) {
+          print('✅ BiometricAuth - user_plans es una Lista');
+          userPlans = userPlansData;
+        } else if (userPlansData is Map) {
+          print('✅ BiometricAuth - user_plans es un Map');
+          final Map<String, dynamic> userPlansMap = userPlansData as Map<String, dynamic>;
+          userPlans = userPlansMap.values.toList();
+        } else {
+          print('⚠️ BiometricAuth - user_plans es null o tipo desconocido, usando lista vacía');
+          userPlans = [];
+        }
+        
         final List<String> planNames = userPlans
-            .map<String>((plan) => plan['nombre_plan'].toString())
+            .map<String>((plan) => plan['nombre_plan']?.toString() ?? '')
             .toList();
+        
+        print('📋 BiometricAuth - Total de planes: ${userPlans.length}, nombres: $planNames');
 
         // Navegar directamente al HomeScreen
         Navigator.pushReplacement(
